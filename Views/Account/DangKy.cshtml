@@ -5,16 +5,15 @@
 
 <div
     class="w-full max-w-7xl bg-white rounded-[3rem] shadow-[0_35px_80px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col md:flex-row min-h-[750px] animate-fade-in mx-auto border border-gray-50">
-    <!-- Cột trái: Welcome (Đồng bộ với Đăng Nhập) -->
+    <!-- Cột trái: Welcome -->
     <div class="w-full md:w-1/2 bg-heatmap-gradient p-16 md:p-24 flex flex-col justify-center relative overflow-hidden">
         <div class="relative z-10">
-            <h1 class="text-white text-6xl md:text-7xl font-black mb-8 leading-[1.1]">Welcome to <br /><span
-                    class="text-red-500">Heatmap Sigma</span></h1>
+            <h1 class="text-white text-6xl md:text-7xl font-black mb-8 leading-[1.1]">Join the <br /><span
+                    class="text-red-500">Circle</span></h1>
             <p class="text-gray-200 text-xl max-w-lg leading-relaxed font-medium opacity-90">
                 Khám phá sức mạnh của Heatmap. <br /> Tạo tài khoản miễn phí chỉ trong vài giây.
             </p>
         </div>
-        <!-- Họa tiết trang trí -->
         <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-red-400/20 rounded-full blur-[100px]"></div>
         <div class="absolute top-20 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
     </div>
@@ -113,7 +112,7 @@
     </div>
 </div>
 
-<!-- Modal Lỗi (Mật khẩu không khớp / Thiếu thông tin) -->
+<!-- Modal Lỗi -->
 <div id="errorModal" class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
     <div
         class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center animate-fade-in border border-gray-100">
@@ -125,7 +124,7 @@
             </svg>
         </div>
         <h3 class="text-3xl font-black mb-4 tracking-tight">Thông báo</h3>
-        <p id="errorModalMessage" class="text-gray-500 text-lg mb-10 leading-relaxed">Mật khẩu không khớp!</p>
+        <p id="errorModalMessage" class="text-gray-500 text-lg mb-10 leading-relaxed"></p>
         <button onclick="closeErrorModal()"
             class="w-full py-4 bg-black text-white rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800">Đã
             hiểu</button>
@@ -138,15 +137,10 @@
             const passwordInput = document.getElementById(inputId);
             const eyeIcon = document.getElementById(eyeId);
             const eyeOffIcon = document.getElementById(eyeOffId);
-
             if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeIcon.classList.add('hidden');
-                eyeOffIcon.classList.remove('hidden');
+                passwordInput.type = 'text'; eyeIcon.classList.add('hidden'); eyeOffIcon.classList.remove('hidden');
             } else {
-                passwordInput.type = 'password';
-                eyeIcon.classList.remove('hidden');
-                eyeOffIcon.classList.add('hidden');
+                passwordInput.type = 'password'; eyeIcon.classList.remove('hidden'); eyeOffIcon.classList.add('hidden');
             }
         }
 
@@ -155,17 +149,24 @@
             document.getElementById('errorModal').style.display = 'flex';
         }
 
-        function closeErrorModal() {
-            document.getElementById('errorModal').style.display = 'none';
+        function closeErrorModal() { document.getElementById('errorModal').style.display = 'none'; }
+
+        function validatePassword(pass) {
+            if (pass.length <= 6) return "Mật khẩu phải lớn hơn 6 ký tự!";
+            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return "Mật khẩu phải bao gồm cả chữ và số!";
+            if (!/[^\w\s]/.test(pass)) return "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+            return null;
         }
 
         function openConfirmModal() {
-            const tk = document.getElementById('txtTaiKhoan').value;
+            const tk = document.getElementById('txtTaiKhoan').value.trim();
             const p = document.getElementById('txtPassword').value;
             const cp = document.getElementById('txtConfirmPassword').value;
 
-            if (!tk) { showErrorModal("Vui lòng nhập tên tài khoản!"); return; }
-            if (!p) { showErrorModal("Vui lòng nhập mật khẩu!"); return; }
+            if (!tk || !p || !cp) { showErrorModal("Vui lòng điền đầy đủ thông tin!"); return; }
+
+            const err = validatePassword(p);
+            if (err) { showErrorModal(err); return; }
             if (p !== cp) { showErrorModal("Mật khẩu không khớp!"); return; }
 
             document.getElementById('confirmModal').style.display = 'flex';
