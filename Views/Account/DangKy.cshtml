@@ -1,0 +1,177 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Đăng Ký";
+}
+
+<div
+    class="w-full max-w-7xl bg-white rounded-[3rem] shadow-[0_35px_80px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col md:flex-row min-h-[750px] animate-fade-in mx-auto border border-gray-50">
+    <!-- Cột trái: Welcome (Đồng bộ với Đăng Nhập) -->
+    <div class="w-full md:w-1/2 bg-heatmap-gradient p-16 md:p-24 flex flex-col justify-center relative overflow-hidden">
+        <div class="relative z-10">
+            <h1 class="text-white text-6xl md:text-7xl font-black mb-8 leading-[1.1]">Welcome to <br /><span
+                    class="text-red-500">Heatmap Sigma</span></h1>
+            <p class="text-gray-200 text-xl max-w-lg leading-relaxed font-medium opacity-90">
+                Khám phá sức mạnh của Heatmap. <br /> Tạo tài khoản miễn phí chỉ trong vài giây.
+            </p>
+        </div>
+        <!-- Họa tiết trang trí -->
+        <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-red-400/20 rounded-full blur-[100px]"></div>
+        <div class="absolute top-20 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Cột phải: Form Đăng ký -->
+    <div class="w-full md:w-1/2 p-16 md:p-24 flex flex-col justify-center bg-white">
+        <div class="max-w-md mx-auto w-full text-center">
+            <h2 class="text-gray-400 font-black uppercase tracking-[0.3em] mb-16 text-sm">Tạo tài khoản mới</h2>
+
+            <form id="registerForm" method="post" class="space-y-8 text-left">
+                <div class="group">
+                    <input type="text" id="txtTaiKhoan" name="TaiKhoan" required
+                        class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300"
+                        placeholder="Tên tài khoản" />
+                </div>
+
+                <div class="group relative">
+                    <input type="password" name="Password" id="txtPassword" required
+                        class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300 pr-16"
+                        placeholder="Mật khẩu" />
+                    <button type="button" onclick="togglePassword('txtPassword', 'eyeIcon1', 'eyeOffIcon1')"
+                        class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors focus:outline-none">
+                        <svg id="eyeIcon1" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg id="eyeOffIcon1" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="group relative">
+                    <input type="password" name="ConfirmPassword" id="txtConfirmPassword" required
+                        class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300 pr-16"
+                        placeholder="Nhập lại mật khẩu" />
+                    <button type="button" onclick="togglePassword('txtConfirmPassword', 'eyeIcon2', 'eyeOffIcon2')"
+                        class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors focus:outline-none">
+                        <svg id="eyeIcon2" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg id="eyeOffIcon2" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <button type="button" onclick="openConfirmModal()"
+                    class="w-full py-5 mt-10 bg-red-600 text-white rounded-2xl font-black uppercase tracking-[0.25em] text-lg shadow-2xl shadow-red-200 hover:bg-red-700 hover:-translate-y-1 active:scale-[0.98] transition-all text-center">
+                    Đăng ký ngay
+                </button>
+            </form>
+
+            <p class="mt-20 text-sm text-gray-400 font-bold tracking-tight">
+                Đã có tài khoản?
+                <a href="/Account/DangNhap"
+                    class="text-red-600 hover:text-red-800 transition-colors ml-1 border-b-2 border-red-100 pb-1">Đăng
+                    nhập ngay</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác nhận -->
+<div id="confirmModal"
+    class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
+    <div
+        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center animate-fade-in border border-gray-100">
+        <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <h3 class="text-3xl font-black mb-4 tracking-tight">Xác nhận?</h3>
+        <p class="text-gray-500 text-lg mb-10 leading-relaxed">Bạn có xác nhận thông tin đăng ký này không?</p>
+        <div class="flex space-x-5">
+            <button onclick="closeConfirmModal()"
+                class="flex-1 py-4 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">Không</button>
+            <button onclick="submitForm()"
+                class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">Có,
+                xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Lỗi (Mật khẩu không khớp / Thiếu thông tin) -->
+<div id="errorModal" class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
+    <div
+        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center animate-fade-in border border-gray-100">
+        <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+        </div>
+        <h3 class="text-3xl font-black mb-4 tracking-tight">Thông báo</h3>
+        <p id="errorModalMessage" class="text-gray-500 text-lg mb-10 leading-relaxed">Mật khẩu không khớp!</p>
+        <button onclick="closeErrorModal()"
+            class="w-full py-4 bg-black text-white rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800">Đã
+            hiểu</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword(inputId, eyeId, eyeOffId) {
+            const passwordInput = document.getElementById(inputId);
+            const eyeIcon = document.getElementById(eyeId);
+            const eyeOffIcon = document.getElementById(eyeOffId);
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.add('hidden');
+                eyeOffIcon.classList.remove('hidden');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('hidden');
+                eyeOffIcon.classList.add('hidden');
+            }
+        }
+
+        function showErrorModal(message) {
+            document.getElementById('errorModalMessage').innerText = message;
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+
+        function openConfirmModal() {
+            const tk = document.getElementById('txtTaiKhoan').value;
+            const p = document.getElementById('txtPassword').value;
+            const cp = document.getElementById('txtConfirmPassword').value;
+
+            if (!tk) { showErrorModal("Vui lòng nhập tên tài khoản!"); return; }
+            if (!p) { showErrorModal("Vui lòng nhập mật khẩu!"); return; }
+            if (p !== cp) { showErrorModal("Mật khẩu không khớp!"); return; }
+
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
+        function submitForm() { document.getElementById('registerForm').submit(); }
+    </script>
+}
