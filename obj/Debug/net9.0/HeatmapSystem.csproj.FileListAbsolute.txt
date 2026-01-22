@@ -95,3 +95,4 @@ C:\HeatmapSystem\HeatmapSystem\obj\Debug\net9.0\refint\HeatmapSystem.dll
 C:\HeatmapSystem\HeatmapSystem\obj\Debug\net9.0\HeatmapSystem.pdb
 C:\HeatmapSystem\HeatmapSystem\obj\Debug\net9.0\HeatmapSystem.genruntimeconfig.cache
 C:\HeatmapSystem\HeatmapSystem\obj\Debug\net9.0\ref\HeatmapSystem.dll
+C:\HeatmapSystem\HeatmapSystem\obj\Debug\net9.0\HeatmapSystem.sourcelink.json
