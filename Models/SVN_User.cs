@@ -1,0 +1,31 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace HeatmapSystem.Models
+{
+
+    [Table("SVN_User")]
+    public class SVN_User
+    {
+        [Key]
+        [Required]
+        [Column("SVNCode")]
+        [StringLength(50)] 
+        public string SVNCode { get; set; }
+
+        [Required]
+        [Column("Password")]
+        [StringLength(200)] 
+        public string Password { get; set; }
+
+        [Column("CreateDate")] 
+        public DateTime? CreateDate { get; set; } = DateTime.Now;
+
+        [Column("LastLogin")]
+        public DateTime? LastLogin { get; set; }
+    }
+}

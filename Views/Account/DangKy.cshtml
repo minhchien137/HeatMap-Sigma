@@ -8,8 +8,8 @@
     <!-- Cột trái: Welcome -->
     <div class="w-full md:w-1/2 bg-heatmap-gradient p-16 md:p-24 flex flex-col justify-center relative overflow-hidden">
         <div class="relative z-10">
-            <h1 class="text-white text-6xl md:text-7xl font-black mb-8 leading-[1.1]">Join the <br /><span
-                    class="text-red-500">Circle</span></h1>
+            <h1 class="text-white text-6xl md:text-7xl font-black mb-8 leading-[1.1]">Welcome to <br /><span
+                    class="text-red-500">Heatmap</span></h1>
             <p class="text-gray-200 text-xl max-w-lg leading-relaxed font-medium opacity-90">
                 Khám phá sức mạnh của Heatmap. <br /> Tạo tài khoản miễn phí chỉ trong vài giây.
             </p>
@@ -23,7 +23,14 @@
         <div class="max-w-md mx-auto w-full text-center">
             <h2 class="text-gray-400 font-black uppercase tracking-[0.3em] mb-16 text-sm">Tạo tài khoản mới</h2>
 
-            <form id="registerForm" method="post" class="space-y-8 text-left">
+            @if (TempData["Error"] != null)
+            {
+                <div class="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-2xl">
+                    <p class="text-red-600 font-semibold">@TempData["Error"]</p>
+                </div>
+            }
+
+            <form id="registerForm" method="post" action="/Account/DangKy" class="space-y-8 text-left">
                 <div class="group">
                     <input type="text" id="txtTaiKhoan" name="TaiKhoan" required
                         class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300"
@@ -138,9 +145,13 @@
             const eyeIcon = document.getElementById(eyeId);
             const eyeOffIcon = document.getElementById(eyeOffId);
             if (passwordInput.type === 'password') {
-                passwordInput.type = 'text'; eyeIcon.classList.add('hidden'); eyeOffIcon.classList.remove('hidden');
+                passwordInput.type = 'text';
+                eyeIcon.classList.add('hidden');
+                eyeOffIcon.classList.remove('hidden');
             } else {
-                passwordInput.type = 'password'; eyeIcon.classList.remove('hidden'); eyeOffIcon.classList.add('hidden');
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('hidden');
+                eyeOffIcon.classList.add('hidden');
             }
         }
 
@@ -149,7 +160,9 @@
             document.getElementById('errorModal').style.display = 'flex';
         }
 
-        function closeErrorModal() { document.getElementById('errorModal').style.display = 'none'; }
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
 
         function validatePassword(pass) {
             if (pass.length <= 6) return "Mật khẩu phải lớn hơn 6 ký tự!";
@@ -163,16 +176,31 @@
             const p = document.getElementById('txtPassword').value;
             const cp = document.getElementById('txtConfirmPassword').value;
 
-            if (!tk || !p || !cp) { showErrorModal("Vui lòng điền đầy đủ thông tin!"); return; }
+            if (!tk || !p || !cp) {
+                showErrorModal("Vui lòng điền đầy đủ thông tin!");
+                return;
+            }
 
             const err = validatePassword(p);
-            if (err) { showErrorModal(err); return; }
-            if (p !== cp) { showErrorModal("Mật khẩu không khớp!"); return; }
+            if (err) {
+                showErrorModal(err);
+                return;
+            }
+
+            if (p !== cp) {
+                showErrorModal("Mật khẩu không khớp!");
+                return;
+            }
 
             document.getElementById('confirmModal').style.display = 'flex';
         }
 
-        function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
-        function submitForm() { document.getElementById('registerForm').submit(); }
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function submitForm() {
+            document.getElementById('registerForm').submit();
+        }
     </script>
 }

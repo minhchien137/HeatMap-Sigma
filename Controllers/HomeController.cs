@@ -15,6 +15,14 @@ namespace HeatmapSystem.Controllers
 
         public IActionResult Index()
         {
+            // Kiểm tra đăng nhập
+            var svnCode = HttpContext.Session.GetString("SVNCode");
+            if (string.IsNullOrEmpty(svnCode))
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+            
+            ViewBag.SVNCode = svnCode;
             return View();
         }
 
