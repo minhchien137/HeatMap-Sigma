@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HeatmapSystem")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3294de130bbe3ef8a5cd61ec696b8df4b5fa35ab")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5ae834a757a201e3002563725c538be3a17990ba")]
 [assembly: System.Reflection.AssemblyProductAttribute("HeatmapSystem")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HeatmapSystem")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
