@@ -36,37 +36,55 @@ namespace HeatmapSystem.Controllers
                 if (string.IsNullOrWhiteSpace(TaiKhoan) || string.IsNullOrWhiteSpace(Password))
                 {
                     TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
-                    ViewBag.TaiKhoan = TaiKhoan; // Giữ lại tài khoản
+                    ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
 
-                // Tìm user - SO SÁNH MẬT KHẨU TRỰC TIẾP (không mã hóa)
+                // Bước 1: Kiểm tra tài khoản có tồn tại không
                 var user = await _context.SVN_User
-                    .FirstOrDefaultAsync(u => u.SVNCode == TaiKhoan && u.Password == Password);
+                    .FirstOrDefaultAsync(u => u.SVNCode == TaiKhoan);
 
                 if (user == null)
                 {
-                    // Ghi log đăng nhập thất bại
+                    // Ghi log - Tài khoản không tồn tại
                     var failLog = new SVN_Logs
                     {
                         SVNCode = TaiKhoan,
                         TimeAccess = DateTime.Now,
                         ActionType = "Login",
-                        Description = "Đăng nhập thất bại - Sai tài khoản hoặc mật khẩu"
+                        Description = "Đăng nhập thất bại - Tài khoản không tồn tại"
+                    };
+                    _context.SVN_Logs.Add(failLog);
+                    await _context.SaveChangesAsync();
+
+                    TempData["Error"] = "Không tồn tại tài khoản này!";
+                    ViewBag.TaiKhoan = TaiKhoan;
+                    return View();
+                }
+
+                // Bước 2: Tài khoản tồn tại, kiểm tra mật khẩu
+                if (user.Password != Password)
+                {
+                    // Ghi log - Sai mật khẩu
+                    var failLog = new SVN_Logs
+                    {
+                        SVNCode = TaiKhoan,
+                        TimeAccess = DateTime.Now,
+                        ActionType = "Login",
+                        Description = "Đăng nhập thất bại - Sai mật khẩu"
                     };
                     _context.SVN_Logs.Add(failLog);
                     await _context.SaveChangesAsync();
 
                     TempData["Error"] = "Tài khoản hoặc mật khẩu không chính xác!";
-                    ViewBag.TaiKhoan = TaiKhoan; // Giữ lại tài khoản khi sai
+                    ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
 
-                // Cập nhật thời gian đăng nhập cuối
+                // Đăng nhập thành công
                 user.LastLogin = DateTime.Now;
                 await _context.SaveChangesAsync();
 
-                // Lưu thông tin vào Session
                 HttpContext.Session.SetString("SVNCode", user.SVNCode);
 
                 // Ghi log đăng nhập thành công
@@ -86,7 +104,7 @@ namespace HeatmapSystem.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi đăng nhập");
                 TempData["Error"] = "Có lỗi xảy ra, vui lòng thử lại!";
-                ViewBag.TaiKhoan = TaiKhoan; // Giữ lại tài khoản khi có lỗi
+                ViewBag.TaiKhoan = TaiKhoan;
                 return View();
             }
         }
