@@ -25,17 +25,49 @@ namespace HeatmapSystem.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+
+            // Kiểm tra cookie "Remember Me"
+            if (Request.Cookies.ContainsKey("RememberMe"))
+            {
+                var rememberCookie = Request.Cookies["RememberMe"];
+                if (!string.IsNullOrEmpty(rememberCookie))
+                {
+                    var parts = rememberCookie.Split('|');
+                    if (parts.Length == 2)
+                    {
+                        ViewBag.TaiKhoan = parts[0];
+                        ViewBag.Password = parts[1];
+                        ViewBag.RememberMe = true;
+                    }
+                }
+            }
+
             return View();
         }
 
         [HttpPost("DangNhap")]
-        public async Task<IActionResult> DangNhap(string TaiKhoan, string Password, bool RememberMe = false)
+        public async Task<IActionResult> DangNhap(string TaiKhoan, string Password, string CaptchaInput, string CaptchaCode, bool RememberMe = false)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(TaiKhoan) || string.IsNullOrWhiteSpace(Password))
                 {
                     TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
+                    ViewBag.TaiKhoan = TaiKhoan;
+                    return View();
+                }
+
+                // Kiểm tra CAPTCHA
+                if (string.IsNullOrWhiteSpace(CaptchaInput) || string.IsNullOrWhiteSpace(CaptchaCode))
+                {
+                    TempData["Error"] = "Vui lòng nhập mã xác nhận!";
+                    ViewBag.TaiKhoan = TaiKhoan;
+                    return View();
+                }
+
+                if (CaptchaInput.ToUpper() != CaptchaCode.ToUpper())
+                {
+                    TempData["Error"] = "Mã xác nhận không đúng!";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -87,6 +119,25 @@ namespace HeatmapSystem.Controllers
 
                 HttpContext.Session.SetString("SVNCode", user.SVNCode);
 
+                // Xử lý Remember Me
+                if (RememberMe)
+                {
+                    // Lưu cookie với thời hạn 30 ngày
+                    var cookieOptions = new CookieOptions
+                    {
+                        Expires = DateTime.Now.AddDays(30),
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict
+                    };
+                    Response.Cookies.Append("RememberMe", $"{TaiKhoan}|{Password}", cookieOptions);
+                }
+                else
+                {
+                    // Xóa cookie nếu không chọn Remember Me
+                    Response.Cookies.Delete("RememberMe");
+                }
+
                 // Ghi log đăng nhập thành công
                 var successLog = new SVN_Logs
                 {
@@ -109,7 +160,6 @@ namespace HeatmapSystem.Controllers
             }
         }
 
-
         [HttpGet("DangKy")]
         public IActionResult DangKy()
         {
@@ -121,19 +171,36 @@ namespace HeatmapSystem.Controllers
         }
 
         [HttpPost("DangKy")]
-        public async Task<IActionResult> DangKy(string TaiKhoan, string Password, string ConfirmPassword)
+        public async Task<IActionResult> DangKy(string TaiKhoan, string Password, string ConfirmPassword, string CaptchaInput, string CaptchaCode)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(TaiKhoan) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(ConfirmPassword))
                 {
                     TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
+                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
+                    return View();
+                }
+
+                // Kiểm tra CAPTCHA
+                if (string.IsNullOrWhiteSpace(CaptchaInput) || string.IsNullOrWhiteSpace(CaptchaCode))
+                {
+                    TempData["Error"] = "Vui lòng nhập mã xác nhận!";
+                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
+                    return View();
+                }
+
+                if (CaptchaInput.ToUpper() != CaptchaCode.ToUpper())
+                {
+                    TempData["Error"] = "Mã xác nhận không đúng!";
+                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
                     return View();
                 }
 
                 if (Password != ConfirmPassword)
                 {
                     TempData["Error"] = "Mật khẩu không khớp!";
+                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
                     return View();
                 }
 
@@ -144,14 +211,15 @@ namespace HeatmapSystem.Controllers
                 if (existingUser != null)
                 {
                     TempData["Error"] = "Tài khoản đã tồn tại!";
+                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
                     return View();
                 }
 
-                // Tạo user mới - LƯU MẬT KHẨU TRỰC TIẾP (không mã hóa)
+                // Tạo user mới
                 var newUser = new SVN_User
                 {
                     SVNCode = TaiKhoan,
-                    Password = Password, // Lưu mật khẩu gốc
+                    Password = Password,
                     CreateDate = DateTime.Now
                 };
 
@@ -176,9 +244,11 @@ namespace HeatmapSystem.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi đăng ký");
                 TempData["Error"] = "Có lỗi xảy ra, vui lòng thử lại!";
+                ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
                 return View();
             }
         }
+
 
         [HttpGet("DangXuat")]
         public async Task<IActionResult> DangXuat()
@@ -187,7 +257,6 @@ namespace HeatmapSystem.Controllers
             
             if (!string.IsNullOrEmpty(svnCode))
             {
-                // Ghi log đăng xuất
                 var logoutLog = new SVN_Logs
                 {
                     SVNCode = svnCode,
@@ -202,7 +271,5 @@ namespace HeatmapSystem.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("DangNhap");
         }
-
-        // XÓA HÀM HashPassword - KHÔNG CẦN THIẾT NỮA
     }
 }

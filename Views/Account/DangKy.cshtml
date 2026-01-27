@@ -8,8 +8,9 @@
     <!-- Cột trái: Welcome -->
     <div class="w-full md:w-1/2 bg-heatmap-gradient p-16 md:p-24 flex flex-col justify-center relative overflow-hidden">
         <div class="relative z-10">
-            <h1 class="text-white text-6xl md:text-7xl font-black mb-8 leading-[1.1]">Welcome to <br /><span
-                    class="text-red-500">Heatmap</span></h1>
+            <h1 class="text-white text-6xl md:text-7xl font-black mb-8 leading-[1.1]">
+                Đăng ký <br /><span class="text-red-500">tài khoản</span>
+            </h1>
             <p class="text-gray-200 text-xl max-w-lg leading-relaxed font-medium opacity-90">
                 Khám phá sức mạnh của Heatmap. <br /> Tạo tài khoản miễn phí chỉ trong vài giây.
             </p>
@@ -32,11 +33,10 @@
 
             <form id="registerForm" method="post" action="/Account/DangKy" class="space-y-8 text-left">
                 <div class="group">
-                    <input type="text" id="txtTaiKhoan" name="TaiKhoan" required
+                    <input type="text" id="txtTaiKhoan" name="TaiKhoan" required value="@ViewBag.TaiKhoan"
                         class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300"
                         placeholder="Tên tài khoản" />
                 </div>
-
                 <div class="group relative">
                     <input type="password" name="Password" id="txtPassword" required
                         class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300 pr-16"
@@ -77,6 +77,29 @@
                                 d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                         </svg>
                     </button>
+                </div>
+
+                <!-- CAPTCHA -->
+                <div class="group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div
+                            class="flex-1 bg-gray-100 rounded-2xl p-4 flex items-center justify-center relative border-2 border-gray-200">
+                            <canvas id="captchaCanvas" width="200" height="60" class="cursor-pointer"
+                                onclick="generateCaptcha()"></canvas>
+                            <button type="button" onclick="generateCaptcha()" title="Tạo mã mới"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors p-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="text" id="txtCaptcha" name="CaptchaInput" required
+                        class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300"
+                        placeholder="Nhập mã xác nhận" autocomplete="off" />
+                    <input type="hidden" id="hiddenCaptcha" name="CaptchaCode" />
                 </div>
 
                 <button type="button" onclick="openConfirmModal()"
@@ -140,6 +163,89 @@
 
 @section Scripts {
     <script>
+        let captchaCode = '';
+
+        // Tạo CAPTCHA
+        function generateCaptcha() {
+            const canvas = document.getElementById('captchaCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background với gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#f8f9fa');
+            gradient.addColorStop(1, '#e9ecef');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Random lines (noise)
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeStyle = `rgba(220, 53, 69, ${Math.random() * 0.3})`;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.stroke();
+            }
+
+            // Generate random 6-character code
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            captchaCode = '';
+            for (let i = 0; i < 6; i++) {
+                captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            // Draw text with random rotation
+            ctx.font = 'bold 32px Arial';
+            ctx.textBaseline = 'middle';
+
+            for (let i = 0; i < captchaCode.length; i++) {
+                ctx.save();
+                const x = 20 + i * 30;
+                const y = canvas.height / 2;
+                const angle = (Math.random() - 0.5) * 0.4;
+
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+
+                // Shadow
+                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                ctx.shadowBlur = 3;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+
+                // Random color
+                const colors = ['#dc3545', '#495057', '#6c757d'];
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                ctx.fillText(captchaCode[i], 0, 0);
+
+                ctx.restore();
+            }
+
+            // Random dots
+            for (let i = 0; i < 30; i++) {
+                ctx.fillStyle = `rgba(108, 117, 125, ${Math.random() * 0.5})`;
+                ctx.beginPath();
+                ctx.arc(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height,
+                    Math.random() * 2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+            }
+
+            // Lưu vào hidden field
+            document.getElementById('hiddenCaptcha').value = captchaCode;
+        }
+
+        // Load captcha khi trang load
+        window.onload = function () {
+            generateCaptcha();
+        };
+
         function togglePassword(inputId, eyeId, eyeOffId) {
             const passwordInput = document.getElementById(inputId);
             const eyeIcon = document.getElementById(eyeId);
@@ -175,9 +281,15 @@
             const tk = document.getElementById('txtTaiKhoan').value.trim();
             const p = document.getElementById('txtPassword').value;
             const cp = document.getElementById('txtConfirmPassword').value;
+            const captchaInput = document.getElementById('txtCaptcha').value.trim();
 
             if (!tk || !p || !cp) {
                 showErrorModal("Vui lòng điền đầy đủ thông tin!");
+                return;
+            }
+
+            if (!captchaInput) {
+                showErrorModal("Vui lòng nhập mã xác nhận!");
                 return;
             }
 
