@@ -49,6 +49,13 @@ namespace HeatmapSystem.Controllers
         }
 
 
+        [HttpGet("Setting")]
+        public IActionResult Setting()
+        {
+            return View();
+        }
+
+
 
     }
 }
