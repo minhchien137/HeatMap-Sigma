@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Heatmap System</title>
+    <title>@ViewData["Title"]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -34,23 +34,64 @@
                 transform: translateY(0);
             }
         }
+
+        /* Breadcrumb animation */
+        .breadcrumb-item {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @@keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* HEATMAP title styling */
+        .heatmap-title {
+            letter-spacing: 0.8em;
+        }
+
+        .breadcrumb-wrapper {
+            letter-spacing: 0.15em;
+        }
     </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
-    <!-- Header: Đã giảm py-6 xuống py-2 để thanh header mỏng và tinh tế hơn -->
+
     <header
-        class="bg-white/95 backdrop-blur-md border-b border-gray-100 py-2 px-4 md:px-8 lg:px-12 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-        <div class="flex items-center">
-            <a href="/" class="flex items-center transition-transform hover:scale-105 active:scale-95">
-                <!-- Logo được điều chỉnh kích thước để phù hợp với header mỏng -->
-                <img src="~/images/logo.png" alt="Heatmap Logo" class="h-12 md:h-16 w-auto object-contain"
-                    onerror="this.onerror=null; this.src='https://placehold.co/120x60/dc2626/white?text=LOGO'" />
-            </a>
-        </div>
-        <div
-            class="text-black font-black text-xl md:text-3xl uppercase tracking-[0.5em] md:tracking-[0.8em] select-none pr-2">
-            Heatmap
+        class="bg-white/95 backdrop-blur-md border-b border-gray-100 py-3 px-4 md:px-8 lg:px-12 sticky top-0 z-50 shadow-sm">
+        <div class="relative flex items-center justify-between">
+            <!-- Logo bên trái - TO HƠN -->
+            <div class="flex items-center flex-shrink-0">
+                <a href="/" class="flex items-center transition-transform hover:scale-105 active:scale-95">
+                    <img src="~/images/logo.png" alt="Heatmap Logo" class="h-16 md:h-18 lg:h-18 w-auto object-contain"
+                        onerror="this.onerror=null; this.src='https://placehold.co/180x90/dc2626/white?text=LOGO'" />
+                </a>
+            </div>
+
+            <!-- Breadcrumb ở GIỮA - Lùi ra bên trái gần giữa -->
+            <div class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1">
+                <div
+                    class="text-gray-500 text-xs md:text-sm font-semibold breadcrumb-wrapper breadcrumb-item whitespace-nowrap">
+                    <span class="text-red-600 font-bold">Heatmap</span>
+                    <span class="mx-2 text-gray-300">/</span>
+                    <span id="currentPage" class="text-gray-700">@ViewData["PageName"]</span>
+                </div>
+            </div>
+
+            <!-- HEATMAP title bên PHẢI như cũ -->
+            <div class="flex items-center">
+                <div class="text-black font-black text-xl md:text-3xl uppercase heatmap-title select-none">
+                    Heatmap
+                </div>
+            </div>
         </div>
     </header>
 

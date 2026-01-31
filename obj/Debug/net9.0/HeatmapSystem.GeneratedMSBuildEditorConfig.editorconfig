@@ -46,6 +46,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxRdWVuTWF0S2hhdS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/HeatmapSystem/HeatmapSystem/Views/Heatmap/History.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVhdG1hcFxIaXN0b3J5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/HeatmapSystem/HeatmapSystem/Views/Heatmap/Home.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVhdG1hcFxIb21lLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -54,8 +58,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVhdG1hcFxJbXBvcnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/HeatmapSystem/HeatmapSystem/Views/Heatmap/Report.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVhdG1hcFxSZXBvcnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/HeatmapSystem/HeatmapSystem/Views/Heatmap/Setting.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVhdG1hcFxTZXR0aW5nLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/HeatmapSystem/HeatmapSystem/Views/Heatmap/Staff.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVhdG1hcFxTdGFmZi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/HeatmapSystem/HeatmapSystem/Views/Home/Index.cshtml]
