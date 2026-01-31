@@ -20,7 +20,6 @@
             background-color: #f8fafc;
         }
 
-
         .bg-heatmap-gradient {
             background: linear-gradient(145deg, #450a0a 0%, #991b1b 50%, #dc2626 100%);
         }
@@ -66,6 +65,30 @@
         .breadcrumb-wrapper {
             letter-spacing: 0.15em;
         }
+
+        /* Navigation button styling */
+        .nav-btn {
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+            color: #dc2626;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-btn:disabled:hover {
+            transform: scale(1);
+            color: inherit;
+        }
     </style>
 </head>
 
@@ -82,16 +105,31 @@
                 </a>
             </div>
 
-
+            <!-- Breadcrumb với nút Back và Forward -->
             <div class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1">
-                <div
-                    class="text-gray-500 text-xs md:text-sm font-semibold breadcrumb-wrapper breadcrumb-item whitespace-nowrap">
-                    <span class="text-red-600 font-bold">Heatmap</span>
-                    <span class="mx-2 text-gray-300">/</span>
-                    <span id="currentPage" class="text-gray-700">@ViewData["PageName"]</span>
+                <div class="flex items-center gap-3 breadcrumb-item">
+                    <!-- Nút Back -->
+                    <button onclick="goBack()"
+                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-lg transition-all"
+                        title="Quay lại">
+                        &lt;
+                    </button>
+
+                    <!-- Breadcrumb -->
+                    <div class="text-gray-500 text-xs md:text-sm font-semibold breadcrumb-wrapper whitespace-nowrap">
+                        <span class="text-red-600 font-bold">Heatmap</span>
+                        <span class="mx-2 text-gray-300">/</span>
+                        <span id="currentPage" class="text-gray-700">@ViewData["PageName"]</span>
+                    </div>
+
+                    <!-- Nút Forward -->
+                    <button onclick="goForward()"
+                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-lg transition-all"
+                        title="Tiến tới">
+                        &gt;
+                    </button>
                 </div>
             </div>
-
 
             <div class="flex items-center">
                 <div class="text-black font-black text-xl md:text-3xl uppercase heatmap-title select-none">
@@ -101,15 +139,37 @@
         </div>
     </header>
 
-
     <main role="main" class="flex-grow flex items-center justify-center p-6 md:p-12 lg:p-16">
         @RenderBody()
     </main>
 
-
     <footer class="py-12 text-center text-gray-400 text-[10px] md:text-xs uppercase tracking-[0.4em] font-black">
         &copy; @DateTime.Now.Year HEATMAP SIGMA • Coldzy
     </footer>
+
+    <!-- JavaScript cho chức năng Back/Forward -->
+    <script>
+        // Hàm quay lại trang trước
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Nếu không có lịch sử, về trang chủ
+                window.location.href = '/';
+            }
+        }
+
+        // Hàm tiến tới trang sau
+        function goForward() {
+            window.history.forward();
+        }
+
+        // Cập nhật trạng thái nút dựa trên history
+        window.addEventListener('DOMContentLoaded', function () {
+            // Có thể thêm logic để disable/enable buttons dựa trên history state
+            // Ví dụ: kiểm tra xem có thể back/forward không
+        });
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>
