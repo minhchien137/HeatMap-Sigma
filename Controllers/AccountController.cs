@@ -3,6 +3,7 @@ using System.Linq;
 using HeatmapSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace HeatmapSystem.Controllers
 {
@@ -23,7 +24,7 @@ namespace HeatmapSystem.Controllers
         {
             if (HttpContext.Session.GetString("SVNCode") != null)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Home", "Heatmap");
             }
 
             // Kiểm tra cookie "Remember Me"
@@ -149,7 +150,7 @@ namespace HeatmapSystem.Controllers
                 _context.SVN_Logs.Add(successLog);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Home", "Heatmap");
             }
             catch (Exception ex)
             {
@@ -249,6 +250,121 @@ namespace HeatmapSystem.Controllers
             }
         }
 
+
+         [HttpGet("Account")]
+        public async Task<IActionResult> Account()
+        {
+            var svnCode = HttpContext.Session.GetString("SVNCode");
+            
+            if (string.IsNullOrEmpty(svnCode))
+            {
+                return RedirectToAction("DangNhap");
+            }
+
+            var user = await _context.SVN_User.FirstOrDefaultAsync(u => u.SVNCode == svnCode);
+            
+            if (user == null)
+            {
+                HttpContext.Session.Clear();
+                return RedirectToAction("DangNhap");
+            }
+
+            return View(user);
+        }
+
+        [HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword(string CurrentPassword, string NewPassword, string ConfirmNewPassword)
+        {
+            try
+            {
+                var svnCode = HttpContext.Session.GetString("SVNCode");
+                
+                if (string.IsNullOrEmpty(svnCode))
+                {
+                    return RedirectToAction("DangNhap");
+                }
+
+                if (string.IsNullOrWhiteSpace(CurrentPassword) || string.IsNullOrWhiteSpace(NewPassword) || string.IsNullOrWhiteSpace(ConfirmNewPassword))
+                {
+                    TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
+                    return RedirectToAction("Account");
+                }
+
+                if (NewPassword != ConfirmNewPassword)
+                {
+                    TempData["Error"] = "Mật khẩu mới không khớp!";
+                    return RedirectToAction("Account");
+                }
+
+                if (NewPassword.Length <= 6)
+                {
+                    TempData["Error"] = "Mật khẩu mới phải lớn hơn 6 ký tự!";
+                    return RedirectToAction("Account");
+                }
+
+                if (!Regex.IsMatch(NewPassword, "[a-zA-Z]") || !Regex.IsMatch(NewPassword, "[0-9]"))
+                {
+                    TempData["Error"] = "Mật khẩu phải bao gồm cả chữ và số!";
+                    return RedirectToAction("Account");
+                }
+
+                if (!Regex.IsMatch(NewPassword, @"[^\w\s]"))
+                {
+                    TempData["Error"] = "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+                    return RedirectToAction("Account");
+                }
+
+                var user = await _context.SVN_User.FirstOrDefaultAsync(u => u.SVNCode == svnCode);
+                
+                if (user == null)
+                {
+                    HttpContext.Session.Clear();
+                    return RedirectToAction("DangNhap");
+                }
+
+                if (user.Password != CurrentPassword)
+                {
+                    TempData["Error"] = "Mật khẩu hiện tại không chính xác!";
+                    
+                    // Ghi log thất bại
+                    var failLog = new SVN_Logs
+                    {
+                        SVNCode = svnCode,
+                        TimeAccess = DateTime.Now,
+                        ActionType = "ChangePassword",
+                        Description = "Đổi mật khẩu thất bại - Sai mật khẩu hiện tại"
+                    };
+                    _context.SVN_Logs.Add(failLog);
+                    await _context.SaveChangesAsync();
+                    
+                    return RedirectToAction("Account");
+                }
+
+                // Đổi mật khẩu
+                user.Password = NewPassword;
+                await _context.SaveChangesAsync();
+
+                // Ghi log thành công
+                var successLog = new SVN_Logs
+                {
+                    SVNCode = svnCode,
+                    TimeAccess = DateTime.Now,
+                    ActionType = "ChangePassword",
+                    Description = "Đổi mật khẩu thành công"
+                };
+                _context.SVN_Logs.Add(successLog);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Đổi mật khẩu thành công!";
+                return RedirectToAction("Account");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi đổi mật khẩu");
+                TempData["Error"] = "Có lỗi xảy ra, vui lòng thử lại!";
+                return RedirectToAction("Account");
+            }
+        }
 
         [HttpGet("DangXuat")]
         public async Task<IActionResult> DangXuat()

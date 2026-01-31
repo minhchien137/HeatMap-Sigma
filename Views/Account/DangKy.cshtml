@@ -120,9 +120,9 @@
 
 <!-- Modal Xác nhận -->
 <div id="confirmModal"
-    class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
+    class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md transition-none duration-0">
     <div
-        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center animate-fade-in border border-gray-100">
+        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100 transition-none duration-0">
         <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -143,9 +143,10 @@
 </div>
 
 <!-- Modal Lỗi -->
-<div id="errorModal" class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
+<div id="errorModal"
+    class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md transition-none duration-0">
     <div
-        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center animate-fade-in border border-gray-100">
+        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100 transition-none duration-0">
         <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -262,12 +263,14 @@
         }
 
         function showErrorModal(message) {
+            const modal = document.getElementById('errorModal');
             document.getElementById('errorModalMessage').innerText = message;
-            document.getElementById('errorModal').style.display = 'flex';
+            modal.style.display = 'flex';
         }
 
         function closeErrorModal() {
-            document.getElementById('errorModal').style.display = 'none';
+            const modal = document.getElementById('errorModal');
+            modal.style.display = 'none';
         }
 
         function validatePassword(pass) {
@@ -304,11 +307,13 @@
                 return;
             }
 
-            document.getElementById('confirmModal').style.display = 'flex';
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'flex';
         }
 
         function closeConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'none';
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'none';
         }
 
         function submitForm() {
