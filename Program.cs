@@ -9,6 +9,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDbContext<ZKBioTimeDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("ZKBioTimeConnection")));
+
+
 // Thêm Session để lưu thông tin đăng nhập
 builder.Services.AddSession(options =>
 {
