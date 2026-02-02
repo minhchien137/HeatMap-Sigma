@@ -21,56 +21,79 @@
         <!-- Left Column - Form Fields -->
         <div class="flex-[2] space-y-6">
 
+            <!-- Bộ phận Dropdown -->
             <div class="group">
                 <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
                     phận</label>
-                <select id="departmentSelect" name="Department"
+                <select id="department" name="department"
                     class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
                     <option value="">-- Chọn bộ phận --</option>
-                    @if (ViewBag.Departments != null)
+                    @foreach (var dept in ViewBag.Departments)
                     {
-                        foreach (var dept in ViewBag.Departments)
+                        <option value="@dept.id">@dept.dept_name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Tên - ĐỔI THÀNH DROPDOWN -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
+                <select id="employeeSelect" name="Name"
+                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
+                    <option value="">-- Chọn bộ phận trước --</option>
+                </select>
+            </div>
+
+            <!-- Project Dropdown -->
+            <div class="group">
+                <label
+                    class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project</label>
+                <select id="projectSelect" name="Project"
+                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
+                    <option value="">-- Chọn dự án --</option>
+                    @if (ViewBag.Projects != null)
+                    {
+                        foreach (var project in ViewBag.Projects)
                         {
-                            <option value="@dept.idDepartment">@dept.nameDepartment</option>
+                            <option value="@project.IdProject">@project.NameProject
+                                @(!string.IsNullOrEmpty(project.NameCustomer) ? $"({project.NameCustomer})" : "")</option>
                         }
                     }
                 </select>
             </div>
 
+            <!-- Week Dropdown -->
             <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
-                <input type="text"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700 placeholder-gray-300"
-                    value="Bùi Minh Chiến - Coldzy" />
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                <select id="weekSelect" name="Week"
+                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
+                    <option value="">-- Chọn tuần --</option>
+                </select>
             </div>
 
+            <!-- Day -->
             <div class="group">
-                <label
-                    class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project</label>
-                <input type="text"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700 placeholder-gray-300"
-                    value="Water Inbox" />
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Ngày</label>
+                <input type="date" name="Day"
+                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700" />
             </div>
 
+            <!-- Hour - Giờ và Phút riêng để convert sang decimal -->
             <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Week</label>
-                <input type="text"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700 placeholder-gray-300"
-                    value="Week 4 (19/1/2026 - 25/1/2026)" />
-            </div>
-
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Day</label>
-                <input type="date"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700"
-                    value="2026-01-19" />
-            </div>
-
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Hour</label>
-                <input type="text"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700 placeholder-gray-300"
-                    value="7 giờ 30 phút" />
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Giờ</label>
+                <div class="flex gap-3">
+                    <select id="hourSelect"
+                        class="flex-1 px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
+                        <option value="">Giờ</option>
+                    </select>
+                    <select id="minuteSelect"
+                        class="flex-1 px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
+                        <option value="">Phút</option>
+                    </select>
+                </div>
+                <!-- Hidden input để lưu giá trị decimal -->
+                <input type="hidden" name="Hour" id="hourDecimal" />
+                <div class="mt-2 text-sm text-gray-500 ml-2" id="hourDisplay"></div>
             </div>
 
         </div>
@@ -161,9 +184,212 @@
 </div>
 
 <script>
+    // THÊM: Lắng nghe sự kiện chọn bộ phận để load nhân viên
+    document.addEventListener('DOMContentLoaded', function () {
+        const departmentSelect = document.getElementById('department');
+        const employeeSelect = document.getElementById('employeeSelect');
+
+        departmentSelect.addEventListener('change', async function () {
+            const departmentId = this.value;
+
+            // Reset dropdown nhân viên
+            employeeSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
+
+            if (departmentId) {
+                try {
+                    // Gọi API để lấy danh sách nhân viên
+                    const response = await fetch(`/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`);
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const employees = await response.json();
+
+                    // Kiểm tra nếu có lỗi trong response
+                    if (employees.error) {
+                        throw new Error(employees.error);
+                    }
+
+                    // Reset dropdown
+                    employeeSelect.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+
+                    // Thêm nhân viên vào dropdown
+                    employees.forEach(emp => {
+                        const option = document.createElement('option');
+                        option.value = emp.id;
+
+                        // Xử lý trường hợp null
+                        const firstName = emp.first_name || '';
+                        const lastName = emp.last_name || '';
+                        const nickname = emp.nickname || '';
+                        const empCode = emp.emp_code || '';
+
+                        // Hiển thị tên đầy đủ
+                        let displayName = '';
+                        if (firstName || lastName) {
+                            displayName = `${firstName} ${lastName}`.trim();
+                            if (nickname) {
+                                displayName += ` (${nickname})`;
+                            }
+                        } else if (empCode) {
+                            displayName = `Mã NV: ${empCode}`;
+                        } else {
+                            displayName = `ID: ${emp.id}`;
+                        }
+
+                        option.textContent = displayName;
+                        employeeSelect.appendChild(option);
+                    });
+
+                    if (employees.length === 0) {
+                        employeeSelect.innerHTML = '<option value="">-- Không có nhân viên --</option>';
+                    }
+                } catch (error) {
+                    console.error('Error loading employees:', error);
+                    employeeSelect.innerHTML = '<option value="">-- Lỗi tải dữ liệu --</option>';
+                    showErrorModal('Không thể tải danh sách nhân viên: ' + error.message);
+                }
+            } else {
+                employeeSelect.innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
+            }
+        });
+
+        generateWeeks();
+        generateHoursAndMinutes();
+
+        // Lắng nghe sự kiện thay đổi tuần - GIỚI HẠN CHỌN NGÀY THEO TUẦN
+        const weekSelect = document.getElementById('weekSelect');
+        const dayInput = document.querySelector('input[name="Day"]');
+
+        weekSelect.addEventListener('change', function () {
+            if (this.value) {
+                const [week, startDate, endDate] = this.value.split('|');
+                const [startDay, startMonth, startYear] = startDate.split('/');
+                const [endDay, endMonth, endYear] = endDate.split('/');
+
+                const minDate = `${startYear}-${startMonth}-${startDay}`;
+                const maxDate = `${endYear}-${endMonth}-${endDay}`;
+
+                dayInput.setAttribute('min', minDate);
+                dayInput.setAttribute('max', maxDate);
+
+                if (dayInput.value && (dayInput.value < minDate || dayInput.value > maxDate)) {
+                    dayInput.value = '';
+                }
+            } else {
+                dayInput.removeAttribute('min');
+                dayInput.removeAttribute('max');
+                dayInput.value = '';
+            }
+        });
+
+        if (weekSelect.value) {
+            weekSelect.dispatchEvent(new Event('change'));
+        }
+
+        // Convert giờ và phút sang decimal
+        const hourSelect = document.getElementById('hourSelect');
+        const minuteSelect = document.getElementById('minuteSelect');
+        const hourDecimal = document.getElementById('hourDecimal');
+        const hourDisplay = document.getElementById('hourDisplay');
+
+        function calculateDecimal() {
+            if (hourSelect.value !== '' && minuteSelect.value !== '') {
+                const hours = parseInt(hourSelect.value);
+                const minutes = parseInt(minuteSelect.value);
+                const decimal = hours + (minutes / 60);
+                hourDecimal.value = decimal.toFixed(2);
+                hourDisplay.textContent = `= ${decimal.toFixed(2)} giờ`;
+            } else {
+                hourDecimal.value = '';
+                hourDisplay.textContent = '';
+            }
+        }
+
+        hourSelect.addEventListener('change', calculateDecimal);
+        minuteSelect.addEventListener('change', calculateDecimal);
+    });
+
+    // Hàm tính số tuần trong năm
+    function getWeekNumber(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return weekNo;
+    }
+
+    function getMonday(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    }
+
+    function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    function generateWeeks() {
+        const weekSelect = document.getElementById('weekSelect');
+        const currentYear = new Date().getFullYear();
+        const currentWeek = getWeekNumber(new Date());
+
+        while (weekSelect.options.length > 1) {
+            weekSelect.remove(1);
+        }
+
+        for (let week = 1; week <= 52; week++) {
+            const jan1 = new Date(currentYear, 0, 1);
+            const daysOffset = (week - 1) * 7;
+            const weekDate = new Date(jan1.setDate(jan1.getDate() + daysOffset));
+            const monday = getMonday(weekDate);
+
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            const weekText = `Tuần ${week} (${formatDate(monday)} - ${formatDate(sunday)})`;
+            const weekValue = `${week}|${formatDate(monday)}|${formatDate(sunday)}`;
+
+            const option = document.createElement('option');
+            option.value = weekValue;
+            option.textContent = weekText;
+
+            if (week === currentWeek) {
+                option.selected = true;
+            }
+
+            weekSelect.appendChild(option);
+        }
+    }
+
+    function generateHoursAndMinutes() {
+        const hourSelect = document.getElementById('hourSelect');
+        const minuteSelect = document.getElementById('minuteSelect');
+
+        for (let h = 0; h <= 23; h++) {
+            const option = document.createElement('option');
+            option.value = h;
+            option.textContent = String(h).padStart(2, '0');
+            hourSelect.appendChild(option);
+        }
+
+        for (let m = 0; m <= 59; m++) {
+            const option = document.createElement('option');
+            option.value = m;
+            option.textContent = String(m).padStart(2, '0');
+            minuteSelect.appendChild(option);
+        }
+    }
+
     function handleSubmit() {
         let valid = true;
-        const inputs = document.querySelectorAll('input[type="text"], input[type="date"], select');
+        const inputs = document.querySelectorAll('input[type="text"], input[type="date"], select:not(#hourSelect):not(#minuteSelect)');
 
         inputs.forEach(input => {
             if (!input.value.trim()) {
@@ -173,6 +399,19 @@
                 input.classList.remove('border-red-600', 'bg-red-50');
             }
         });
+
+        const hourSelect = document.getElementById('hourSelect');
+        const minuteSelect = document.getElementById('minuteSelect');
+        const hourDecimal = document.getElementById('hourDecimal');
+
+        if (!hourDecimal.value) {
+            hourSelect.classList.add('border-red-600', 'bg-red-50');
+            minuteSelect.classList.add('border-red-600', 'bg-red-50');
+            valid = false;
+        } else {
+            hourSelect.classList.remove('border-red-600', 'bg-red-50');
+            minuteSelect.classList.remove('border-red-600', 'bg-red-50');
+        }
 
         if (!valid) {
             showErrorModal('Vui lòng nhập đầy đủ dữ liệu');
@@ -192,13 +431,12 @@
 
     function submitForm() {
         closeModal();
-        // Success feedback
+
         const btn = event.target;
         btn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
         setTimeout(() => {
             alert('✓ Đã lưu dữ liệu thành công!');
-            // TODO: AJAX hoặc form.submit()
         }, 800);
     }
 
