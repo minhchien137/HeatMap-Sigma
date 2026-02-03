@@ -12,12 +12,24 @@ namespace HeatmapSystem.Models
         public int StaffDetailId { get; set; }
 
         [Required]
-        [Column("IdStaff")]
-        public int IdStaff { get; set; }
+        [Column("SVNStaff")]
+        [StringLength(20)]
+        public string SVNStaff { get; set; }
 
         [Required]
-        [Column("ProjectId")]
-        public int ProjectId { get; set; }
+        [Column("NameStaff")]
+        [StringLength(200)]
+        public string NameStaff { get; set; }
+
+        [Required]
+        [Column("Department")]
+        [StringLength(150)]
+        public string Department { get; set; }
+
+        [Required]
+        [Column("Project")]
+        [StringLength(100)]
+        public string Project { get; set; }
 
         [Required]
         [Column("WorkDate")]
@@ -30,17 +42,13 @@ namespace HeatmapSystem.Models
         [Required]
         [Column("Year")]
         public int Year { get; set; }
-
+  
         [Column(TypeName = "decimal(5, 2)")]
         public decimal? WorkHours { get; set; }
 
-        [Column("Description")]
-        [StringLength(200)]
-        public string Description { get; set; }
-
         [Required]
         [Column("CreateBy")]
-        [StringLength(50)]
+        [StringLength(150)]
         public string CreateBy { get; set; }
 
         [Required]
