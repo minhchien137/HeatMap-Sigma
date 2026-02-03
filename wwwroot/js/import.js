@@ -534,7 +534,90 @@ function copyFirstDayDataToAll() {
 
 // Submit handlers
 function handleSubmitMode1() {
-    showErrorModal('Chức năng đang phát triển - Mode 1');
+    // Validate input
+    const department = document.getElementById('department1').value;
+    const employee = document.getElementById('employee1').value;
+    const project = document.getElementById('project1').value;
+    const day = document.getElementById('day1').value;
+    const hourDecimal = document.getElementById('hourDecimal1').value;
+
+    if (!department) {
+        showErrorModal('Vui lòng chọn bộ phận');
+        return;
+    }
+
+    if (!employee) {
+        showErrorModal('Vui lòng chọn nhân viên');
+        return;
+    }
+
+    if (!project) {
+        showErrorModal('Vui lòng chọn dự án');
+        return;
+    }
+
+    if (!day) {
+        showErrorModal('Vui lòng chọn ngày');
+        return;
+    }
+
+    if (!hourDecimal || parseFloat(hourDecimal) <= 0) {
+        showErrorModal('Vui lòng nhập giờ làm việc hợp lệ');
+        return;
+    }
+
+    // Get selected text for confirmation
+    const employeeName = document.getElementById('employee1').selectedOptions[0].text;
+    const projectName = document.getElementById('project1').selectedOptions[0].text;
+    const formattedDate = new Date(day).toLocaleDateString('vi-VN');
+
+    const message = `Xác nhận lưu dữ liệu?\n\nNhân viên: ${employeeName}\nDự án: ${projectName}\nNgày: ${formattedDate}\nGiờ: ${hourDecimal} giờ`;
+    
+    showConfirmModal(message, function() {
+        // Prepare data
+        const data = {
+            EmployeeId: parseInt(employee),
+            ProjectId: parseInt(project),
+            WorkDate: day,
+            WorkHours: parseFloat(hourDecimal)
+        };
+
+        // Send to server
+        fetch('/Heatmap/SaveStaffDetail', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('✓ Lưu dữ liệu thành công!\n\n' +
+                      `Nhân viên: ${result.data.employee}\n` +
+                      `Bộ phận: ${result.data.department}\n` +
+                      `Dự án: ${result.data.project}\n` +
+                      `Ngày: ${result.data.workDate}\n` +
+                      `Giờ: ${result.data.workHours} giờ`);
+                
+                // Reset form
+                document.getElementById('department1').selectedIndex = 0;
+                document.getElementById('employee1').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
+                document.getElementById('project1').selectedIndex = 0;
+                document.getElementById('day1').value = '';
+                document.getElementById('hour1').selectedIndex = 0;
+                document.getElementById('minute1').selectedIndex = 0;
+                document.getElementById('hourDecimal1').value = '';
+                document.getElementById('hourDisplay1').textContent = '';
+            } else {
+                showErrorModal(result.message || 'Có lỗi xảy ra khi lưu dữ liệu');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorModal('Lỗi kết nối đến server: ' + error.message);
+        });
+    });
 }
 
 function handleSubmitMode2() {
