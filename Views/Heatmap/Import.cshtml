@@ -5,108 +5,112 @@
 }
 
 <div
-    class="w-full max-w-5xl bg-white rounded-[3rem] shadow-[0_35px_80px_rgba(0,0,0,0.08)] overflow-hidden p-12 md:p-16 animate-fade-in mx-auto border border-gray-50 min-h-[700px]">
+    class="w-full max-w-6xl bg-white rounded-[3rem] shadow-[0_35px_80px_rgba(0,0,0,0.08)] overflow-hidden p-12 md:p-16 animate-fade-in mx-auto border border-gray-50 min-h-[700px]">
 
     <!-- Header -->
-    <div class="text-center mb-12">
+    <div class="text-center mb-8">
         <h2 class="text-gray-400 font-black uppercase tracking-[0.3em] mb-3 text-xs">Nhập dữ liệu</h2>
         <h1 class="text-5xl md:text-6xl font-black leading-[1.1] text-red-600">
             Heatmap
         </h1>
     </div>
 
-    <!-- Form Container -->
-    <div class="flex flex-col lg:flex-row gap-10 max-w-5xl mx-auto">
+    <!-- Mode Selector (3 Tabs) -->
+    <div class="mb-10">
+        <div class="flex gap-4 justify-center">
+            <button id="modeBtn1" onclick="switchMode(1)"
+                class="mode-btn active px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
+                Nhập đơn (1 người - 1 ngày)
+            </button>
+            <button id="modeBtn2" onclick="switchMode(2)"
+                class="mode-btn px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
+                Một người - Nhiều ngày
+            </button>
+            <button id="modeBtn3" onclick="switchMode(3)"
+                class="mode-btn px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
+                Nhiều người - Nhiều ngày
+            </button>
+        </div>
+    </div>
 
-        <!-- Left Column - Form Fields -->
-        <div class="flex-[2] space-y-6">
+    <!-- MODE 1: Nhập đơn -->
+    <div id="mode1" class="mode-content">
+        <div class="flex flex-col lg:flex-row gap-10">
+            <!-- Left Column -->
+            <div class="flex-[2] space-y-6">
+                <!-- Bộ phận -->
+                <div class="group">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
+                        phận</label>
+                    <select id="department1" class="input-field">
+                        <option value="">-- Chọn bộ phận --</option>
+                        @foreach (var dept in ViewBag.Departments)
+                        {
+                            <option value="@dept.id">@dept.dept_name</option>
+                        }
+                    </select>
+                </div>
 
-            <!-- Bộ phận Dropdown -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
-                    phận</label>
-                <select id="department" name="department"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
-                    <option value="">-- Chọn bộ phận --</option>
-                    @foreach (var dept in ViewBag.Departments)
-                    {
-                        <option value="@dept.id">@dept.dept_name</option>
-                    }
-                </select>
-            </div>
+                <!-- Tên -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
+                    <select id="employee1" class="input-field">
+                        <option value="">-- Chọn bộ phận trước --</option>
+                    </select>
+                </div>
 
-            <!-- Tên - ĐỔI THÀNH DROPDOWN -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
-                <select id="employeeSelect" name="Name"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
-                    <option value="">-- Chọn bộ phận trước --</option>
-                </select>
-            </div>
-
-            <!-- Project Dropdown -->
-            <div class="group">
-                <label
-                    class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project</label>
-                <select id="projectSelect" name="Project"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
-                    <option value="">-- Chọn dự án --</option>
-                    @if (ViewBag.Projects != null)
-                    {
-                        foreach (var project in ViewBag.Projects)
+                <!-- Project -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project</label>
+                    <select id="project1" class="input-field">
+                        <option value="">-- Chọn dự án --</option>
+                        @foreach (var project in ViewBag.Projects)
                         {
                             <option value="@project.IdProject">@project.NameProject
                                 @(!string.IsNullOrEmpty(project.NameCustomer) ? $"({project.NameCustomer})" : "")</option>
                         }
-                    }
-                </select>
-            </div>
-
-            <!-- Week Dropdown -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
-                <select id="weekSelect" name="Week"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
-                    <option value="">-- Chọn tuần --</option>
-                </select>
-            </div>
-
-            <!-- Day -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Ngày</label>
-                <input type="date" name="Day"
-                    class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700" />
-            </div>
-
-            <!-- Hour - Giờ và Phút riêng để convert sang decimal -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Giờ</label>
-                <div class="flex gap-3">
-                    <select id="hourSelect"
-                        class="flex-1 px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
-                        <option value="">Giờ</option>
-                    </select>
-                    <select id="minuteSelect"
-                        class="flex-1 px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
-                        <option value="">Phút</option>
                     </select>
                 </div>
-                <!-- Hidden input để lưu giá trị decimal -->
-                <input type="hidden" name="Hour" id="hourDecimal" />
-                <div class="mt-2 text-sm text-gray-500 ml-2" id="hourDisplay"></div>
+
+                <!-- Tuần -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                    <select id="week1" class="input-field">
+                        <option value="">-- Chọn tuần --</option>
+                    </select>
+                </div>
+
+                <!-- Ngày -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Ngày</label>
+                    <input type="date" id="day1" class="input-field" />
+                </div>
+
+                <!-- Giờ -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Giờ</label>
+                    <div class="flex gap-3">
+                        <select id="hour1" class="input-field flex-1">
+                            <option value="">Giờ</option>
+                        </select>
+                        <select id="minute1" class="input-field flex-1">
+                            <option value="">Phút</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="hourDecimal1" />
+                    <div class="mt-2 text-sm text-gray-500 ml-2" id="hourDisplay1"></div>
+                </div>
             </div>
 
-        </div>
-
-        <!-- Right Column - Image Upload -->
-        <div class="flex-1 flex flex-col items-center justify-start">
-            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Image User</label>
-            <div
-                class="w-full max-w-[240px] h-[240px] border-4 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center text-gray-400 hover:border-red-300 hover:bg-red-50/30 transition-all cursor-pointer group relative overflow-hidden">
-                <div
-                    class="absolute inset-0 bg-gradient-to-br from-red-50/0 to-red-100/0 group-hover:from-red-50/50 group-hover:to-red-100/30 transition-all">
-                </div>
-                <div class="relative z-10 text-center">
+            <!-- Right Column - Image -->
+            <div class="flex-1 flex flex-col items-center justify-start">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Image User</label>
+                <div class="upload-box">
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-12 w-12 mx-auto mb-3 text-gray-300 group-hover:text-red-400 transition-colors"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -119,23 +123,204 @@
             </div>
         </div>
 
+        <!-- Submit Button -->
+        <div class="mt-12 text-center">
+            <button onclick="handleSubmitMode1()" class="submit-btn">
+                Lưu dữ liệu
+            </button>
+        </div>
     </div>
 
-    <!-- Action Button -->
-    <div class="mt-12 text-center">
-        <button onclick="handleSubmit()"
-            class="px-12 py-4 bg-red-600 text-white rounded-2xl font-black uppercase tracking-[0.25em] text-base shadow-2xl shadow-red-200 hover:bg-red-700 hover:-translate-y-1 active:scale-[0.98] transition-all">
-            Lưu dữ liệu
-        </button>
+    <!-- MODE 2: Nhiều ngày - 1 người -->
+    <div id="mode2" class="mode-content hidden">
+        <div class="space-y-6 max-w-3xl mx-auto">
+            <!-- Bộ phận -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
+                    phận</label>
+                <select id="department2" class="input-field">
+                    <option value="">-- Chọn bộ phận --</option>
+                    @foreach (var dept in ViewBag.Departments)
+                    {
+                        <option value="@dept.id">@dept.dept_name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Tên -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
+                <select id="employee2" class="input-field">
+                    <option value="">-- Chọn bộ phận trước --</option>
+                </select>
+            </div>
+
+            <!-- Toggle: Chọn cách nhập dự án -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn dự
+                    án</label>
+                <div class="flex gap-4">
+                    <button type="button" id="projectModeBtn1" onclick="switchProjectMode(1)"
+                        class="project-mode-btn active flex-1 px-6 py-4 rounded-2xl font-bold text-sm transition-all border-2">
+                        Một dự án cho tất cả
+                    </button>
+                    <button type="button" id="projectModeBtn2" onclick="switchProjectMode(2)"
+                        class="project-mode-btn flex-1 px-6 py-4 rounded-2xl font-bold text-sm transition-all border-2">
+                        Dự án riêng từng ngày
+                    </button>
+                </div>
+            </div>
+
+            <!-- Project chung (khi chọn mode 1) -->
+            <div class="group" id="commonProjectSection">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project (áp
+                    dụng cho tất cả các ngày)</label>
+                <select id="commonProject" class="input-field">
+                    <option value="">-- Chọn dự án --</option>
+                    @foreach (var project in ViewBag.Projects)
+                    {
+                        <option value="@project.IdProject">@project.NameProject
+                            @(!string.IsNullOrEmpty(project.NameCustomer) ? $"({project.NameCustomer})" : "")</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Tuần -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                <select id="week2" class="input-field">
+                    <option value="">-- Chọn tuần --</option>
+                </select>
+            </div>
+
+            <!-- Chọn các ngày trong tuần -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn
+                    ngày</label>
+                <div class="grid grid-cols-7 gap-3" id="dayCheckboxes2">
+                    <!-- Sẽ được tạo động bằng JavaScript -->
+                </div>
+            </div>
+
+            <!-- Nhập thông tin cho từng ngày đã chọn -->
+            <div class="group" id="dayHoursSection2" style="display: none;">
+                <div class="flex items-center justify-between mb-3">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Nhập thông tin
+                        cho từng ngày</label>
+                    <button type="button" onclick="copyFirstDayDataToAll()"
+                        class="text-xs px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all font-semibold">
+                        📋 Copy ngày đầu cho tất cả
+                    </button>
+                </div>
+                <div class="space-y-3 bg-gray-50 p-6 rounded-2xl" id="dayHoursList2">
+                    <!-- Sẽ được tạo động bằng JavaScript -->
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-12 text-center">
+                <button onclick="handleSubmitMode2()" class="submit-btn">
+                    Lưu dữ liệu
+                </button>
+            </div>
+        </div>
     </div>
 
+    <!-- MODE 3: Nhiều người - Nhiều ngày -->
+    <div id="mode3" class="mode-content hidden">
+        <div class="space-y-6 max-w-4xl mx-auto">
+            <!-- Bộ phận -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
+                    phận</label>
+                <select id="department3" class="input-field">
+                    <option value="">-- Chọn bộ phận --</option>
+                    @foreach (var dept in ViewBag.Departments)
+                    {
+                        <option value="@dept.id">@dept.dept_name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Danh sách nhân viên (checkbox) -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">
+                    Chọn nhân viên
+                    <span class="text-xs font-normal normal-case ml-2">(Tích chọn nhiều người)</span>
+                </label>
+                <div id="employeeCheckboxes3" class="space-y-2 max-h-60 overflow-y-auto bg-gray-50 p-4 rounded-2xl">
+                    <!-- Sẽ được tạo động bằng JavaScript -->
+                </div>
+            </div>
+
+            <!-- Tuần -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                <select id="week3" class="input-field">
+                    <option value="">-- Chọn tuần --</option>
+                </select>
+            </div>
+
+            <!-- Chọn các ngày trong tuần -->
+            <div class="group">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn
+                    ngày</label>
+                <div class="grid grid-cols-7 gap-3" id="dayCheckboxes3">
+                    <!-- Sẽ được tạo động bằng JavaScript -->
+                </div>
+            </div>
+
+            <!-- Button mở popup -->
+            <div class="mt-12 text-center">
+                <button onclick="openBulkInputPopup()" class="submit-btn">
+                    Tiếp tục nhập thông tin →
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popup cho Mode 3 -->
+<div id="bulkInputPopup"
+    class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
+    <div
+        class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden border border-gray-100">
+        <h3 class="text-3xl font-black mb-6 tracking-tight text-center">Nhập thông tin cho từng người</h3>
+
+        <div class="overflow-y-auto max-h-[60vh] mb-6">
+            <table class="w-full">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">Tên</th>
+                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">Dự án</th>
+                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">Giờ</th>
+                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">Phút</th>
+                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">= Decimal</th>
+                    </tr>
+                </thead>
+                <tbody id="bulkInputTableBody">
+                    <!-- Sẽ được tạo động bằng JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex gap-4 justify-center">
+            <button onclick="closeBulkInputPopup()"
+                class="px-8 py-4 border-2 border-gray-200 rounded-2xl font-bold text-gray-600 hover:bg-gray-50 transition-all">
+                Hủy
+            </button>
+            <button onclick="handleSubmitMode3()"
+                class="px-8 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
+                Xác nhận và lưu
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Confirm Modal -->
 <div id="confirmModal"
-    class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md transition-none duration-0">
-    <div
-        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100 transition-none duration-0">
+    class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
+    <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100">
         <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -143,18 +328,14 @@
                     d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
-
         <h3 class="text-3xl font-black mb-4 tracking-tight">Xác nhận?</h3>
-        <p class="text-gray-500 text-lg mb-10 leading-relaxed">
-            Bạn có chắc chắn muốn lưu dữ liệu này không?
-        </p>
-
+        <p class="text-gray-500 text-lg mb-10 leading-relaxed" id="confirmMessage"></p>
         <div class="flex space-x-5">
-            <button onclick="closeModal()"
+            <button onclick="closeConfirmModal()"
                 class="flex-1 py-4 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">
                 Không
             </button>
-            <button onclick="submitForm()"
+            <button onclick="confirmSubmit()"
                 class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
                 Có, xác nhận
             </button>
@@ -163,10 +344,8 @@
 </div>
 
 <!-- Error Modal -->
-<div id="errorModal"
-    class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md transition-none duration-0">
-    <div
-        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100 transition-none duration-0">
+<div id="errorModal" class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
+    <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100">
         <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -183,271 +362,154 @@
     </div>
 </div>
 
+<style>
+    .input-field {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background-color: #f9fafb;
+        border: 2px solid transparent;
+        border-radius: 1rem;
+        outline: none;
+        transition: all 0.3s;
+        font-size: 1rem;
+        color: #374151;
+    }
+
+    .input-field:focus {
+        background-color: white;
+        border-color: #dc2626;
+        ring: 0;
+    }
+
+    .mode-btn {
+        border-color: #e5e7eb;
+        color: #9ca3af;
+        background-color: white;
+    }
+
+    .mode-btn.active {
+        border-color: #dc2626;
+        color: #dc2626;
+        background-color: #fef2f2;
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.1);
+    }
+
+    .mode-btn:hover:not(.active) {
+        border-color: #d1d5db;
+        background-color: #f9fafb;
+    }
+
+    .project-mode-btn {
+        border-color: #e5e7eb;
+        color: #9ca3af;
+        background-color: white;
+    }
+
+    .project-mode-btn.active {
+        border-color: #dc2626;
+        color: #dc2626;
+        background-color: #fef2f2;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.1);
+    }
+
+    .project-mode-btn:hover:not(.active) {
+        border-color: #d1d5db;
+        background-color: #f9fafb;
+    }
+
+    .submit-btn {
+        padding: 1rem 3rem;
+        background-color: #dc2626;
+        color: white;
+        border-radius: 1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.25em;
+        font-size: 1rem;
+        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.2);
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+        background-color: #b91c1c;
+        transform: translateY(-2px);
+    }
+
+    .submit-btn:active {
+        transform: scale(0.98);
+    }
+
+    .upload-box {
+        width: 100%;
+        max-width: 240px;
+        height: 240px;
+        border: 4px dashed #e5e7eb;
+        border-radius: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .upload-box:hover {
+        border-color: #fca5a5;
+        background-color: rgba(254, 242, 242, 0.3);
+    }
+
+    .day-checkbox,
+    .employee-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background-color: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .day-checkbox:hover,
+    .employee-checkbox:hover {
+        border-color: #dc2626;
+        background-color: #fef2f2;
+    }
+
+    .day-checkbox.selected,
+    .employee-checkbox.selected {
+        border-color: #dc2626;
+        background-color: #fef2f2;
+        font-weight: bold;
+    }
+
+    .day-checkbox input[type="checkbox"],
+    .employee-checkbox input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        accent-color: #dc2626;
+    }
+
+    /* Styles for day hours list in Mode 2 */
+    #dayHoursList2 .day-decimal {
+        min-width: 80px;
+        text-align: right;
+    }
+</style>
+
+
 <script>
-    // THÊM: Lắng nghe sự kiện chọn bộ phận để load nhân viên
-    document.addEventListener('DOMContentLoaded', function () {
-        const departmentSelect = document.getElementById('department');
-        const employeeSelect = document.getElementById('employeeSelect');
-
-        departmentSelect.addEventListener('change', async function () {
-            const departmentId = this.value;
-
-            // Reset dropdown nhân viên
-            employeeSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
-
-            if (departmentId) {
-                try {
-                    // Gọi API để lấy danh sách nhân viên
-                    const response = await fetch(`/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`);
-
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-
-                    const employees = await response.json();
-
-                    // Kiểm tra nếu có lỗi trong response
-                    if (employees.error) {
-                        throw new Error(employees.error);
-                    }
-
-                    // Reset dropdown
-                    employeeSelect.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
-
-                    // Thêm nhân viên vào dropdown
-                    employees.forEach(emp => {
-                        const option = document.createElement('option');
-                        option.value = emp.id;
-
-                        // Xử lý trường hợp null
-                        const firstName = emp.first_name || '';
-                        const lastName = emp.last_name || '';
-                        const nickname = emp.nickname || '';
-                        const empCode = emp.emp_code || '';
-
-                        // Hiển thị tên đầy đủ
-                        let displayName = '';
-                        if (firstName || lastName) {
-                            displayName = `${firstName} ${lastName}`.trim();
-                            if (nickname) {
-                                displayName += ` (${nickname})`;
-                            }
-                        } else if (empCode) {
-                            displayName = `Mã NV: ${empCode}`;
-                        } else {
-                            displayName = `ID: ${emp.id}`;
-                        }
-
-                        option.textContent = displayName;
-                        employeeSelect.appendChild(option);
-                    });
-
-                    if (employees.length === 0) {
-                        employeeSelect.innerHTML = '<option value="">-- Không có nhân viên --</option>';
-                    }
-                } catch (error) {
-                    console.error('Error loading employees:', error);
-                    employeeSelect.innerHTML = '<option value="">-- Lỗi tải dữ liệu --</option>';
-                    showErrorModal('Không thể tải danh sách nhân viên: ' + error.message);
-                }
-            } else {
-                employeeSelect.innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
-            }
-        });
-
-        generateWeeks();
-        generateHoursAndMinutes();
-
-        // Lắng nghe sự kiện thay đổi tuần - GIỚI HẠN CHỌN NGÀY THEO TUẦN
-        const weekSelect = document.getElementById('weekSelect');
-        const dayInput = document.querySelector('input[name="Day"]');
-
-        weekSelect.addEventListener('change', function () {
-            if (this.value) {
-                const [week, startDate, endDate] = this.value.split('|');
-                const [startDay, startMonth, startYear] = startDate.split('/');
-                const [endDay, endMonth, endYear] = endDate.split('/');
-
-                const minDate = `${startYear}-${startMonth}-${startDay}`;
-                const maxDate = `${endYear}-${endMonth}-${endDay}`;
-
-                dayInput.setAttribute('min', minDate);
-                dayInput.setAttribute('max', maxDate);
-
-                if (dayInput.value && (dayInput.value < minDate || dayInput.value > maxDate)) {
-                    dayInput.value = '';
-                }
-            } else {
-                dayInput.removeAttribute('min');
-                dayInput.removeAttribute('max');
-                dayInput.value = '';
-            }
-        });
-
-        if (weekSelect.value) {
-            weekSelect.dispatchEvent(new Event('change'));
+    // Tạo biến global chứa projects data để file import.js sử dụng
+    window.projectsData = [
+        @foreach (var project in ViewBag.Projects)
+        {
+            <text>{IdProject: @project.IdProject, NameProject: "@project.NameProject" },</text>
         }
-
-        // Convert giờ và phút sang decimal
-        const hourSelect = document.getElementById('hourSelect');
-        const minuteSelect = document.getElementById('minuteSelect');
-        const hourDecimal = document.getElementById('hourDecimal');
-        const hourDisplay = document.getElementById('hourDisplay');
-
-        function calculateDecimal() {
-            if (hourSelect.value !== '' && minuteSelect.value !== '') {
-                const hours = parseInt(hourSelect.value);
-                const minutes = parseInt(minuteSelect.value);
-                const decimal = hours + (minutes / 60);
-                hourDecimal.value = decimal.toFixed(2);
-                hourDisplay.textContent = `= ${decimal.toFixed(2)} giờ`;
-            } else {
-                hourDecimal.value = '';
-                hourDisplay.textContent = '';
-            }
-        }
-
-        hourSelect.addEventListener('change', calculateDecimal);
-        minuteSelect.addEventListener('change', calculateDecimal);
-    });
-
-    // Hàm tính số tuần trong năm
-    function getWeekNumber(date) {
-        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-        const dayNum = d.getUTCDay() || 7;
-        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        return weekNo;
-    }
-
-    function getMonday(date) {
-        const d = new Date(date);
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(d.setDate(diff));
-    }
-
-    function formatDate(date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    }
-
-    function generateWeeks() {
-        const weekSelect = document.getElementById('weekSelect');
-        const currentYear = new Date().getFullYear();
-        const currentWeek = getWeekNumber(new Date());
-
-        while (weekSelect.options.length > 1) {
-            weekSelect.remove(1);
-        }
-
-        for (let week = 1; week <= 52; week++) {
-            const jan1 = new Date(currentYear, 0, 1);
-            const daysOffset = (week - 1) * 7;
-            const weekDate = new Date(jan1.setDate(jan1.getDate() + daysOffset));
-            const monday = getMonday(weekDate);
-
-            const sunday = new Date(monday);
-            sunday.setDate(monday.getDate() + 6);
-
-            const weekText = `Tuần ${week} (${formatDate(monday)} - ${formatDate(sunday)})`;
-            const weekValue = `${week}|${formatDate(monday)}|${formatDate(sunday)}`;
-
-            const option = document.createElement('option');
-            option.value = weekValue;
-            option.textContent = weekText;
-
-            if (week === currentWeek) {
-                option.selected = true;
-            }
-
-            weekSelect.appendChild(option);
-        }
-    }
-
-    function generateHoursAndMinutes() {
-        const hourSelect = document.getElementById('hourSelect');
-        const minuteSelect = document.getElementById('minuteSelect');
-
-        for (let h = 0; h <= 23; h++) {
-            const option = document.createElement('option');
-            option.value = h;
-            option.textContent = String(h).padStart(2, '0');
-            hourSelect.appendChild(option);
-        }
-
-        for (let m = 0; m <= 59; m++) {
-            const option = document.createElement('option');
-            option.value = m;
-            option.textContent = String(m).padStart(2, '0');
-            minuteSelect.appendChild(option);
-        }
-    }
-
-    function handleSubmit() {
-        let valid = true;
-        const inputs = document.querySelectorAll('input[type="text"], input[type="date"], select:not(#hourSelect):not(#minuteSelect)');
-
-        inputs.forEach(input => {
-            if (!input.value.trim()) {
-                input.classList.add('border-red-600', 'bg-red-50');
-                valid = false;
-            } else {
-                input.classList.remove('border-red-600', 'bg-red-50');
-            }
-        });
-
-        const hourSelect = document.getElementById('hourSelect');
-        const minuteSelect = document.getElementById('minuteSelect');
-        const hourDecimal = document.getElementById('hourDecimal');
-
-        if (!hourDecimal.value) {
-            hourSelect.classList.add('border-red-600', 'bg-red-50');
-            minuteSelect.classList.add('border-red-600', 'bg-red-50');
-            valid = false;
-        } else {
-            hourSelect.classList.remove('border-red-600', 'bg-red-50');
-            minuteSelect.classList.remove('border-red-600', 'bg-red-50');
-        }
-
-        if (!valid) {
-            showErrorModal('Vui lòng nhập đầy đủ dữ liệu');
-            return;
-        }
-
-        const modal = document.getElementById('confirmModal');
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('confirmModal');
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    }
-
-    function submitForm() {
-        closeModal();
-
-        const btn = event.target;
-        btn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-
-        setTimeout(() => {
-            alert('✓ Đã lưu dữ liệu thành công!');
-        }, 800);
-    }
-
-    function showErrorModal(message) {
-        const modal = document.getElementById('errorModal');
-        document.getElementById('errorModalMessage').innerText = message;
-        modal.style.display = 'flex';
-    }
-
-    function closeErrorModal() {
-        const modal = document.getElementById('errorModal');
-        modal.style.display = 'none';
-    }
+    ];
 </script>
+
+<script src="~/js/import.js"></script>
