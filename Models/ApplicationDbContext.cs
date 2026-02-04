@@ -13,8 +13,6 @@ namespace HeatmapSystem.Models
         public DbSet<SVN_Logs> SVN_Logs { get; set; }
         public DbSet<SVN_Projects> SVN_Projects { get; set; }
 
-        public DbSet<SVN_Staff> SVN_Staff { get; set; }
-
         public DbSet<SVN_StaffDetail> SVN_StaffDetail { get; set; }
 
         public DbSet<SVN_Department> SVN_Department { get; set; }
