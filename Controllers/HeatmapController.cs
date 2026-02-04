@@ -31,8 +31,26 @@ namespace HeatmapSystem.Controllers
         public string last_name { get; set; }
         public string nickname { get; set; }
         public int department_id { get; set; }
-        public int status { get; set; }
+        public short status { get; set; }  // SMALLINT trong database
     }
+
+    // DTO class cho Staff data
+    public class StaffDto
+    {
+        public int id { get; set; }
+        public string emp_code { get; set; }
+        public string first_name { get; set; }
+        public string last_name { get; set; }
+        public string full_name { get; set; }
+        public string gender { get; set; }
+        public DateTime? birthday { get; set; }
+        public string city { get; set; }
+        public DateTime? hire_date { get; set; }
+        public string department { get; set; }
+        public short status { get; set; }  // SMALLINT trong database
+    }
+
+
 
     [Route("[controller]")]
     public class HeatmapController : Controller
@@ -144,7 +162,7 @@ namespace HeatmapSystem.Controllers
                                     last_name = reader.IsDBNull(3) ? "" : reader.GetString(3),
                                     nickname = reader.IsDBNull(4) ? "" : reader.GetString(4),
                                     department_id = Convert.ToInt32(reader[5]),  // Đổi thành Convert.ToInt32
-                                    status = Convert.ToInt32(reader[6])  // Đổi thành Convert.ToInt32
+                                    status = Convert.ToInt16(reader[6])  // Đổi thành Convert.ToInt32
                                 });
                             }
                         }
@@ -242,7 +260,7 @@ namespace HeatmapSystem.Controllers
                                     last_name = reader.IsDBNull(reader.GetOrdinal("last_name")) ? "" : reader.GetString(reader.GetOrdinal("last_name")),
                                     nickname = reader.IsDBNull(reader.GetOrdinal("nickname")) ? "" : reader.GetString(reader.GetOrdinal("nickname")),
                                     department_id = Convert.ToInt32(reader["department_id"]),
-                                    status = Convert.ToInt32(reader["status"])
+                                    status = Convert.ToInt16(reader["status"])  // SMALLINT
                                 };
                             }
                         }
@@ -386,8 +404,53 @@ namespace HeatmapSystem.Controllers
             }
         }
 
+        /*------------------- Dữ liệu nhân viên-----------------------*/
+        [HttpGet("Staff")]
+        public IActionResult Staff()
+        {
+            // Kiểm tra authentication
+            if (!IsAuthenticated())
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
 
-        // Thêm các methods này vào HeatmapController.cs
+            return View();
+        }
+
+        [HttpGet("GetStaffData")]
+        public IActionResult GetStaffData()
+        {
+            try
+            {
+                var staffData = _zkContext.Database
+                    .SqlQueryRaw<StaffDto>(@"
+                SELECT 
+                    e.id,
+                    ISNULL(e.emp_code, '') as emp_code,
+                    ISNULL(e.first_name, '') as first_name,
+                    ISNULL(e.last_name, '') as last_name,
+                    ISNULL(e.first_name, '') as full_name,
+                    ISNULL(e.gender, '') as gender,
+                    e.birthday,
+                    ISNULL(e.city, '') as city,
+                    e.hire_date,
+                    ISNULL(d.dept_name, '') as department,
+                    ISNULL(e.status, 0) as status
+                FROM personnel_employee e
+                LEFT JOIN personnel_department d ON e.department_id = d.id
+                ORDER BY e.emp_code")
+                    .ToList();
+
+                return Json(staffData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting staff data");
+                return Json(new List<StaffDto>());
+            }
+        }
+
+        /*------------------- Lịch sự nhập liệu -----------------------*/
 
         [HttpGet("History")]
         public IActionResult History()
@@ -561,6 +624,7 @@ namespace HeatmapSystem.Controllers
             }
         }
 
+       
         [HttpGet("ExportHistoryToExcel")]
         public IActionResult ExportHistoryToExcel(
             string department = "",
