@@ -4,45 +4,144 @@
     ViewData["PageName"] = "Import";
 }
 
-<div
-    class="w-full max-w-6xl bg-white rounded-[3rem] shadow-[0_35px_80px_rgba(0,0,0,0.08)] overflow-hidden p-12 md:p-16 animate-fade-in mx-auto border border-gray-50 min-h-[700px]">
+<div class="w-full max-w-6xl mx-auto">
+    <div
+        class="bg-white rounded-[3rem] shadow-[0_35px_80px_rgba(0,0,0,0.08)] overflow-hidden p-12 md:p-16 animate-fade-in border border-gray-50 min-h-[700px]">
 
-    <!-- Header -->
-    <div class="text-center mb-8">
-        <h2 class="text-gray-400 font-black uppercase tracking-[0.3em] mb-3 text-xs">Nhập dữ liệu</h2>
-        <h1 class="text-5xl md:text-6xl font-black leading-[1.1] text-red-600">
-            Heatmap
-        </h1>
-    </div>
-
-    <!-- Mode Selector (3 Tabs) -->
-    <div class="mb-10">
-        <div class="flex gap-4 justify-center">
-            <button id="modeBtn1" onclick="switchMode(1)"
-                class="mode-btn active px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
-                Nhập đơn (1 người - 1 ngày)
-            </button>
-            <button id="modeBtn2" onclick="switchMode(2)"
-                class="mode-btn px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
-                Một người - Nhiều ngày
-            </button>
-            <button id="modeBtn3" onclick="switchMode(3)"
-                class="mode-btn px-8 py-4 rounded-2xl font-bold text-base transition-all border-2 hidden">
-                Nhiều người - Nhiều ngày
-            </button>
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h2 class="text-gray-400 font-black uppercase tracking-[0.3em] mb-3 text-xs">Nhập dữ liệu</h2>
+            <h1 class="text-5xl md:text-6xl font-black leading-[1.1] text-red-600">
+                Heatmap
+            </h1>
         </div>
-    </div>
 
-    <!-- MODE 1: Nhập đơn -->
-    <div id="mode1" class="mode-content">
-        <div class="flex flex-col lg:flex-row gap-10">
-            <!-- Left Column -->
-            <div class="flex-[2] space-y-6">
+        <!-- Mode Selector (3 Tabs) -->
+        <div class="mb-10">
+            <div class="flex gap-4 justify-center">
+                <button id="modeBtn1" onclick="switchMode(1)"
+                    class="mode-btn active px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
+                    Nhập đơn (1 người - 1 ngày)
+                </button>
+                <button id="modeBtn2" onclick="switchMode(2)"
+                    class="mode-btn px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
+                    Một người - Nhiều ngày
+                </button>
+                <button id="modeBtn3" onclick="switchMode(3)"
+                    class="mode-btn px-8 py-4 rounded-2xl font-bold text-base transition-all border-2 hidden">
+                    Nhiều người - Nhiều ngày
+                </button>
+            </div>
+        </div>
+
+        <!-- MODE 1: Nhập đơn -->
+        <div id="mode1" class="mode-content">
+            <div class="flex flex-col lg:flex-row gap-10">
+                <!-- Left Column -->
+                <div class="flex-[2] space-y-6">
+                    <!-- Bộ phận -->
+                    <div class="group">
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
+                            phận</label>
+                        <select id="department1" class="input-field">
+                            <option value="">-- Chọn bộ phận --</option>
+                            @foreach (var dept in ViewBag.Departments)
+                            {
+                                <option value="@dept.id">@dept.dept_name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Tên -->
+                    <div class="group">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
+                        <select id="employee1" class="input-field">
+                            <option value="">-- Chọn bộ phận trước --</option>
+                        </select>
+                    </div>
+
+                    <!-- Project -->
+                    <div class="group">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project</label>
+                        <select id="project1" class="input-field">
+                            <option value="">-- Chọn dự án --</option>
+                            @foreach (var project in ViewBag.Projects)
+                            {
+                                <option value="@project.IdProject">@project.NameProject
+                                    @(!string.IsNullOrEmpty(project.NameCustomer) ? $"({project.NameCustomer})" : "")
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Tuần -->
+                    <div class="group">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                        <select id="week1" class="input-field">
+                            <option value="">-- Chọn tuần --</option>
+                        </select>
+                    </div>
+
+                    <!-- Ngày -->
+                    <div class="group">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Ngày</label>
+                        <input type="date" id="day1" class="input-field" />
+                    </div>
+
+                    <!-- Giờ -->
+                    <div class="group">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Giờ</label>
+                        <div class="flex gap-3">
+                            <select id="hour1" class="input-field flex-1">
+                                <option value="">Giờ</option>
+                            </select>
+                            <select id="minute1" class="input-field flex-1">
+                                <option value="">Phút</option>
+                            </select>
+                        </div>
+                        <input type="hidden" id="hourDecimal1" />
+                        <div class="mt-2 text-sm text-gray-500 ml-2" id="hourDisplay1"></div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Image -->
+                <div class="flex-1 flex flex-col items-center justify-start">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Image
+                        User</label>
+                    <div class="upload-box">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-12 w-12 mx-auto mb-3 text-gray-300 group-hover:text-red-400 transition-colors"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="font-bold text-xs">Comming soon</p>
+                        <p class="text-[10px] mt-1 opacity-60">Coming soon</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-12 text-center">
+                <button onclick="handleSubmitMode1()" class="submit-btn">
+                    Lưu dữ liệu
+                </button>
+            </div>
+        </div>
+
+        <!-- MODE 2: Nhiều ngày - 1 người -->
+        <div id="mode2" class="mode-content hidden">
+            <div class="space-y-6 max-w-3xl mx-auto">
                 <!-- Bộ phận -->
                 <div class="group">
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
                         phận</label>
-                    <select id="department1" class="input-field">
+                    <select id="department2" class="input-field">
                         <option value="">-- Chọn bộ phận --</option>
                         @foreach (var dept in ViewBag.Departments)
                         {
@@ -55,16 +154,33 @@
                 <div class="group">
                     <label
                         class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
-                    <select id="employee1" class="input-field">
+                    <select id="employee2" class="input-field">
                         <option value="">-- Chọn bộ phận trước --</option>
                     </select>
                 </div>
 
-                <!-- Project -->
+                <!-- Toggle: Chọn cách nhập dự án -->
                 <div class="group">
-                    <label
-                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project</label>
-                    <select id="project1" class="input-field">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn dự
+                        án</label>
+                    <div class="flex gap-4">
+                        <button type="button" id="projectModeBtn1" onclick="switchProjectMode(1)"
+                            class="project-mode-btn active flex-1 px-6 py-4 rounded-2xl font-bold text-sm transition-all border-2">
+                            Một dự án cho tất cả
+                        </button>
+                        <button type="button" id="projectModeBtn2" onclick="switchProjectMode(2)"
+                            class="project-mode-btn flex-1 px-6 py-4 rounded-2xl font-bold text-sm transition-all border-2">
+                            Dự án riêng từng ngày
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project chung (khi chọn mode 1) -->
+                <div class="group" id="commonProjectSection">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project
+                        (áp
+                        dụng cho tất cả các ngày)</label>
+                    <select id="commonProject" class="input-field">
                         <option value="">-- Chọn dự án --</option>
                         @foreach (var project in ViewBag.Projects)
                         {
@@ -78,240 +194,137 @@
                 <div class="group">
                     <label
                         class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
-                    <select id="week1" class="input-field">
+                    <select id="week2" class="input-field">
                         <option value="">-- Chọn tuần --</option>
                     </select>
                 </div>
 
-                <!-- Ngày -->
+                <!-- Chọn các ngày trong tuần -->
                 <div class="group">
-                    <label
-                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Ngày</label>
-                    <input type="date" id="day1" class="input-field" />
-                </div>
-
-                <!-- Giờ -->
-                <div class="group">
-                    <label
-                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Giờ</label>
-                    <div class="flex gap-3">
-                        <select id="hour1" class="input-field flex-1">
-                            <option value="">Giờ</option>
-                        </select>
-                        <select id="minute1" class="input-field flex-1">
-                            <option value="">Phút</option>
-                        </select>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn
+                        ngày</label>
+                    <div id="dayCheckboxes2" class="grid grid-cols-1 gap-3">
+                        <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
                     </div>
-                    <input type="hidden" id="hourDecimal1" />
-                    <div class="mt-2 text-sm text-gray-500 ml-2" id="hourDisplay1"></div>
                 </div>
-            </div>
 
-            <!-- Right Column - Image -->
-            <div class="flex-1 flex flex-col items-center justify-start">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Image User</label>
-                <div class="upload-box">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="h-12 w-12 mx-auto mb-3 text-gray-300 group-hover:text-red-400 transition-colors"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p class="font-bold text-xs">Comming soon</p>
-                    <p class="text-[10px] mt-1 opacity-60">Coming soon</p>
+                <!-- List nhập giờ cho từng ngày -->
+                <div class="group">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Nhập giờ
+                        làm
+                        việc</label>
+                    <div id="dayHoursList2" class="space-y-3">
+                        <p class="text-gray-400 text-center py-4">Chưa chọn ngày nào</p>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center mt-10">
+                    <button onclick="handleSubmitMode2()" class="submit-btn">
+                        Lưu dữ liệu
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Submit Button -->
-        <div class="mt-12 text-center">
-            <button onclick="handleSubmitMode1()" class="submit-btn">
-                Lưu dữ liệu
-            </button>
-        </div>
-    </div>
-
-    <!-- MODE 2: Nhiều ngày - 1 người -->
-    <div id="mode2" class="mode-content hidden">
-        <div class="space-y-6 max-w-3xl mx-auto">
-            <!-- Bộ phận -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
-                    phận</label>
-                <select id="department2" class="input-field">
-                    <option value="">-- Chọn bộ phận --</option>
-                    @foreach (var dept in ViewBag.Departments)
-                    {
-                        <option value="@dept.id">@dept.dept_name</option>
-                    }
-                </select>
-            </div>
-
-            <!-- Tên -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
-                <select id="employee2" class="input-field">
-                    <option value="">-- Chọn bộ phận trước --</option>
-                </select>
-            </div>
-
-            <!-- Toggle: Chọn cách nhập dự án -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn dự
-                    án</label>
-                <div class="flex gap-4">
-                    <button type="button" id="projectModeBtn1" onclick="switchProjectMode(1)"
-                        class="project-mode-btn active flex-1 px-6 py-4 rounded-2xl font-bold text-sm transition-all border-2">
-                        Một dự án cho tất cả
-                    </button>
-                    <button type="button" id="projectModeBtn2" onclick="switchProjectMode(2)"
-                        class="project-mode-btn flex-1 px-6 py-4 rounded-2xl font-bold text-sm transition-all border-2">
-                        Dự án riêng từng ngày
-                    </button>
+        <!-- MODE 3: Nhiều người - Nhiều ngày -->
+        <div id="mode3" class="mode-content hidden">
+            <div class="space-y-6 max-w-3xl mx-auto">
+                <!-- Bộ phận -->
+                <div class="group">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
+                        phận</label>
+                    <select id="department3" class="input-field">
+                        <option value="">-- Chọn bộ phận --</option>
+                        @foreach (var dept in ViewBag.Departments)
+                        {
+                            <option value="@dept.id">@dept.dept_name</option>
+                        }
+                    </select>
                 </div>
-            </div>
 
-            <!-- Project chung (khi chọn mode 1) -->
-            <div class="group" id="commonProjectSection">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project (áp
-                    dụng cho tất cả các ngày)</label>
-                <select id="commonProject" class="input-field">
-                    <option value="">-- Chọn dự án --</option>
-                    @foreach (var project in ViewBag.Projects)
-                    {
-                        <option value="@project.IdProject">@project.NameProject
-                            @(!string.IsNullOrEmpty(project.NameCustomer) ? $"({project.NameCustomer})" : "")</option>
-                    }
-                </select>
-            </div>
-
-            <!-- Tuần -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
-                <select id="week2" class="input-field">
-                    <option value="">-- Chọn tuần --</option>
-                </select>
-            </div>
-
-            <!-- Chọn các ngày trong tuần -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn
-                    ngày</label>
-                <div class="grid grid-cols-7 gap-3" id="dayCheckboxes2">
-                    <!-- Sẽ được tạo động bằng JavaScript -->
+                <!-- Chọn nhân viên (checkboxes) -->
+                <div class="group">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn nhân
+                        viên</label>
+                    <div id="employeeCheckboxes3"
+                        class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                        <p class="text-gray-400 text-center py-4">Vui lòng chọn bộ phận</p>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Nhập thông tin cho từng ngày đã chọn -->
-            <div class="group" id="dayHoursSection2" style="display: none;">
-                <div class="flex items-center justify-between mb-3">
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Nhập thông tin
-                        cho từng ngày</label>
-                    <button type="button" onclick="copyFirstDayDataToAll()"
-                        class="text-xs px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all font-semibold">
-                        📋 Copy ngày đầu cho tất cả
+                <!-- Tuần -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                    <select id="week3" class="input-field">
+                        <option value="">-- Chọn tuần --</option>
+                    </select>
+                </div>
+
+                <!-- Chọn các ngày trong tuần -->
+                <div class="group">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn
+                        ngày</label>
+                    <div id="dayCheckboxes3" class="grid grid-cols-1 gap-3">
+                        <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
+                    </div>
+                </div>
+
+                <!-- Button nhập dữ liệu hàng loạt -->
+                <div class="text-center mt-10">
+                    <button onclick="showBulkInputPopup()" class="submit-btn">
+                        Nhập dữ liệu hàng loạt
                     </button>
                 </div>
-                <div class="space-y-3 bg-gray-50 p-6 rounded-2xl" id="dayHoursList2">
-                    <!-- Sẽ được tạo động bằng JavaScript -->
-                </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="mt-12 text-center">
-                <button onclick="handleSubmitMode2()" class="submit-btn">
-                    Lưu dữ liệu
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODE 3: Nhiều người - Nhiều ngày -->
-    <div id="mode3" class="mode-content hidden">
-        <div class="space-y-6 max-w-4xl mx-auto">
-            <!-- Bộ phận -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
-                    phận</label>
-                <select id="department3" class="input-field">
-                    <option value="">-- Chọn bộ phận --</option>
-                    @foreach (var dept in ViewBag.Departments)
-                    {
-                        <option value="@dept.id">@dept.dept_name</option>
-                    }
-                </select>
-            </div>
-
-            <!-- Danh sách nhân viên (checkbox) -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">
-                    Chọn nhân viên
-                    <span class="text-xs font-normal normal-case ml-2">(Tích chọn nhiều người)</span>
-                </label>
-                <div id="employeeCheckboxes3" class="space-y-2 max-h-60 overflow-y-auto bg-gray-50 p-4 rounded-2xl">
-                    <!-- Sẽ được tạo động bằng JavaScript -->
-                </div>
-            </div>
-
-            <!-- Tuần -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
-                <select id="week3" class="input-field">
-                    <option value="">-- Chọn tuần --</option>
-                </select>
-            </div>
-
-            <!-- Chọn các ngày trong tuần -->
-            <div class="group">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn
-                    ngày</label>
-                <div class="grid grid-cols-7 gap-3" id="dayCheckboxes3">
-                    <!-- Sẽ được tạo động bằng JavaScript -->
-                </div>
-            </div>
-
-            <!-- Button mở popup -->
-            <div class="mt-12 text-center">
-                <button onclick="openBulkInputPopup()" class="submit-btn">
-                    Tiếp tục nhập thông tin →
-                </button>
-            </div>
-        </div>
+    <!-- Back to Home Button - Nằm ngoài container trắng -->
+    <div class="text-center mt-10">
+        <a href="/Heatmap/Home"
+            class="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Về trang chủ
+        </a>
     </div>
 </div>
 
-<!-- Popup cho Mode 3 -->
+<!-- Bulk Input Popup (Mode 3) -->
 <div id="bulkInputPopup"
     class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
     <div
-        class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden border border-gray-100">
-        <h3 class="text-3xl font-black mb-6 tracking-tight text-center">Nhập thông tin cho từng người</h3>
-
-        <div class="overflow-y-auto max-h-[60vh] mb-6">
+        class="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden border border-gray-100">
+        <div class="p-8 border-b border-gray-100">
+            <h3 class="text-2xl font-black text-gray-900">Nhập dữ liệu hàng loạt</h3>
+        </div>
+        <div class="p-8 overflow-y-auto max-h-[60vh]">
             <table class="w-full">
-                <thead class="bg-gray-50 sticky top-0">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">Tên</th>
-                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">Dự án</th>
-                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">Giờ</th>
-                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">Phút</th>
-                        <th class="px-4 py-3 text-left text-xs font-black uppercase text-gray-400">= Decimal</th>
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-6 py-4 text-left text-xs font-black uppercase text-gray-400">Nhân viên</th>
+                        <th class="px-6 py-4 text-left text-xs font-black uppercase text-gray-400">Dự án</th>
+                        <th class="px-6 py-4 text-left text-xs font-black uppercase text-gray-400">Giờ làm việc</th>
+                        <th class="px-6 py-4 text-left text-xs font-black uppercase text-gray-400">Thập phân</th>
                     </tr>
                 </thead>
                 <tbody id="bulkInputTableBody">
-                    <!-- Sẽ được tạo động bằng JavaScript -->
+                    <!-- Rows will be generated by JavaScript -->
                 </tbody>
             </table>
         </div>
-
-        <div class="flex gap-4 justify-center">
+        <div class="p-8 border-t border-gray-100 flex justify-end gap-4">
             <button onclick="closeBulkInputPopup()"
-                class="px-8 py-4 border-2 border-gray-200 rounded-2xl font-bold text-gray-600 hover:bg-gray-50 transition-all">
+                class="px-6 py-3 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">
                 Hủy
             </button>
             <button onclick="handleSubmitMode3()"
-                class="px-8 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
-                Xác nhận và lưu
+                class="px-6 py-3 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
+                Xác nhận lưu
             </button>
         </div>
     </div>
