@@ -214,175 +214,301 @@ function loadEmployeesAsCheckboxes(departmentId) {
                 const div = document.createElement('div');
                 div.className = 'employee-checkbox';
                 div.innerHTML = `
-                    <input type="checkbox" value="${emp.id}" data-name="${fullName}" id="emp_${emp.id}">
-                    <label for="emp_${emp.id}" class="cursor-pointer flex-1">${fullName}</label>
+                    <input type="checkbox" 
+                           id="emp${emp.id}" 
+                           value="${emp.id}" 
+                           data-name="${fullName}"
+                           onchange="handleEmployeeCheckboxChange(this)">
+                    <label for="emp${emp.id}" class="cursor-pointer select-none">${fullName}</label>
                 `;
-                div.addEventListener('click', function(e) {
-                    if (e.target.tagName !== 'INPUT') {
-                        const checkbox = this.querySelector('input[type="checkbox"]');
-                        checkbox.checked = !checkbox.checked;
-                    }
-                    this.classList.toggle('selected', this.querySelector('input').checked);
-                });
                 container.appendChild(div);
             });
         })
         .catch(error => {
             console.error('Error loading employees:', error);
-            container.innerHTML = '<p class="text-red-500 text-center py-4">Lỗi khi tải danh sách</p>';
+            container.innerHTML = '<p class="text-red-400 text-center py-4">Lỗi khi tải danh sách</p>';
         });
 }
 
-// Generate day checkboxes for selected week
+// Handle employee checkbox change (Mode 3)
+function handleEmployeeCheckboxChange(checkbox) {
+    const parent = checkbox.closest('.employee-checkbox');
+    if (checkbox.checked) {
+        parent.classList.add('selected');
+    } else {
+        parent.classList.remove('selected');
+    }
+    updateSelectedEmployeesDisplay();
+}
+
+// Update selected employees display (Mode 3)
+function updateSelectedEmployeesDisplay() {
+    const selectedCheckboxes = document.querySelectorAll('#employeeCheckboxes3 input[type="checkbox"]:checked');
+    const selectedCount = selectedCheckboxes.length;
+    
+    // Could be used for displaying count or other UI updates
+    console.log(`${selectedCount} nhân viên được chọn`);
+}
+
+// Generate day checkboxes based on selected week
 function generateDayCheckboxes(weekValue, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
-
-    if (!weekValue) return;
-
-    const [week, startDate, endDate] = weekValue.split('|');
-    const [startDay, startMonth, startYear] = startDate.split('/').map(Number);
     
-    const daysOfWeek = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    const startDateObj = new Date(startYear, startMonth - 1, startDay);
+    if (!weekValue) {
+        container.innerHTML = '<p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>';
+        return;
+    }
 
+    const [weekNum, startDateStr, endDateStr] = weekValue.split('|');
+    const startDate = new Date(startDateStr.split('/').reverse().join('-'));
+    const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+    
     for (let i = 0; i < 7; i++) {
-        const currentDate = new Date(startDateObj);
-        currentDate.setDate(startDateObj.getDate() + i);
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
         
-        const dateStr = `${currentDate.getDate().toString().padStart(2, '0')}/${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
-        const dateValue = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+        const dateStr = formatDate(currentDate);
+        const dayName = daysOfWeek[i];
         
         const div = document.createElement('div');
         div.className = 'day-checkbox';
         div.innerHTML = `
-            <input type="checkbox" value="${dateValue}" data-label="${daysOfWeek[i]} ${currentDate.getDate()}/${currentDate.getMonth() + 1}" id="day_${containerId}_${i}">
-            <label for="day_${containerId}_${i}" class="cursor-pointer text-sm">
-                <div class="font-bold">${daysOfWeek[i]}</div>
-                <div class="text-xs text-gray-500">${currentDate.getDate()}/${currentDate.getMonth() + 1}</div>
+            <input type="checkbox" 
+                   id="day${containerId}_${i}" 
+                   value="${dateStr}" 
+                   data-day="${dayName}"
+                   onchange="handleDayCheckboxChange(this, '${containerId}')">
+            <label for="day${containerId}_${i}" class="cursor-pointer select-none flex-1">
+                ${dayName} - ${dateStr}
             </label>
         `;
-        div.addEventListener('click', function(e) {
-            if (e.target.tagName !== 'INPUT') {
-                const checkbox = this.querySelector('input[type="checkbox"]');
-                checkbox.checked = !checkbox.checked;
-            }
-            this.classList.toggle('selected', this.querySelector('input').checked);
-            
-            // Update hours list for Mode 2
-            if (containerId === 'dayCheckboxes2') {
-                updateDayHoursList();
-            }
-        });
         container.appendChild(div);
     }
 }
 
-// Update hours list for Mode 2 when days are selected
+// Handle day checkbox change
+function handleDayCheckboxChange(checkbox, containerId) {
+    const parent = checkbox.closest('.day-checkbox');
+    if (checkbox.checked) {
+        parent.classList.add('selected');
+    } else {
+        parent.classList.remove('selected');
+    }
+    
+    // For Mode 2, update the day hours list
+    if (containerId === 'dayCheckboxes2') {
+        updateDayHoursList();
+    }
+}
+
+// Update day hours list for Mode 2
 function updateDayHoursList() {
     const selectedDays = Array.from(document.querySelectorAll('#dayCheckboxes2 input[type="checkbox"]:checked'));
-    const dayHoursSection = document.getElementById('dayHoursSection2');
-    const dayHoursList = document.getElementById('dayHoursList2');
-
+    const container = document.getElementById('dayHoursList2');
+    
     if (selectedDays.length === 0) {
-        dayHoursSection.style.display = 'none';
-        dayHoursList.innerHTML = '';
+        container.innerHTML = '<p class="text-gray-400 text-center py-4">Chưa chọn ngày nào</p>';
         return;
     }
-
-    dayHoursSection.style.display = 'block';
-    dayHoursList.innerHTML = '';
-
-    let projectOptions = '<option value="">-- Chọn dự án --</option>';
-    if (window.projectsData) {
-        window.projectsData.forEach(p => {
-            projectOptions += `<option value="${p.IdProject}">${p.NameProject}</option>`;
-        });
-    }
-
+    
+    container.innerHTML = '';
+    
     selectedDays.forEach(dayCheckbox => {
-        const dateValue = dayCheckbox.value;
-        const dateLabel = dayCheckbox.dataset.label;
-
-        const row = document.createElement('div');
-        row.className = 'flex items-center gap-4 bg-white p-4 rounded-xl border-2 border-gray-100';
-
-        row.innerHTML = `
-            <div class="flex-1 font-semibold text-gray-700">${dateLabel}</div>
-            <div class="flex gap-3 flex-[3]">
-                ${projectMode === 2 ? `
-                <div class="flex flex-col flex-1">
-                    <select class="input-field py-2 text-sm day-project" data-date="${dateValue}">
-                        ${projectOptions}
-                    </select>
-                    <div class="day-project-label text-xs mt-1 text-red-500 font-semibold"></div>
-                </div>` : ``}
-                <select class="input-field py-2 text-sm day-hour" data-date="${dateValue}">
+        const dateStr = dayCheckbox.value;
+        const dayName = dayCheckbox.dataset.day;
+        
+        const dayRow = document.createElement('div');
+        dayRow.className = 'flex items-center gap-4 p-4 bg-gray-50 rounded-xl border-2 border-gray-100';
+        
+        // Preserve existing data if switching modes
+        const existingData = dayDataState[dateStr] || { hours: '', minutes: '', project: '' };
+        
+        let projectDropdown = '';
+        if (projectMode === 2) {
+            // Mode 2: Individual project per day
+            projectDropdown = `
+                <select class="day-project input-field flex-1" data-date="${dateStr}" onchange="saveDayData('${dateStr}', this.value, null, null)">
+                    <option value="">-- Chọn dự án --</option>
+                    ${window.projectsData.map(p => 
+                        `<option value="${p.IdProject}" ${p.IdProject == existingData.project ? 'selected' : ''}>${p.NameProject}</option>`
+                    ).join('')}
+                </select>
+            `;
+        }
+        
+        dayRow.innerHTML = `
+            <div class="flex-1">
+                <p class="font-bold text-gray-900">${dayName}</p>
+                <p class="text-sm text-gray-500">${dateStr}</p>
+            </div>
+            ${projectDropdown}
+            <div class="flex gap-2">
+                <select class="day-hour input-field" style="width: 80px;" data-date="${dateStr}" onchange="updateDayDecimal('${dateStr}')">
                     <option value="">Giờ</option>
-                    ${Array.from({length:24},(_,i)=>`<option value="${i}">${String(i).padStart(2,'0')}</option>`).join('')}
+                    ${Array.from({length: 24}, (_, h) => 
+                        `<option value="${h}" ${h == existingData.hours ? 'selected' : ''}>${String(h).padStart(2, '0')}</option>`
+                    ).join('')}
                 </select>
-                <select class="input-field py-2 text-sm day-minute" data-date="${dateValue}">
+                <select class="day-minute input-field" style="width: 80px;" data-date="${dateStr}" onchange="updateDayDecimal('${dateStr}')">
                     <option value="">Phút</option>
-                    ${Array.from({length:60},(_,i)=>`<option value="${i}">${String(i).padStart(2,'0')}</option>`).join('')}
+                    ${Array.from({length: 60}, (_, m) => 
+                        `<option value="${m}" ${m == existingData.minutes ? 'selected' : ''}>${String(m).padStart(2, '0')}</option>`
+                    ).join('')}
                 </select>
-                <div class="flex items-center px-3 text-sm font-mono text-gray-600 day-decimal">-</div>
+            </div>
+            <div class="day-decimal text-sm text-gray-500 font-bold" data-value="${existingData.decimal || ''}">
+                ${existingData.decimal ? existingData.decimal + ' giờ' : ''}
             </div>
         `;
-
-        dayHoursList.appendChild(row);
-
-        const hour = row.querySelector('.day-hour');
-        const minute = row.querySelector('.day-minute');
-        const decimal = row.querySelector('.day-decimal');
-        const project = row.querySelector('.day-project');
-        const label = row.querySelector('.day-project-label');
-
-        // 🔥 RESTORE DATA
-        if (dayDataState[dateValue]) {
-            const d = dayDataState[dateValue];
-
-            if (project && d.project) {
-                project.value = d.project;
-                label.textContent = project.options[project.selectedIndex].text;
-            }
-
-            if (d.hour) hour.value = d.hour;
-            if (d.minute) minute.value = d.minute;
-            if (d.decimal) {
-                decimal.textContent = `= ${d.decimal}`;
-                decimal.dataset.value = d.decimal;
-            }
+        
+        container.appendChild(dayRow);
+        
+        // Restore decimal if exists
+        if (existingData.decimal) {
+            updateDayDecimal(dateStr);
         }
-
-        // SAVE PROJECT
-        if (project) {
-            project.addEventListener('change', function () {
-                if (!dayDataState[dateValue]) dayDataState[dateValue] = {};
-                dayDataState[dateValue].project = this.value;
-                label.textContent = this.options[this.selectedIndex].text;
-            });
-        }
-
-        // SAVE HOURS
-        const updateDecimal = () => {
-            if (hour.value && minute.value) {
-                const dec = (parseInt(hour.value) + parseInt(minute.value)/60).toFixed(2);
-                decimal.textContent = `= ${dec}`;
-                decimal.dataset.value = dec;
-
-                if (!dayDataState[dateValue]) dayDataState[dateValue] = {};
-                dayDataState[dateValue].hour = hour.value;
-                dayDataState[dateValue].minute = minute.value;
-                dayDataState[dateValue].decimal = dec;
-            }
-        };
-
-        hour.addEventListener('change', updateDecimal);
-        minute.addEventListener('change', updateDecimal);
     });
 }
 
+// Update decimal for a specific day
+function updateDayDecimal(dateStr) {
+    const dayRows = document.querySelectorAll('#dayHoursList2 > div');
+    let targetRow;
+    
+    dayRows.forEach(row => {
+        const hourSelect = row.querySelector('.day-hour');
+        if (hourSelect && hourSelect.dataset.date === dateStr) {
+            targetRow = row;
+        }
+    });
+    
+    if (!targetRow) return;
+    
+    const hourSelect = targetRow.querySelector('.day-hour');
+    const minuteSelect = targetRow.querySelector('.day-minute');
+    const decimalDisplay = targetRow.querySelector('.day-decimal');
+    
+    if (hourSelect.value !== '' && minuteSelect.value !== '') {
+        const hours = parseInt(hourSelect.value);
+        const minutes = parseInt(minuteSelect.value);
+        const decimal = (hours + (minutes / 60)).toFixed(2);
+        
+        decimalDisplay.textContent = decimal + ' giờ';
+        decimalDisplay.dataset.value = decimal;
+        
+        // Save to state
+        saveDayData(dateStr, null, hours, minutes);
+    } else {
+        decimalDisplay.textContent = '';
+        decimalDisplay.dataset.value = '';
+    }
+}
 
+// Save day data to state
+function saveDayData(dateStr, project, hours, minutes) {
+    if (!dayDataState[dateStr]) {
+        dayDataState[dateStr] = {};
+    }
+    
+    if (project !== null) dayDataState[dateStr].project = project;
+    if (hours !== null) dayDataState[dateStr].hours = hours;
+    if (minutes !== null) dayDataState[dateStr].minutes = minutes;
+    
+    if (dayDataState[dateStr].hours !== undefined && dayDataState[dateStr].minutes !== undefined) {
+        const decimal = (parseInt(dayDataState[dateStr].hours) + (parseInt(dayDataState[dateStr].minutes) / 60)).toFixed(2);
+        dayDataState[dateStr].decimal = decimal;
+    }
+}
+
+// Show bulk input popup (Mode 3)
+function showBulkInputPopup() {
+    const selectedEmployees = Array.from(document.querySelectorAll('#employeeCheckboxes3 input[type="checkbox"]:checked'));
+    
+    if (selectedEmployees.length === 0) {
+        showErrorModal('Vui lòng chọn ít nhất 1 nhân viên');
+        return;
+    }
+    
+    const selectedDays = Array.from(document.querySelectorAll('#dayCheckboxes3 input[type="checkbox"]:checked'));
+    if (selectedDays.length === 0) {
+        showErrorModal('Vui lòng chọn ít nhất 1 ngày');
+        return;
+    }
+    
+    const tbody = document.getElementById('bulkInputTableBody');
+    tbody.innerHTML = '';
+    
+    selectedEmployees.forEach(empCheckbox => {
+        const empId = empCheckbox.value;
+        const empName = empCheckbox.dataset.name;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="px-6 py-4 border-b border-gray-100">${empName}</td>
+            <td class="px-6 py-4 border-b border-gray-100">
+                <select class="bulk-project input-field" data-emp="${empId}">
+                    <option value="">-- Chọn dự án --</option>
+                    ${window.projectsData.map(p => 
+                        `<option value="${p.IdProject}">${p.NameProject}</option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td class="px-6 py-4 border-b border-gray-100">
+                <div class="flex gap-2">
+                    <select class="bulk-hour input-field" style="width: 80px;" data-emp="${empId}" onchange="updateBulkDecimal('${empId}')">
+                        <option value="">Giờ</option>
+                        ${Array.from({length: 24}, (_, h) => 
+                            `<option value="${h}">${String(h).padStart(2, '0')}</option>`
+                        ).join('')}
+                    </select>
+                    <select class="bulk-minute input-field" style="width: 80px;" data-emp="${empId}" onchange="updateBulkDecimal('${empId}')">
+                        <option value="">Phút</option>
+                        ${Array.from({length: 60}, (_, m) => 
+                            `<option value="${m}">${String(m).padStart(2, '0')}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+            </td>
+            <td class="px-6 py-4 border-b border-gray-100">
+                <div class="bulk-decimal text-sm text-gray-500 font-bold" data-value=""></div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    document.getElementById('bulkInputPopup').style.display = 'flex';
+}
+
+// Update bulk decimal for Mode 3
+function updateBulkDecimal(empId) {
+    const rows = document.querySelectorAll('#bulkInputTableBody tr');
+    
+    rows.forEach(row => {
+        const hourSelect = row.querySelector(`.bulk-hour[data-emp="${empId}"]`);
+        if (!hourSelect) return;
+        
+        const minuteSelect = row.querySelector(`.bulk-minute[data-emp="${empId}"]`);
+        const decimalDisplay = row.querySelector('.bulk-decimal');
+        
+        if (hourSelect.value !== '' && minuteSelect.value !== '') {
+            const hours = parseInt(hourSelect.value);
+            const minutes = parseInt(minuteSelect.value);
+            const decimal = (hours + (minutes / 60)).toFixed(2);
+            
+            decimalDisplay.textContent = decimal + ' giờ';
+            decimalDisplay.dataset.value = decimal;
+        } else {
+            decimalDisplay.textContent = '';
+            decimalDisplay.dataset.value = '';
+        }
+    });
+}
+
+// Close bulk input popup
+function closeBulkInputPopup() {
+    document.getElementById('bulkInputPopup').style.display = 'none';
+}
 
 // Helper functions
 function getWeekNumber(date) {
@@ -401,136 +527,12 @@ function getMonday(date) {
 }
 
 function formatDate(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
     return `${day}/${month}/${year}`;
 }
-
-// Mode 3: Open bulk input popup
-function openBulkInputPopup() {
-    const selectedEmployees = Array.from(document.querySelectorAll('#employeeCheckboxes3 input[type="checkbox"]:checked'));
-    const selectedDays = Array.from(document.querySelectorAll('#dayCheckboxes3 input[type="checkbox"]:checked'));
-
-    if (selectedEmployees.length === 0) {
-        showErrorModal('Vui lòng chọn ít nhất 1 nhân viên');
-        return;
-    }
-
-    if (selectedDays.length === 0) {
-        showErrorModal('Vui lòng chọn ít nhất 1 ngày');
-        return;
-    }
-
-    // Generate table rows - sử dụng biến global projectsData
-    const tableBody = document.getElementById('bulkInputTableBody');
-    tableBody.innerHTML = '';
-
-    selectedEmployees.forEach(empCheckbox => {
-        const empId = empCheckbox.value;
-        const empName = empCheckbox.dataset.name;
-
-        // Build project options từ biến global
-        let projectOptions = '<option value="">-- Chọn dự án --</option>';
-        if (window.projectsData) {
-            window.projectsData.forEach(project => {
-                projectOptions += `<option value="${project.IdProject}">${project.NameProject}</option>`;
-            });
-        }
-
-        const tr = document.createElement('tr');
-        tr.className = 'border-b border-gray-100';
-        tr.innerHTML = `
-            <td class="px-4 py-3 font-medium">${empName}</td>
-            <td class="px-4 py-3">
-                <select class="input-field py-2 text-sm bulk-project" data-emp-id="${empId}">
-                    ${projectOptions}
-                </select>
-            </td>
-            <td class="px-4 py-3">
-                <select class="input-field py-2 text-sm bulk-hour" data-emp-id="${empId}">
-                    <option value="">Giờ</option>
-                    ${Array.from({length: 24}, (_, i) => `<option value="${i}">${String(i).padStart(2, '0')}</option>`).join('')}
-                </select>
-            </td>
-            <td class="px-4 py-3">
-                <select class="input-field py-2 text-sm bulk-minute" data-emp-id="${empId}">
-                    <option value="">Phút</option>
-                    ${Array.from({length: 60}, (_, i) => `<option value="${i}">${String(i).padStart(2, '0')}</option>`).join('')}
-                </select>
-            </td>
-            <td class="px-4 py-3 text-sm font-mono text-gray-600 bulk-decimal" data-emp-id="${empId}">-</td>
-        `;
-        tableBody.appendChild(tr);
-
-        // Add change listeners for decimal calculation
-        const hourSelect = tr.querySelector('.bulk-hour');
-        const minuteSelect = tr.querySelector('.bulk-minute');
-        const decimalCell = tr.querySelector('.bulk-decimal');
-
-        const updateDecimal = () => {
-        if (hourSelect.value !== '' && minuteSelect.value !== '') {
-            const hours = parseInt(hourSelect.value);
-            const minutes = parseInt(minuteSelect.value);
-            const decimal = (hours + minutes / 60).toFixed(2);
-
-            decimalDisplay.textContent = `= ${decimal}`;
-            decimalDisplay.dataset.value = decimal;
-
-            if (!dayDataState[dateValue]) dayDataState[dateValue] = {};
-            dayDataState[dateValue].hour = hourSelect.value;
-            dayDataState[dateValue].minute = minuteSelect.value;
-            dayDataState[dateValue].decimal = decimal;
-        }
-    };
-
-        hourSelect.addEventListener('change', updateDecimal);
-        minuteSelect.addEventListener('change', updateDecimal);
-    });
-
-    document.getElementById('bulkInputPopup').classList.remove('hidden');
-    document.getElementById('bulkInputPopup').style.display = 'flex';
-}
-
-function closeBulkInputPopup() {
-    document.getElementById('bulkInputPopup').classList.add('hidden');
-    document.getElementById('bulkInputPopup').style.display = 'none';
-}
-
-function copyFirstDayDataToAll() {
-    const firstRow = document.querySelector('#dayHoursList2 .day-hour');
-    if (!firstRow) return;
-
-    const firstDate = firstRow.dataset.date;
-    const firstState = dayDataState[firstDate];
-
-    // Chỉ cần ngày đầu có dữ liệu
-    if (
-        !firstState ||
-        !firstState.hour ||
-        !firstState.minute ||
-        (projectMode === 2 && !firstState.project)
-    ) {
-        showErrorModal('Vui lòng nhập đầy đủ Dự án / Giờ / Phút cho ngày đầu tiên');
-        return;
-    }
-
-    // Lấy tất cả ngày đang tick
-    const selectedDays = Array.from(
-        document.querySelectorAll('#dayCheckboxes2 input[type="checkbox"]:checked')
-    ).map(cb => cb.value);
-
-    // Copy state cho tất cả ngày
-    selectedDays.forEach(date => {
-        if (date !== firstDate) {
-            dayDataState[date] = { ...firstState };
-        }
-    });
-
-    updateDayHoursList();
-}
-
-
 
 // Submit handlers
 function handleSubmitMode1() {
@@ -593,12 +595,15 @@ function handleSubmitMode1() {
         .then(response => response.json())
         .then(result => {
             if (result.success) {
-                alert('✓ Lưu dữ liệu thành công!\n\n' +
-                      `Nhân viên: ${result.data.employee}\n` +
-                      `Bộ phận: ${result.data.department}\n` +
-                      `Dự án: ${result.data.project}\n` +
-                      `Ngày: ${result.data.workDate}\n` +
-                      `Giờ: ${result.data.workHours} giờ`);
+                // Thông báo đơn giản hơn, không có "localhost:5029 cho biết"
+                showSuccessModal(
+                    '✓ Lưu dữ liệu thành công!\n\n' +
+                    `Nhân viên: ${result.data.employee}\n` +
+                    `Bộ phận: ${result.data.department}\n` +
+                    `Dự án: ${result.data.project}\n` +
+                    `Ngày: ${result.data.workDate}\n` +
+                    `Giờ: ${result.data.workHours} giờ`
+                );
                 
                 // Reset form
                 document.getElementById('department1').selectedIndex = 0;
@@ -728,6 +733,13 @@ function showErrorModal(message) {
 
 function closeErrorModal() {
     document.getElementById('errorModal').style.display = 'none';
+}
+
+// Thêm hàm mới để hiển thị thông báo thành công
+function showSuccessModal(message) {
+    // Sử dụng modal error nhưng với nội dung thành công
+    document.getElementById('errorModalMessage').textContent = message;
+    document.getElementById('errorModal').style.display = 'flex';
 }
 
 function showConfirmModal(message, callback) {
