@@ -38,6 +38,26 @@ async function loadData() {
     }
 }
 
+// Helper function to get Monday of a week
+function getMonday(year, week) {
+    const jan1 = new Date(year, 0, 1);
+    const daysOffset = (week - 1) * 7;
+    const weekDate = new Date(jan1.setDate(jan1.getDate() + daysOffset));
+    
+    const day = weekDate.getDay();
+    const diff = weekDate.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(weekDate.setDate(diff));
+}
+
+// Helper function to format date as dd/mm/yyyy
+function formatDate(date) {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
 // Populate filter dropdowns with unique values
 function populateFilters() {
     // Department filter
@@ -70,15 +90,23 @@ function populateFilters() {
         yearSelect.appendChild(option);
     });
 
-    // Week filter (1-53)
+
+    // Week filter (1-53) with date ranges
     const weekSelect = document.getElementById('filterWeek');
+    const currentYear = new Date().getFullYear();
+    
     for (let i = 1; i <= 53; i++) {
+        const monday = getMonday(currentYear, i);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        
         const option = document.createElement('option');
         option.value = i;
-        option.textContent = `Tuần ${i}`;
+        option.textContent = `Tuần ${i} (${formatDate(monday)} - ${formatDate(sunday)})`;
         weekSelect.appendChild(option);
     }
 }
+
 
 // Apply filters
 function applyFilters() {
