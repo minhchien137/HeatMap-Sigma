@@ -1,4 +1,5 @@
 using HeatmapSystem.Models;
+using HeatmapSystem.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<ZKBioTimeDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("ZKBioTimeConnection")));
 
 
+
 // Thêm Session để lưu thông tin đăng nhập
 builder.Services.AddSession(options =>
 {
@@ -21,6 +23,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+builder.Services.AddScoped<IReportService, ReportService>();
 
 
 var app = builder.Build();

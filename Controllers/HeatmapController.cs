@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using HeatmapSystem.Models;
+using HeatmapSystem.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace HeatmapSystem.Controllers
 {
@@ -50,6 +52,62 @@ namespace HeatmapSystem.Controllers
         public short status { get; set; }  // SMALLINT trong database
     }
 
+    public class ReportDataDto
+{
+    public KpiDto kpis { get; set; }
+    public List<TrendDataDto> trendData { get; set; }
+    public List<TrendDataDto> monthlyTrendData { get; set; }
+    public List<DepartmentDataDto> departmentData { get; set; }
+    public List<HeatmapDataDto> heatmapData { get; set; }
+    public List<DetailDataDto> detailData { get; set; }
+}
+
+public class KpiDto
+{
+    public decimal totalHours { get; set; }
+    public decimal avgUtilization { get; set; }
+    public int activeProjects { get; set; }
+    public int staffCount { get; set; }
+}
+
+public class TrendDataDto
+{
+    public string label { get; set; }
+    public decimal hours { get; set; }
+    public decimal utilization { get; set; }
+}
+
+public class DepartmentDataDto
+{
+    public string department { get; set; }
+    public decimal hours { get; set; }
+}
+
+public class HeatmapDataDto
+{
+    public string project { get; set; }
+    public string week { get; set; }
+    public string department { get; set; }
+    public decimal hours { get; set; }
+    public int staffCount { get; set; }
+}
+
+public class DetailDataDto
+{
+    public string project { get; set; }
+    public string department { get; set; }
+    public int staffCount { get; set; }
+    public decimal totalHours { get; set; }
+}
+
+    public class StaffDetailDto
+    {
+        public string name { get; set; }
+        public string svnStaff { get; set; }
+        public string department { get; set; }
+        public decimal hours { get; set; }
+        public int days { get; set; }
+    }
 
 
     [Route("[controller]")]
@@ -58,13 +116,15 @@ namespace HeatmapSystem.Controllers
         private readonly ILogger<HeatmapController> _logger;
         private readonly ApplicationDbContext _context;
         private readonly ZKBioTimeDbContext _zkContext;
+        private readonly IReportService _reportService;
 
 
-        public HeatmapController(ILogger<HeatmapController> logger, ApplicationDbContext context, ZKBioTimeDbContext zkContext)
+        public HeatmapController(ILogger<HeatmapController> logger, ApplicationDbContext context, ZKBioTimeDbContext zkContext, IReportService reportService)
         {
             _logger = logger;
             _context = context;
             _zkContext = zkContext;
+            _reportService = reportService;
         }
 
         // Helper method để lấy SVNCode từ Session
@@ -404,7 +464,6 @@ namespace HeatmapSystem.Controllers
             }
         }
 
-        /*------------------- Dữ liệu nhân viên-----------------------*/
         [HttpGet("Staff")]
         public IActionResult Staff()
         {
@@ -703,6 +762,177 @@ namespace HeatmapSystem.Controllers
             }
         }
 
+
+        #region Report Methods - Using ReportService
+
+        [HttpGet("Report")]
+        public IActionResult Report()
+        {
+            if (!IsAuthenticated())
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+            return View();
+        }
+
+        [HttpGet("GetDepartmentList")]
+        public IActionResult GetDepartmentList()
+        {
+            try
+            {
+                var departments = _reportService.GetDepartmentList();
+                return Json(departments);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading department list");
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("GetProjectList")]
+        public IActionResult GetProjectList()
+        {
+            try
+            {
+                var projects = _reportService.GetProjectList();
+                return Json(projects);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading project list");
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("GetReportData")]
+        public IActionResult GetReportData(
+            string timeRange = "current_week",
+            string year = "",
+            string department = "",
+            string project = "",
+            string startDate = "",
+            string endDate = "")
+        {
+            try
+            {
+                if (!IsAuthenticated())
+                {
+                    return Json(new { error = "Unauthorized" });
+                }
+
+                var filter = new ReportFilterDto
+                {
+                    TimeRange = timeRange,
+                    Year = year,
+                    Department = department,
+                    Project = project,
+                    StartDate = startDate,
+                    EndDate = endDate
+                };
+
+                var reportData = _reportService.GetReportData(filter);
+                return Json(reportData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting report data");
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("GetCellStaffDetail")]
+        public IActionResult GetCellStaffDetail(string project, string week, string department)
+        {
+            try
+            {
+                if (!IsAuthenticated())
+                {
+                    return Json(new { error = "Unauthorized" });
+                }
+
+                var staffDetails = _reportService.GetCellStaffDetail(project, week, department);
+                return Json(staffDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting cell staff detail");
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("GetProjectStaffDetail")]
+        public IActionResult GetProjectStaffDetail(
+            string timeRange = "current_week",
+            string year = "",
+            string department = "",
+            string project = "",
+            string startDate = "",
+            string endDate = "")
+        {
+            try
+            {
+                if (!IsAuthenticated())
+                {
+                    return Json(new { error = "Unauthorized" });
+                }
+
+                var filter = new ReportFilterDto
+                {
+                    TimeRange = timeRange,
+                    Year = year,
+                    Department = department,
+                    Project = project,
+                    StartDate = startDate,
+                    EndDate = endDate
+                };
+
+                var staffDetails = _reportService.GetProjectStaffDetail(filter, project, department);
+                return Json(staffDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting project staff detail");
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("ExportReport")]
+        public IActionResult ExportReport(
+            string timeRange = "current_week",
+            string year = "",
+            string department = "",
+            string project = "",
+            string startDate = "",
+            string endDate = "")
+        {
+            try
+            {
+                if (!IsAuthenticated())
+                {
+                    return RedirectToAction("DangNhap", "Account");
+                }
+
+                var filter = new ReportFilterDto
+                {
+                    TimeRange = timeRange,
+                    Year = year,
+                    Department = department,
+                    Project = project,
+                    StartDate = startDate,
+                    EndDate = endDate
+                };
+
+                var bytes = _reportService.ExportReportToCsv(filter);
+                return File(bytes, "text/csv", $"Bao_cao_nang_suat_{DateTime.Now:yyyyMMddHHmmss}.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting report");
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        #endregion
     }
 }
-
