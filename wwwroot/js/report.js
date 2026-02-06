@@ -244,8 +244,7 @@ function updateTrendChart(trendData) {
                     },
                     grid: {
                         drawOnChartArea: false
-                    },
-                    max: 100
+                    }
                 }
             }
         }
@@ -264,27 +263,17 @@ function updateDepartmentChart(departmentData) {
     const labels = departmentData.map(d => d.department);
     const hours = departmentData.map(d => d.hours);
 
-    // Color palette (red, black, white theme)
-    const colors = [
-        '#dc2626', // red-600
-        '#1f2937', // gray-800
-        '#ef4444', // red-500
-        '#374151', // gray-700
-        '#f87171', // red-400
-        '#6b7280', // gray-500
-        '#fca5a5', // red-300
-        '#9ca3af'  // gray-400
-    ];
-
     departmentChart = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
             labels: labels,
             datasets: [{
+                label: 'Giờ làm việc',
                 data: hours,
-                backgroundColor: colors,
-                borderColor: '#ffffff',
-                borderWidth: 3
+                backgroundColor: 'rgba(220, 38, 38, 0.8)',
+                borderColor: '#dc2626',
+                borderWidth: 2,
+                borderRadius: 8
             }]
         },
         options: {
@@ -292,31 +281,7 @@ function updateDepartmentChart(departmentData) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        font: {
-                            size: 12,
-                            weight: 'bold'
-                        },
-                        generateLabels: function (chart) {
-                            const data = chart.data;
-                            if (data.labels.length && data.datasets.length) {
-                                return data.labels.map((label, i) => {
-                                    const value = data.datasets[0].data[i];
-                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return {
-                                        text: `${label}: ${formatNumber(value)}h (${percentage}%)`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        hidden: false,
-                                        index: i
-                                    };
-                                });
-                            }
-                            return [];
-                        }
-                    }
+                    display: false
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -325,18 +290,50 @@ function updateDepartmentChart(departmentData) {
                         size: 14,
                         weight: 'bold'
                     },
+                    bodyFont: {
+                        size: 13
+                    },
                     callbacks: {
                         label: function (context) {
-                            const label = context.label || '';
-                            const value = context.parsed;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return `${label}: ${formatNumber(value)}h (${percentage}%)`;
+                            return 'Giờ: ' + formatNumber(context.parsed.y);
                         }
+                    }
+                },
+                datalabels: {
+                    anchor: 'center',
+                    align: 'center',
+                    color: '#ffffff',
+                    font: {
+                        weight: 'bold',
+                        size: 14
+                    },
+                    formatter: function(value) {
+                        return formatNumber(value) + 'h';
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Giờ làm việc',
+                        font: {
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
                     }
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 }
 
@@ -344,87 +341,88 @@ function updateDepartmentChart(departmentData) {
 function updateHeatmap(heatmapData) {
     const container = document.getElementById('heatmapContainer');
 
-    if (!heatmapData || heatmapData.length === 0) {
+    if (heatmapData.length === 0) {
         container.innerHTML = `
             <div class="text-center py-12 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <p class="font-medium">Không có dữ liệu</p>
+                <p class="font-medium">Không có dữ liệu heatmap</p>
             </div>
         `;
         return;
     }
 
-    // Get unique projects and weeks
-    const projects = [...new Set(heatmapData.map(d => d.project))];
-    const weeks = [...new Set(heatmapData.map(d => d.week))].sort((a, b) => {
-        const [yearA, weekA] = a.split('-W').map(Number);
-        const [yearB, weekB] = b.split('-W').map(Number);
-        return yearA !== yearB ? yearA - yearB : weekA - weekB;
+    // Group by project
+    const projectGroups = {};
+    heatmapData.forEach(item => {
+        if (!projectGroups[item.project]) {
+            projectGroups[item.project] = [];
+        }
+        projectGroups[item.project].push(item);
     });
+
+    // Get all unique weeks
+    const weeks = [...new Set(heatmapData.map(item => item.week))].sort();
 
     // Calculate max hours for color scaling
-    const maxHours = Math.max(...heatmapData.map(d => d.hours));
+    const maxHours = Math.max(...heatmapData.map(item => item.hours));
 
-    // Build heatmap HTML
-    let html = '<table class="w-full border-collapse">';
+    let html = '<div class="space-y-4">';
 
-    // Header row
-    html += '<thead><tr><th class="sticky left-0 z-20 bg-white px-4 py-3 text-left font-black text-gray-700 border-b-2 border-r-2 border-gray-200">Dự án</th>';
-    weeks.forEach(week => {
-        const [year, weekNum] = week.split('-W');
-        html += `<th class="px-3 py-3 text-center font-bold text-xs text-gray-600 border-b-2 border-gray-200">W${weekNum}<br/><span class="text-gray-400">${year}</span></th>`;
-    });
-    html += '</tr></thead>';
+    Object.keys(projectGroups).forEach(project => {
+        const projectData = projectGroups[project];
 
-    // Body rows
-    html += '<tbody>';
-    projects.forEach(project => {
-        html += '<tr class="hover:bg-gray-50">';
-        html += `<td class="sticky left-0 z-10 bg-white px-4 py-3 font-bold text-gray-900 border-r-2 border-gray-200">${project}</td>`;
+        html += `
+            <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <h4 class="font-black text-gray-900">${project}</h4>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-${Math.min(weeks.length, 8)} gap-2">
+        `;
 
         weeks.forEach(week => {
-            const cell = heatmapData.find(d => d.project === project && d.week === week);
+            const cell = projectData.find(d => d.week === week);
             if (cell) {
                 const intensity = (cell.hours / maxHours) * 100;
-                const bgColor = getHeatmapColor(intensity);
-                const textColor = intensity > 50 ? 'text-white' : 'text-gray-900';
+                const bgColor = `rgba(220, 38, 38, ${intensity / 100})`;
 
                 html += `
-                    <td class="heatmap-cell border border-gray-200 p-0">
-                        <div class="px-3 py-3 text-center cursor-pointer ${bgColor} ${textColor} font-bold text-sm transition-all hover:scale-105"
-                             onclick='showCellDetail(${JSON.stringify(cell)})'>
-                            ${formatNumber(cell.hours)}h
-                            <div class="text-xs opacity-75 mt-1">${cell.staffCount} NS</div>
-                        </div>
-                    </td>
+                    <div class="heatmap-cell p-3 rounded-lg border border-gray-200 text-center" 
+                         style="background-color: ${bgColor}"
+                         onclick='showCellDetail(${JSON.stringify(cell)})'>
+                        <div class="text-xs font-bold text-gray-700 mb-1">${week}</div>
+                        <div class="text-lg font-black text-gray-900">${formatNumber(cell.hours)}h</div>
+                        <div class="text-xs text-gray-600">${cell.staffCount} người</div>
+                    </div>
                 `;
             } else {
-                html += '<td class="border border-gray-200 p-0"><div class="px-3 py-3 text-center text-gray-300">-</div></td>';
+                html += `
+                    <div class="p-3 rounded-lg border border-gray-200 bg-gray-50 text-center opacity-50">
+                        <div class="text-xs font-bold text-gray-400 mb-1">${week}</div>
+                        <div class="text-xs text-gray-400">-</div>
+                    </div>
+                `;
             }
         });
 
-        html += '</tr>';
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
     });
-    html += '</tbody></table>';
 
+    html += '</div>';
     container.innerHTML = html;
-}
-
-// Get heatmap color based on intensity
-function getHeatmapColor(intensity) {
-    if (intensity >= 75) return 'bg-red-500 border-red-600';
-    if (intensity >= 50) return 'bg-red-300 border-red-400';
-    if (intensity >= 25) return 'bg-yellow-200 border-yellow-300';
-    return 'bg-green-100 border-green-200';
 }
 
 // Update detail table
 function updateDetailTable(detailData) {
     const tbody = document.getElementById('detailTableBody');
 
-    if (!detailData || detailData.length === 0) {
+    if (detailData.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="px-6 py-12 text-center text-gray-400">
@@ -439,38 +437,30 @@ function updateDetailTable(detailData) {
     }
 
     let html = '';
-    detailData.forEach((row, index) => {
+    detailData.forEach(row => {
         const avgHours = row.totalHours / row.staffCount;
         const statusClass = getStatusClass(avgHours);
         const statusText = getStatusText(avgHours);
 
         html += `
             <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4">
-                    <div class="font-bold text-gray-900">${row.project}</div>
-                </td>
-                <td class="px-6 py-4">
-                    <div class="text-gray-700">${row.department}</div>
-                </td>
+                <td class="px-6 py-4 font-bold text-gray-900">${row.project}</td>
+                <td class="px-6 py-4 text-gray-700">${row.department}</td>
                 <td class="px-6 py-4 text-center">
-                    <div class="inline-flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full font-bold text-gray-900">
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 font-black text-gray-900">
                         ${row.staffCount}
-                    </div>
+                    </span>
                 </td>
-                <td class="px-6 py-4 text-center">
-                    <div class="font-bold text-gray-900">${formatNumber(row.totalHours)}h</div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                    <div class="font-bold text-gray-700">${avgHours.toFixed(1)}h</div>
-                </td>
+                <td class="px-6 py-4 text-center font-black text-red-600">${formatNumber(row.totalHours)}h</td>
+                <td class="px-6 py-4 text-center font-bold text-gray-900">${avgHours.toFixed(1)}h</td>
                 <td class="px-6 py-4 text-center">
                     <span class="px-3 py-1 rounded-full text-xs font-bold ${statusClass}">
                         ${statusText}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <button onclick='showProjectDetail(${JSON.stringify(row)})'
-                        class="px-4 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-sm hover:bg-red-600 hover:text-white transition-all">
+                    <button onclick='showProjectDetail(${JSON.stringify(row)})' 
+                            class="px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                         Xem chi tiết
                     </button>
                 </td>
@@ -507,6 +497,9 @@ function showCellDetail(cell) {
 
     // Fetch detailed staff data
     fetchCellStaffDetail(cell.project, cell.week, cell.department).then(staffData => {
+        // Calculate total days for percentage
+        const totalDays = staffData.reduce((sum, staff) => sum + staff.days, 0);
+        
         let html = `
             <div class="mb-6">
                 <div class="grid grid-cols-2 gap-4">
@@ -526,6 +519,8 @@ function showCellDetail(cell) {
         `;
 
         staffData.forEach(staff => {
+            const dayPercentage = totalDays > 0 ? ((staff.days / totalDays) * 100).toFixed(1) : 0;
+            
             html += `
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                     <div>
@@ -534,7 +529,7 @@ function showCellDetail(cell) {
                     </div>
                     <div class="text-right">
                         <div class="font-black text-lg text-red-600">${staff.hours}h</div>
-                        <div class="text-xs text-gray-500">${staff.days} ngày</div>
+                        <div class="text-xs text-gray-500">${staff.days} ngày (${dayPercentage}%)</div>
                     </div>
                 </div>
             `;
@@ -557,6 +552,9 @@ function showProjectDetail(row) {
 
     // Fetch detailed staff data
     fetchProjectStaffDetail(row.project, row.department).then(staffData => {
+        // Calculate total days for percentage
+        const totalDays = staffData.reduce((sum, staff) => sum + staff.days, 0);
+        
         let html = `
             <div class="mb-6">
                 <div class="grid grid-cols-3 gap-4">
@@ -584,18 +582,26 @@ function showProjectDetail(row) {
                             <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">SVN</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số giờ</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số ngày</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">%</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
         `;
 
         staffData.forEach(staff => {
+            const dayPercentage = totalDays > 0 ? ((staff.days / totalDays) * 100).toFixed(1) : 0;
+            
             html += `
                 <tr class="hover:bg-gray-50">
                     <td class="px-4 py-3 font-medium text-gray-900">${staff.name}</td>
                     <td class="px-4 py-3 text-gray-600">${staff.svnStaff}</td>
                     <td class="px-4 py-3 text-center font-bold text-red-600">${staff.hours}h</td>
                     <td class="px-4 py-3 text-center text-gray-700">${staff.days}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                            ${dayPercentage}%
+                        </span>
+                    </td>
                 </tr>
             `;
         });
