@@ -436,22 +436,49 @@ function updateDetailTable(detailData) {
         return;
     }
 
-    let html = '';
+    // Group by project
+    const projectGroups = {};
     detailData.forEach(row => {
-        const avgHours = row.totalHours / row.staffCount;
+        if (!projectGroups[row.project]) {
+            projectGroups[row.project] = {
+                project: row.project,
+                departments: [],
+                totalStaffCount: 0,
+                totalHours: 0
+            };
+        }
+        projectGroups[row.project].departments.push({
+            department: row.department,
+            staffCount: row.staffCount,
+            totalHours: row.totalHours
+        });
+        projectGroups[row.project].totalStaffCount += row.staffCount;
+        projectGroups[row.project].totalHours += row.totalHours;
+    });
+
+    let html = '';
+    Object.values(projectGroups).forEach(group => {
+        const avgHours = group.totalHours / group.totalStaffCount;
         const statusClass = getStatusClass(avgHours);
         const statusText = getStatusText(avgHours);
+        
+        // Create department badges
+        const departmentBadges = group.departments.map(d => 
+            `<span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium mr-1">${d.department}</span>`
+        ).join('');
 
         html += `
             <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 font-bold text-gray-900">${row.project}</td>
-                <td class="px-6 py-4 text-gray-700">${row.department}</td>
+                <td class="px-6 py-4 font-bold text-gray-900">${group.project}</td>
+                <td class="px-6 py-4">
+                    <div class="flex flex-wrap gap-1">${departmentBadges}</div>
+                </td>
                 <td class="px-6 py-4 text-center">
                     <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 font-black text-gray-900">
-                        ${row.staffCount}
+                        ${group.totalStaffCount}
                     </span>
                 </td>
-                <td class="px-6 py-4 text-center font-black text-red-600">${formatNumber(row.totalHours)}h</td>
+                <td class="px-6 py-4 text-center font-black text-red-600">${formatNumber(group.totalHours)}h</td>
                 <td class="px-6 py-4 text-center font-bold text-gray-900">${avgHours.toFixed(1)}h</td>
                 <td class="px-6 py-4 text-center">
                     <span class="px-3 py-1 rounded-full text-xs font-bold ${statusClass}">
@@ -459,7 +486,7 @@ function updateDetailTable(detailData) {
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <button onclick='showProjectDetail(${JSON.stringify(row)})' 
+                    <button onclick='showProjectDepartments(${JSON.stringify(group)})' 
                             class="px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                         Xem chi tiết
                     </button>
@@ -540,6 +567,310 @@ function showCellDetail(cell) {
     });
 
     modal.classList.remove('hidden');
+}
+
+// Show project departments (first level detail)
+function showProjectDepartments(projectGroup) {
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('modalTitle');
+    const content = document.getElementById('modalContent');
+
+    title.textContent = projectGroup.project;
+
+    let html = `
+        <div class="mb-6">
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="text-sm font-medium text-gray-500 mb-1">Tổng giờ</div>
+                    <div class="text-2xl font-black text-gray-900">${formatNumber(projectGroup.totalHours)}h</div>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="text-sm font-medium text-gray-500 mb-1">Số nhân sự</div>
+                    <div class="text-2xl font-black text-gray-900">${projectGroup.totalStaffCount}</div>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="text-sm font-medium text-gray-500 mb-1">TB giờ/người</div>
+                    <div class="text-2xl font-black text-gray-900">${(projectGroup.totalHours / projectGroup.totalStaffCount).toFixed(1)}h</div>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="text-lg font-black text-gray-900 mb-4">Phân bổ theo bộ phận</h4>
+        <div class="space-y-3">
+    `;
+
+    projectGroup.departments.forEach(dept => {
+        const avgHours = dept.totalHours / dept.staffCount;
+        const statusClass = getStatusClass(avgHours);
+        const statusText = getStatusText(avgHours);
+        const hoursPercentage = projectGroup.totalHours > 0 ? ((dept.totalHours / projectGroup.totalHours) * 100).toFixed(1) : 0;
+
+        html += `
+            <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer"
+                 onclick='showDepartmentDetail("${projectGroup.project}", "${dept.department}")'>
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h5 class="font-black text-gray-900 text-lg">${dept.department}</h5>
+                        <p class="text-sm text-gray-500">${dept.staffCount} nhân viên</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold ${statusClass}">
+                        ${statusText}
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-xs text-gray-500 mb-1">Tổng giờ</div>
+                        <div class="flex items-baseline gap-2">
+                            <div class="text-xl font-black text-red-600">${formatNumber(dept.totalHours)}h</div>
+                            <span class="text-sm font-bold text-blue-600">(${hoursPercentage}%)</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 mb-1">TB giờ/người</div>
+                        <div class="text-xl font-black text-gray-900">${avgHours.toFixed(1)}h</div>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center text-sm font-bold text-red-600">
+                    <span>Xem chi tiết nhân viên</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    content.innerHTML = html;
+    modal.classList.remove('hidden');
+}
+
+// Show department detail (second level detail - staff list)
+function showDepartmentDetail(project, department) {
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('modalTitle');
+    const content = document.getElementById('modalContent');
+
+    title.textContent = `${project} - ${department}`;
+
+    // Show loading
+    content.innerHTML = `
+        <div class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+            <p class="mt-4 text-gray-500 font-medium">Đang tải dữ liệu...</p>
+        </div>
+    `;
+
+    // Fetch detailed staff data
+    fetchProjectStaffDetail(project, department).then(staffData => {
+        // Calculate total days for percentage
+        const totalDays = staffData.reduce((sum, staff) => sum + staff.days, 0);
+        const totalHours = staffData.reduce((sum, staff) => sum + staff.hours, 0);
+        
+        let html = `
+            <div class="mb-4">
+                <button onclick='showProjectDepartments(${JSON.stringify(getCurrentProjectGroup(project))})' 
+                        class="flex items-center text-sm font-bold text-gray-600 hover:text-red-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Quay lại danh sách bộ phận
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="text-sm font-medium text-gray-500 mb-1">Tổng giờ</div>
+                        <div class="text-2xl font-black text-gray-900">${formatNumber(totalHours)}h</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="text-sm font-medium text-gray-500 mb-1">Số nhân sự</div>
+                        <div class="text-2xl font-black text-gray-900">${staffData.length}</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="text-sm font-medium text-gray-500 mb-1">TB giờ/người</div>
+                        <div class="text-2xl font-black text-gray-900">${(totalHours / staffData.length).toFixed(1)}h</div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="text-lg font-black text-gray-900 mb-4">Danh sách nhân viên</h4>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b-2 border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">Nhân viên</th>
+                            <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">SVN</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số giờ</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số ngày</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">%</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+        `;
+
+        staffData.forEach(staff => {
+            const dayPercentage = totalDays > 0 ? ((staff.days / totalDays) * 100).toFixed(1) : 0;
+            
+            html += `
+                <tr class="hover:bg-gray-50 cursor-pointer transition-colors" 
+                    onclick='showStaffDailyDetail("${project}", "${department}", "${staff.svnStaff}", "${staff.name}")'>
+                    <td class="px-4 py-3 font-medium text-gray-900">${staff.name}</td>
+                    <td class="px-4 py-3 text-gray-600">${staff.svnStaff}</td>
+                    <td class="px-4 py-3 text-center font-bold text-red-600">${staff.hours}h</td>
+                    <td class="px-4 py-3 text-center text-gray-700">${staff.days}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                            ${dayPercentage}%
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        content.innerHTML = html;
+    });
+}
+
+// Show staff daily detail (fourth level - daily breakdown)
+function showStaffDailyDetail(project, department, svnStaff, staffName) {
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('modalTitle');
+    const content = document.getElementById('modalContent');
+
+    title.textContent = `${staffName} (${svnStaff})`;
+
+    // Show loading
+    content.innerHTML = `
+        <div class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+            <p class="mt-4 text-gray-500 font-medium">Đang tải dữ liệu...</p>
+        </div>
+    `;
+
+    // Fetch staff daily detail
+    fetchStaffDailyDetail(project, department, svnStaff).then(dailyData => {
+        const totalHours = dailyData.reduce((sum, day) => sum + day.hours, 0);
+        
+        let html = `
+            <div class="mb-4">
+                <button onclick='showDepartmentDetail("${project}", "${department}")' 
+                        class="flex items-center text-sm font-bold text-gray-600 hover:text-red-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Quay lại danh sách nhân viên
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="text-sm font-medium text-gray-500 mb-1">Dự án</div>
+                        <div class="text-lg font-black text-gray-900">${project}</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="text-sm font-medium text-gray-500 mb-1">Bộ phận</div>
+                        <div class="text-lg font-black text-gray-900">${department}</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="text-sm font-medium text-gray-500 mb-1">Tổng giờ</div>
+                        <div class="text-lg font-black text-red-600">${formatNumber(totalHours)}h</div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="text-lg font-black text-gray-900 mb-4">Chi tiết theo ngày (${dailyData.length} ngày làm việc)</h4>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b-2 border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">Ngày</th>
+                            <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">Thứ</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số giờ</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Tuần</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+        `;
+
+        dailyData.forEach(day => {
+            html += `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-900">${day.dateFormatted}</td>
+                    <td class="px-4 py-3 text-gray-600">${day.dayOfWeek}</td>
+                    <td class="px-4 py-3 text-center font-bold text-red-600">${day.hours}h</td>
+                    <td class="px-4 py-3 text-center text-gray-700">${day.week}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                    <tfoot class="bg-gray-50 border-t-2 border-gray-200">
+                        <tr>
+                            <td colspan="2" class="px-4 py-3 font-black text-gray-900 text-right">TỔNG CỘNG:</td>
+                            <td class="px-4 py-3 text-center font-black text-red-600 text-lg">${formatNumber(totalHours)}h</td>
+                            <td class="px-4 py-3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+
+        content.innerHTML = html;
+    });
+}
+
+// Fetch staff daily detail
+async function fetchStaffDailyDetail(project, department, svnStaff) {
+    const filters = getFilters();
+    try {
+        const queryString = new URLSearchParams({
+            ...filters,
+            project: project,
+            department: department,
+            svnStaff: svnStaff
+        }).toString();
+        const response = await fetch(`/Heatmap/GetStaffDailyDetail?${queryString}`);
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Error fetching staff daily detail:', error);
+    }
+    return [];
+}
+function getCurrentProjectGroup(projectName) {
+    if (!currentData || !currentData.detailData) return null;
+    
+    const projectGroups = {};
+    currentData.detailData.forEach(row => {
+        if (!projectGroups[row.project]) {
+            projectGroups[row.project] = {
+                project: row.project,
+                departments: [],
+                totalStaffCount: 0,
+                totalHours: 0
+            };
+        }
+        projectGroups[row.project].departments.push({
+            department: row.department,
+            staffCount: row.staffCount,
+            totalHours: row.totalHours
+        });
+        projectGroups[row.project].totalStaffCount += row.staffCount;
+        projectGroups[row.project].totalHours += row.totalHours;
+    });
+    
+    return projectGroups[projectName];
 }
 
 // Show project detail
