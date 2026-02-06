@@ -23,8 +23,12 @@ namespace HeatmapSystem.Services
 
 
         /// Lấy chi tiết nhân viên theo dự án
-   
+
         List<StaffDetailDto> GetProjectStaffDetail(ReportFilterDto filter, string project, string department);
+        
+
+         /// Lấy chi tiết theo ngày của nhân viên
+        List<StaffDailyDetailDto> GetStaffDailyDetail(ReportFilterDto filter, string project, string department, string svnStaff);
 
    
         /// Xuất dữ liệu báo cáo sang CSV
@@ -36,6 +40,15 @@ namespace HeatmapSystem.Services
     {
         public string name { get; set; }
     }
+
+    public class StaffDailyDetailDto
+    {
+        public string dateFormatted { get; set; }
+        public string dayOfWeek { get; set; }
+        public decimal hours { get; set; }
+        public string week { get; set; }
+    }
+    
 
     public class ProjectListDto
     {
@@ -108,4 +121,6 @@ namespace HeatmapSystem.Services
         public decimal hours { get; set; }
         public int days { get; set; }
     }
+
+    
 }

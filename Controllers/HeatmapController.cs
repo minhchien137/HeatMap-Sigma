@@ -933,6 +933,46 @@ public class DetailDataDto
             }
         }
 
+        // Thêm endpoint này vào HeatmapController.cs trước #endregion ở cuối file
+
+        [HttpGet("GetStaffDailyDetail")]
+        public IActionResult GetStaffDailyDetail(
+            string timeRange = "current_week",
+            string year = "",
+            string department = "",
+            string project = "",
+            string svnStaff = "",
+            string startDate = "",
+            string endDate = "")
+        {
+            try
+            {
+                if (!IsAuthenticated())
+                {
+                    return Json(new { error = "Unauthorized" });
+                }
+
+                var filter = new ReportFilterDto
+                {
+                    TimeRange = timeRange,
+                    Year = year,
+                    Department = department,
+                    Project = project,
+                    StartDate = startDate,
+                    EndDate = endDate
+                };
+
+                var dailyDetails = _reportService.GetStaffDailyDetail(filter, project, department, svnStaff);
+                return Json(dailyDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting staff daily detail");
+                return Json(new { error = ex.Message });
+            }
+        }
+        
+
         #endregion
     }
 }

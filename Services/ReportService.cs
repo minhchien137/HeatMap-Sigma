@@ -145,6 +145,48 @@ namespace HeatmapSystem.Services
             }
         }
 
+        // Thêm method này vào class ReportService (sau GetProjectStaffDetail)
+
+        public List<StaffDailyDetailDto> GetStaffDailyDetail(ReportFilterDto filter, string project, string department, string svnStaff)
+        {
+            try
+            {
+                var (fromDate, toDate) = GetDateRange(filter);
+
+                var dailyData = _context.SVN_StaffDetail
+                    .Where(s => s.WorkDate >= fromDate && s.WorkDate <= toDate &&
+                               s.Project == project &&
+                               s.Department == department &&
+                               s.SVNStaff == svnStaff)
+                    .GroupBy(s => s.WorkDate)
+                    .Select(g => new
+                    {
+                        WorkDate = g.Key,
+                        Hours = g.Sum(s => s.WorkHours ?? 0),
+                        Year = g.First().Year,
+                        WeekNo = g.First().WeekNo
+                    })
+                    .OrderBy(d => d.WorkDate)
+                    .ToList();
+
+                // Mảng tên ngày trong tuần
+                string[] dayNames = { "Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy" };
+
+                return dailyData.Select(d => new StaffDailyDetailDto
+                {
+                    dateFormatted = d.WorkDate.ToString("dd/MM/yyyy"),
+                    dayOfWeek = dayNames[(int)d.WorkDate.DayOfWeek],
+                    hours = d.Hours,
+                    week = $"{d.Year}-W{d.WeekNo:D2}"
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting staff daily detail for svnStaff: {SVNStaff}, project: {Project}", svnStaff, project);
+                throw;
+            }
+        }
+
         public byte[] ExportReportToCsv(ReportFilterDto filter)
         {
             try
