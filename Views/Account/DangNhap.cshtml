@@ -43,27 +43,27 @@
             <form id="loginForm" method="post" action="/Account/DangNhap" class="space-y-8">
                 <div class="group">
                     <input type="text" id="txtTaiKhoan" name="TaiKhoan" required value="@ViewBag.TaiKhoan"
-                        class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300"
-                        placeholder="Nhập mã SVN Code" />
+                           class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300"
+                           placeholder="Nhập mã SVN Code" />
                 </div>
 
                 <div class="group relative">
                     <input type="password" name="Password" id="passwordInput" required value="@ViewBag.Password"
-                        class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300 pr-16"
-                        placeholder="Nhập mật khẩu" />
+                           class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300 pr-16"
+                           placeholder="Nhập mật khẩu" />
                     <button type="button" onclick="togglePassword('passwordInput', 'eyeIcon', 'eyeOffIcon')"
-                        class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors focus:outline-none">
+                            class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors focus:outline-none">
                         <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
+                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                         <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
+                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                         </svg>
                     </button>
                 </div>
@@ -74,239 +74,239 @@
                         <div
                             class="flex-1 bg-gray-100 rounded-2xl p-4 flex items-center justify-center relative border-2 border-gray-200">
                             <canvas id="captchaCanvas" width="200" height="60" class="cursor-pointer"
-                                onclick="generateCaptcha()"></canvas>
+                                    onclick="generateCaptcha()"></canvas>
                             <button type="button" onclick="generateCaptcha()" title="Tạo mã mới"
-                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors p-2">
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors p-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
+                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                             </button>
                         </div>
                     </div>
                     <input type="text" id="txtCaptcha" name="CaptchaInput" required
-                        class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300"
-                        placeholder="Nhập mã xác nhận" autocomplete="off" />
+                           class="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-lg text-gray-700 placeholder-gray-300"
+                           placeholder="Nhập mã xác nhận" autocomplete="off" />
                     <input type="hidden" id="hiddenCaptcha" name="CaptchaCode" />
                 </div>
 
                 <div class="flex items-center justify-between px-2">
                     <label class="flex items-center cursor-pointer group">
                         <input type="checkbox" name="RememberMe" id="chkRememberMe" @(ViewBag.RememberMe == true ?
-                                                                                                                "checked" : "")
-                            class="w-5 h-5 text-red-600 rounded-lg border-gray-200 focus:ring-red-500 transition-all" />
+                                                                                                                                                                                                                                                                                                                                        "checked" : "")
+                               class="w-5 h-5 text-red-600 rounded-lg border-gray-200 focus:ring-red-500 transition-all" />
                         <span
                             class="ml-3 text-[11px] text-gray-400 font-black uppercase tracking-widest group-hover:text-gray-600 transition-colors">Nhớ
                             mật khẩu</span>
-                    </label>
-                    <a href=""
-                        class="text-[11px] text-gray-400 font-black uppercase tracking-widest hover:text-red-600 transition-colors">Quên
-                        mật khẩu (Coming soon)</a>
+                        </label>
+                        <a href=""
+                               class="text-[11px] text-gray-400 font-black uppercase tracking-widest hover:text-red-600 transition-colors">Quên
+                            mật khẩu</a>
+                        </div>
+
+                        <button type="button" onclick="openConfirmModal()"
+                                class="w-full py-5 mt-10 bg-red-600 text-white rounded-2xl font-black uppercase tracking-[0.25em] text-lg shadow-2xl shadow-red-200 hover:bg-red-700 hover:-translate-y-1 active:scale-[0.98] transition-all">
+                            Đăng nhập
+                        </button>
+                    </form>
+
+                    <p class="mt-20 text-sm text-gray-400 font-bold tracking-tight">
+                        Chưa có tài khoản?
+                        <a href="/Account/DangKy"
+                               class="text-red-600 hover:text-red-800 transition-colors ml-1 border-b-2 border-red-100 pb-1">Đăng
+                            ký ngay</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Xác nhận -->
+            <div id="confirmModal"
+                 class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md transition-none duration-0">
+                <div
+                    class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100 transition-none duration-0">
+                    <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 tracking-tight">Xác nhận?</h3>
+                    <p class="text-gray-500 text-lg mb-10 leading-relaxed">Bạn có muốn tiếp tục đăng nhập vào hệ thống không?</p>
+                    <div class="flex space-x-5">
+                        <button onclick="closeConfirmModal()"
+                                class="flex-1 py-4 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">Không</button>
+                        <button onclick="submitForm()"
+                                class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">Có,
+                            xác nhận</button>
+                        </div>
+                    </div>
                 </div>
 
-                <button type="button" onclick="openConfirmModal()"
-                    class="w-full py-5 mt-10 bg-red-600 text-white rounded-2xl font-black uppercase tracking-[0.25em] text-lg shadow-2xl shadow-red-200 hover:bg-red-700 hover:-translate-y-1 active:scale-[0.98] transition-all">
-                    Đăng nhập
-                </button>
-            </form>
+                <!-- Modal Lỗi -->
+                <div id="errorModal"
+                     class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md transition-none duration-0">
+                    <div
+                        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100 transition-none duration-0">
+                        <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-3xl font-black mb-4 tracking-tight">Thông báo</h3>
+                        <p id="errorModalMessage" class="text-gray-500 text-lg mb-10 leading-relaxed"></p>
+                        <button onclick="closeErrorModal()"
+                                class="w-full py-4 bg-black text-white rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800">Đã
+                            hiểu</button>
+                        </div>
+                    </div>
 
-            <p class="mt-20 text-sm text-gray-400 font-bold tracking-tight">
-                Chưa có tài khoản?
-                <a href="/Account/DangKy"
-                    class="text-red-600 hover:text-red-800 transition-colors ml-1 border-b-2 border-red-100 pb-1">Đăng
-                    ký ngay</a>
-            </p>
-        </div>
-    </div>
-</div>
+                    @section Scripts {
+                        <script>
+                                                        let captchaCode = '';
 
-<!-- Modal Xác nhận -->
-<div id="confirmModal"
-    class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md transition-none duration-0">
-    <div
-        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100 transition-none duration-0">
-        <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        </div>
-        <h3 class="text-3xl font-black mb-4 tracking-tight">Xác nhận?</h3>
-        <p class="text-gray-500 text-lg mb-10 leading-relaxed">Bạn có muốn tiếp tục đăng nhập vào hệ thống không?</p>
-        <div class="flex space-x-5">
-            <button onclick="closeConfirmModal()"
-                class="flex-1 py-4 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">Không</button>
-            <button onclick="submitForm()"
-                class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">Có,
-                xác nhận</button>
-        </div>
-    </div>
-</div>
+                                                        // Tạo CAPTCHA
+                                                        function generateCaptcha() {
+                                                            const canvas = document.getElementById('captchaCanvas');
+                                                            const ctx = canvas.getContext('2d');
 
-<!-- Modal Lỗi -->
-<div id="errorModal"
-    class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md transition-none duration-0">
-    <div
-        class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100 transition-none duration-0">
-        <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-        </div>
-        <h3 class="text-3xl font-black mb-4 tracking-tight">Thông báo</h3>
-        <p id="errorModalMessage" class="text-gray-500 text-lg mb-10 leading-relaxed"></p>
-        <button onclick="closeErrorModal()"
-            class="w-full py-4 bg-black text-white rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800">Đã
-            hiểu</button>
-    </div>
-</div>
+                                                            // Clear canvas
+                                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-@section Scripts {
-    <script>
-        let captchaCode = '';
+                                                            // Background với gradient
+                                                            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                                                            gradient.addColorStop(0, '#f8f9fa');
+                                                            gradient.addColorStop(1, '#e9ecef');
+                                                            ctx.fillStyle = gradient;
+                                                            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Tạo CAPTCHA
-        function generateCaptcha() {
-            const canvas = document.getElementById('captchaCanvas');
-            const ctx = canvas.getContext('2d');
+                                                            // Random lines (noise)
+                                                            for (let i = 0; i < 3; i++) {
+                                                                ctx.strokeStyle = `rgba(220, 53, 69, ${Math.random() * 0.3})`;
+                                                                ctx.beginPath();
+                                                                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                                                                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                                                                ctx.stroke();
+                                                            }
 
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                                            // Generate random 6-character code
+                                                            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                                                            captchaCode = '';
+                                                            for (let i = 0; i < 6; i++) {
+                                                                captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
+                                                            }
 
-            // Background với gradient
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#f8f9fa');
-            gradient.addColorStop(1, '#e9ecef');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                                            // Draw text with random rotation
+                                                            ctx.font = 'bold 32px Arial';
+                                                            ctx.textBaseline = 'middle';
 
-            // Random lines (noise)
-            for (let i = 0; i < 3; i++) {
-                ctx.strokeStyle = `rgba(220, 53, 69, ${Math.random() * 0.3})`;
-                ctx.beginPath();
-                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
-                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
-                ctx.stroke();
-            }
+                                                            for (let i = 0; i < captchaCode.length; i++) {
+                                                                ctx.save();
+                                                                const x = 20 + i * 30;
+                                                                const y = canvas.height / 2;
+                                                                const angle = (Math.random() - 0.5) * 0.4;
 
-            // Generate random 6-character code
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            captchaCode = '';
-            for (let i = 0; i < 6; i++) {
-                captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
+                                                                ctx.translate(x, y);
+                                                                ctx.rotate(angle);
 
-            // Draw text with random rotation
-            ctx.font = 'bold 32px Arial';
-            ctx.textBaseline = 'middle';
+                                                                // Shadow
+                                                                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                                                                ctx.shadowBlur = 3;
+                                                                ctx.shadowOffsetX = 2;
+                                                                ctx.shadowOffsetY = 2;
 
-            for (let i = 0; i < captchaCode.length; i++) {
-                ctx.save();
-                const x = 20 + i * 30;
-                const y = canvas.height / 2;
-                const angle = (Math.random() - 0.5) * 0.4;
+                                                                // Random color
+                                                                const colors = ['#dc3545', '#495057', '#6c757d'];
+                                                                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                                                                ctx.fillText(captchaCode[i], 0, 0);
 
-                ctx.translate(x, y);
-                ctx.rotate(angle);
+                                                                ctx.restore();
+                                                            }
 
-                // Shadow
-                ctx.shadowColor = 'rgba(0,0,0,0.2)';
-                ctx.shadowBlur = 3;
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
+                                                            // Random dots
+                                                            for (let i = 0; i < 30; i++) {
+                                                                ctx.fillStyle = `rgba(108, 117, 125, ${Math.random() * 0.5})`;
+                                                                ctx.beginPath();
+                                                                ctx.arc(
+                                                                    Math.random() * canvas.width,
+                                                                    Math.random() * canvas.height,
+                                                                    Math.random() * 2,
+                                                                    0,
+                                                                    Math.PI * 2
+                                                                );
+                                                                ctx.fill();
+                                                            }
 
-                // Random color
-                const colors = ['#dc3545', '#495057', '#6c757d'];
-                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-                ctx.fillText(captchaCode[i], 0, 0);
+                                                            // Lưu vào hidden field
+                                                            document.getElementById('hiddenCaptcha').value = captchaCode;
+                                                        }
 
-                ctx.restore();
-            }
+                                                        // Load captcha khi trang load
+                                                        window.onload = function () {
+                                                            generateCaptcha();
+                                                        };
 
-            // Random dots
-            for (let i = 0; i < 30; i++) {
-                ctx.fillStyle = `rgba(108, 117, 125, ${Math.random() * 0.5})`;
-                ctx.beginPath();
-                ctx.arc(
-                    Math.random() * canvas.width,
-                    Math.random() * canvas.height,
-                    Math.random() * 2,
-                    0,
-                    Math.PI * 2
-                );
-                ctx.fill();
-            }
+                                                        function togglePassword(inputId, eyeId, eyeOffId) {
+                                                            const passwordInput = document.getElementById(inputId);
+                                                            const eyeIcon = document.getElementById(eyeId);
+                                                            const eyeOffIcon = document.getElementById(eyeOffId);
 
-            // Lưu vào hidden field
-            document.getElementById('hiddenCaptcha').value = captchaCode;
-        }
+                                                            if (passwordInput.type === 'password') {
+                                                                passwordInput.type = 'text';
+                                                                eyeIcon.classList.add('hidden');
+                                                                eyeOffIcon.classList.remove('hidden');
+                                                            } else {
+                                                                passwordInput.type = 'password';
+                                                                eyeIcon.classList.remove('hidden');
+                                                                eyeOffIcon.classList.add('hidden');
+                                                            }
+                                                        }
 
-        // Load captcha khi trang load
-        window.onload = function () {
-            generateCaptcha();
-        };
+                                                        function showErrorModal(message) {
+                                                            const modal = document.getElementById('errorModal');
+                                                            document.getElementById('errorModalMessage').innerText = message;
+                                                            modal.style.display = 'flex';
+                                                        }
 
-        function togglePassword(inputId, eyeId, eyeOffId) {
-            const passwordInput = document.getElementById(inputId);
-            const eyeIcon = document.getElementById(eyeId);
-            const eyeOffIcon = document.getElementById(eyeOffId);
+                                                        function closeErrorModal() {
+                                                            const modal = document.getElementById('errorModal');
+                                                            modal.style.display = 'none';
+                                                        }
 
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeIcon.classList.add('hidden');
-                eyeOffIcon.classList.remove('hidden');
-            } else {
-                passwordInput.type = 'password';
-                eyeIcon.classList.remove('hidden');
-                eyeOffIcon.classList.add('hidden');
-            }
-        }
+                                                        function validatePassword(pass) {
+                                                            if (pass.length <= 6) return "Mật khẩu phải có ít nhất 7 ký tự!";
+                                                            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return "Mật khẩu phải bao gồm cả chữ và số!";
+                                                            if (!/[^\w\s]/.test(pass)) return "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+                                                            return null;
+                                                        }
 
-        function showErrorModal(message) {
-            const modal = document.getElementById('errorModal');
-            document.getElementById('errorModalMessage').innerText = message;
-            modal.style.display = 'flex';
-        }
+                                                        function openConfirmModal() {
+                                                            const tk = document.getElementById('txtTaiKhoan').value.trim();
+                                                            const p = document.getElementById('passwordInput').value;
+                                                            const captchaInput = document.getElementById('txtCaptcha').value.trim();
 
-        function closeErrorModal() {
-            const modal = document.getElementById('errorModal');
-            modal.style.display = 'none';
-        }
+                                                            if (!tk || !p) { showErrorModal("Vui lòng điền đầy đủ thông tin!"); return; }
 
-        function validatePassword(pass) {
-            if (pass.length <= 6) return "Mật khẩu phải có ít nhất 7 ký tự!";
-            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return "Mật khẩu phải bao gồm cả chữ và số!";
-            if (!/[^\w\s]/.test(pass)) return "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
-            return null;
-        }
+                                                            if (!captchaInput) { showErrorModal("Vui lòng nhập mã xác nhận!"); return; }
 
-        function openConfirmModal() {
-            const tk = document.getElementById('txtTaiKhoan').value.trim();
-            const p = document.getElementById('passwordInput').value;
-            const captchaInput = document.getElementById('txtCaptcha').value.trim();
+                                                            const err = validatePassword(p);
+                                                            if (err) { showErrorModal(err); return; }
 
-            if (!tk || !p) { showErrorModal("Vui lòng điền đầy đủ thông tin!"); return; }
+                                                            const modal = document.getElementById('confirmModal');
+                                                            modal.style.display = 'flex';
+                                                        }
 
-            if (!captchaInput) { showErrorModal("Vui lòng nhập mã xác nhận!"); return; }
+                                                        function closeConfirmModal() {
+                                                            const modal = document.getElementById('confirmModal');
+                                                            modal.style.display = 'none';
+                                                        }
 
-            const err = validatePassword(p);
-            if (err) { showErrorModal(err); return; }
-
-            const modal = document.getElementById('confirmModal');
-            modal.style.display = 'flex';
-        }
-
-        function closeConfirmModal() {
-            const modal = document.getElementById('confirmModal');
-            modal.style.display = 'none';
-        }
-
-        function submitForm() {
-            document.getElementById('loginForm').submit();
-        }
-    </script>
-}
+                                                        function submitForm() {
+                                                            document.getElementById('loginForm').submit();
+                                                        }
+                        </script>
+                    }
