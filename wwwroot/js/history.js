@@ -231,17 +231,16 @@ function displayData() {
                     <td class="table-cell">
                         <span class="badge badge-green">${item.department}</span>
                     </td>
-                    <td class="table-cell">${item.project}</td>
-                    <td class="table-cell text-center font-semibold">
-                        ${formatDate(workDate)}
+                    <td class="table-cell">
+                        <span class="badge badge-red">${item.project}</span>
                     </td>
                     <td class="table-cell text-center">
-                        <span class="badge badge-red">Tuần ${item.weekNo}</span>
+                        ${formatDate(workDate)}
                     </td>
-                    <td class="table-cell text-center font-bold">${item.year}</td>
-                    <td class="table-cell text-right">
-                        <span class="text-lg font-black text-red-600">${item.workHours || 0}</span>
-                        <span class="text-sm text-gray-400 ml-1">giờ</span>
+                    <td class="table-cell text-center font-semibold">${item.weekNo}</td>
+                    <td class="table-cell text-center">${item.year}</td>
+                    <td class="table-cell text-center">
+                        <span class="font-bold text-red-600">${item.workHours}h</span>
                     </td>
                     <td class="table-cell text-gray-600">${item.createBy}</td>
                     <td class="table-cell text-center text-sm text-gray-500">
@@ -368,60 +367,59 @@ function changeRecordsPerPage() {
     displayData();
 }
 
-// Export to Excel
+// ✅ XUẤT EXCEL - ĐÃ SỬA ĐỔI ĐỂ GỌI API SERVER
+// Export to Excel - Gọi API server thay vì xuất ở client
 function exportToExcel() {
     if (filteredData.length === 0) {
         showError('Không có dữ liệu để xuất');
         return;
     }
 
-    // Prepare data for export
-    const exportData = filteredData.map(item => ({
-        'STT': filteredData.indexOf(item) + 1,
-        'SVN Staff': item.svnStaff,
-        'Tên nhân viên': item.nameStaff,
-        'Bộ phận': item.department,
-        'Dự án': item.project,
-        'Ngày làm việc': formatDate(new Date(item.workDate)),
-        'Tuần': item.weekNo,
-        'Năm': item.year,
-        'Giờ làm': item.workHours,
-        'Người tạo': item.createBy,
-        'Ngày tạo': formatDateTime(new Date(item.createDate))
-    }));
+    // Lấy giá trị từ các bộ lọc
+    const department = document.getElementById('filterDepartment').value;
+    const project = document.getElementById('filterProject').value;
+    const year = document.getElementById('filterYear').value;
+    const week = document.getElementById('filterWeek').value;
+    const search = document.getElementById('searchInput').value;
 
-    // Create CSV content
-    const headers = Object.keys(exportData[0]);
-    const csvContent = [
-        headers.join(','),
-        ...exportData.map(row => headers.map(header => {
-            const value = row[header];
-            // Escape commas and quotes in values
-            if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-                return `"${value.replace(/"/g, '""')}"`;
-            }
-            return value;
-        }).join(','))
-    ].join('\n');
+    // Tạo URL với query parameters
+    const params = new URLSearchParams();
+    if (department) params.append('department', department);
+    if (project) params.append('project', project);
+    if (year) params.append('year', year);
+    if (week) params.append('week', week);
+    if (search) params.append('search', search);
 
-    // Add BOM for UTF-8
-    const BOM = '\uFEFF';
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Gọi API server để xuất Excel
+    // API này sẽ tự động ghi log vào bảng SVN_Logs
+    const url = `/Heatmap/ExportHistoryToExcel?${params.toString()}`;
     
-    // Create download link
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `Lich_su_nhap_lieu_${new Date().getTime()}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Tải file
+    window.location.href = url;
+    
+    // Hiển thị thông báo thành công
+    setTimeout(() => {
+        showSuccess('Đang tải xuống file Excel...');
+    }, 100);
 }
+// ✅ KẾT THÚC PHẦN SỬA ĐỔI
 
 // Show error message
 function showError(message) {
     alert(message);
+}
+
+// Show success message
+function showSuccess(message) {
+    // Tạo toast notification đơn giản
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
 
 // Delete modal functions
