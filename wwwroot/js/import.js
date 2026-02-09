@@ -304,13 +304,17 @@ function handleDayCheckboxChange(checkbox, containerId) {
 
 // Update day hours list for Mode 2
 function updateDayHoursList() {
-    const selectedDays = Array.from(document.querySelectorAll('#dayCheckboxes2 input[type="checkbox"]:checked'));
+    const dayHoursSection = document.getElementById('dayHoursSection2');
     const container = document.getElementById('dayHoursList2');
+    const selectedDays = Array.from(document.querySelectorAll('#dayCheckboxes2 input[type="checkbox"]:checked'));
     
+    // Show/hide section
     if (selectedDays.length === 0) {
+        dayHoursSection.style.display = 'none';
         container.innerHTML = '<p class="text-gray-400 text-center py-4">Chưa chọn ngày nào</p>';
         return;
     }
+    dayHoursSection.style.display = 'block';
     
     container.innerHTML = '';
     
@@ -758,4 +762,48 @@ function confirmSubmit() {
         confirmCallback();
     }
     closeConfirmModal();
+}
+// Copy first day data to all other days
+function copyFirstDayDataToAll() {
+    const firstRow = document.querySelector('#dayHoursList2 .day-hour');
+    if (!firstRow) {
+        showErrorModal('Không có ngày nào được chọn');
+        return;
+    }
+
+    const firstDate = firstRow.dataset.date;
+    const firstState = dayDataState[firstDate];
+
+    // Validate first day data
+    if (
+        !firstState ||
+        !firstState.hours ||
+        !firstState.minutes ||
+        (projectMode === 2 && !firstState.project)
+    ) {
+        showErrorModal('Vui lòng nhập đầy đủ thông tin cho ngày đầu tiên');
+        return;
+    }
+
+    // Get all selected days
+    const selectedDays = Array.from(
+        document.querySelectorAll('#dayCheckboxes2 input[type="checkbox"]:checked')
+    ).map(cb => cb.value);
+
+    if (selectedDays.length <= 1) {
+        showErrorModal('Cần chọn ít nhất 2 ngày để copy');
+        return;
+    }
+
+    // Copy state to all days
+    selectedDays.forEach(date => {
+        if (date !== firstDate) {
+            dayDataState[date] = { ...firstState };
+        }
+    });
+
+    // Refresh UI
+    updateDayHoursList();
+    
+    showSuccessModal('✓ Đã copy dữ liệu ngày đầu cho tất cả các ngày!');
 }
