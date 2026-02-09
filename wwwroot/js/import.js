@@ -685,18 +685,81 @@ function handleSubmitMode2() {
     
     const message = `Bạn sắp lưu dữ liệu cho ${selectedDays.length} ngày. Xác nhận?`;
     showConfirmModal(message, function() {
-        let projectInfo = '';
-        if (projectMode === 1) {
-            const commonProject = document.getElementById('commonProject');
-            projectInfo = `- Dự án: ${commonProject.selectedOptions[0].text} (chung cho tất cả)`;
-        } else {
-            projectInfo = '- Dự án: Riêng cho từng ngày';
-        }
+        // Chuẩn bị dữ liệu để gửi
+        const days = [];
         
-        alert('Chức năng đang phát triển - Mode 2\n\nDữ liệu sẽ được lưu:\n' + 
-              `- Nhân viên: ${document.getElementById('employee2').selectedOptions[0].text}\n` +
-              projectInfo + '\n' +
-              `- Số ngày: ${selectedDays.length}`);
+        selectedDays.forEach(dayCheckbox => {
+            const dateStr = dayCheckbox.value;
+            const dayState = dayDataState[dateStr];
+            
+            if (!dayState || !dayState.decimal) {
+                return; // Skip if no data
+            }
+            
+            // Chuyển đổi ngày sang định dạng yyyy-MM-dd
+            const dateParts = dateStr.split('/');
+            const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+            
+            const dayData = {
+                Date: formattedDate,
+                WorkHours: parseFloat(dayState.decimal),
+                ProjectId: projectMode === 2 ? parseInt(dayState.project) : null
+            };
+            
+            days.push(dayData);
+        });
+        
+        const requestData = {
+            EmployeeId: parseInt(employee),
+            ProjectMode: projectMode,
+            CommonProjectId: projectMode === 1 ? parseInt(document.getElementById('commonProject').value) : null,
+            Days: days
+        };
+        
+        // Gửi dữ liệu đến server
+        fetch('/Heatmap/SaveMultipleDays', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                const projectText = projectMode === 1 
+                    ? document.getElementById('commonProject').selectedOptions[0].text + ' (chung)'
+                    : 'Riêng từng ngày';
+                
+                showSuccessModal(
+                    '✓ Lưu dữ liệu thành công!\n\n' +
+                    `Nhân viên: ${document.getElementById('employee2').selectedOptions[0].text}\n` +
+                    `Bộ phận: ${result.data.department}\n` +
+                    `Dự án: ${projectText}\n` +
+                    `Tổng số ngày: ${result.data.totalDays}\n` +
+                    `   - Mới tạo: ${result.data.savedCount}\n` +
+                    `   - Cập nhật: ${result.data.updatedCount}\n\n` +
+                    `Các ngày: ${result.data.dates.join(', ')}`
+                );
+                
+                // Reset form
+                document.getElementById('department2').selectedIndex = 0;
+                document.getElementById('employee2').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
+                if (projectMode === 1) {
+                    document.getElementById('commonProject').selectedIndex = 0;
+                }
+                document.getElementById('week2').selectedIndex = 0;
+                document.getElementById('dayCheckboxes2').innerHTML = '<p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>';
+                document.getElementById('dayHoursSection2').style.display = 'none';
+                dayDataState = {};
+            } else {
+                showErrorModal(result.message || 'Có lỗi xảy ra khi lưu dữ liệu');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorModal('Lỗi kết nối đến server: ' + error.message);
+        });
     });
 }
 
@@ -805,5 +868,5 @@ function copyFirstDayDataToAll() {
     // Refresh UI
     updateDayHoursList();
     
-    showSuccessModal('✓ Đã copy dữ liệu ngày đầu cho tất cả các ngày!');
+    showSuccessModal('Đã copy dữ liệu ngày đầu cho tất cả các ngày!');
 }
