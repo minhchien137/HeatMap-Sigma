@@ -464,6 +464,244 @@ public class DetailDataDto
             }
         }
 
+        // DTO cho Mode 2: Một người - Nhiều ngày
+        public class DayDataRequest
+        {
+            public string Date { get; set; }
+            public int? ProjectId { get; set; }  // Nullable cho trường hợp common project
+            public decimal WorkHours { get; set; }
+        }
+
+        public class SaveMultipleDaysRequest
+        {
+            public int EmployeeId { get; set; }
+            public int ProjectMode { get; set; }  // 1 = một dự án chung, 2 = dự án riêng
+            public int? CommonProjectId { get; set; }  // Dùng khi ProjectMode = 1
+            public List<DayDataRequest> Days { get; set; }
+        }
+
+        [HttpPost("SaveMultipleDays")]
+        public IActionResult SaveMultipleDays([FromBody] SaveMultipleDaysRequest request)
+        {
+            try
+            {
+                EmployeeDto employee = null;
+                DepartmentDto department = null;
+
+                // 1. Lấy thông tin nhân viên và bộ phận từ ZKBioTime
+                using (var connection = _zkContext.Database.GetDbConnection())
+                {
+                    if (connection.State != System.Data.ConnectionState.Open)
+                    {
+                        connection.Open();
+                    }
+
+                    // Lấy thông tin nhân viên
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                            SELECT 
+                                id, emp_code, first_name, last_name, 
+                                nickname, department_id, status 
+                            FROM personnel_employee 
+                            WHERE id = @employeeId";
+
+                        var param = command.CreateParameter();
+                        param.ParameterName = "@employeeId";
+                        param.Value = request.EmployeeId;
+                        command.Parameters.Add(param);
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                employee = new EmployeeDto
+                                {
+                                    id = Convert.ToInt32(reader["id"]),
+                                    emp_code = reader.IsDBNull(reader.GetOrdinal("emp_code")) ? "" : reader.GetString(reader.GetOrdinal("emp_code")),
+                                    first_name = reader.IsDBNull(reader.GetOrdinal("first_name")) ? "" : reader.GetString(reader.GetOrdinal("first_name")),
+                                    last_name = reader.IsDBNull(reader.GetOrdinal("last_name")) ? "" : reader.GetString(reader.GetOrdinal("last_name")),
+                                    nickname = reader.IsDBNull(reader.GetOrdinal("nickname")) ? "" : reader.GetString(reader.GetOrdinal("nickname")),
+                                    department_id = Convert.ToInt32(reader["department_id"]),
+                                    status = Convert.ToInt16(reader["status"])
+                                };
+                            }
+                        }
+                    }
+
+                    if (employee == null)
+                    {
+                        return Json(new { success = false, message = "Không tìm thấy nhân viên" });
+                    }
+
+                    // Lấy tên bộ phận
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                            SELECT 
+                                id, dept_code, dept_name, is_default, 
+                                parent_dept_id, dept_manager_id, company_id 
+                            FROM personnel_department 
+                            WHERE id = @departmentId";
+
+                        var param = command.CreateParameter();
+                        param.ParameterName = "@departmentId";
+                        param.Value = employee.department_id;
+                        command.Parameters.Add(param);
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                department = new DepartmentDto
+                                {
+                                    id = Convert.ToInt32(reader["id"]),
+                                    dept_code = reader.IsDBNull(reader.GetOrdinal("dept_code")) ? "" : reader.GetString(reader.GetOrdinal("dept_code")),
+                                    dept_name = reader.IsDBNull(reader.GetOrdinal("dept_name")) ? "" : reader.GetString(reader.GetOrdinal("dept_name")),
+                                    is_default = Convert.ToBoolean(reader["is_default"]),
+                                    parent_dept_id = reader.IsDBNull(reader.GetOrdinal("parent_dept_id")) ? (int?)null : Convert.ToInt32(reader["parent_dept_id"]),
+                                    dept_manager_id = reader.IsDBNull(reader.GetOrdinal("dept_manager_id")) ? (int?)null : Convert.ToInt32(reader["dept_manager_id"]),
+                                    company_id = Convert.ToInt32(reader["company_id"])
+                                };
+                            }
+                        }
+                    }
+                }
+
+                // 2. Lấy SVNCode từ Session
+                string currentUser = GetCurrentSVNCode();
+                if (string.IsNullOrEmpty(currentUser))
+                {
+                    return Json(new { success = false, message = "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại." });
+                }
+
+                // 3. Tạo tên nhân viên
+                string fullName = $"{employee.first_name} {employee.last_name}".Trim();
+                if (string.IsNullOrEmpty(fullName))
+                {
+                    fullName = employee.nickname ?? employee.emp_code;
+                }
+
+                // 4. Lấy common project nếu ProjectMode = 1
+                SVN_Projects commonProject = null;
+                if (request.ProjectMode == 1)
+                {
+                    if (!request.CommonProjectId.HasValue)
+                    {
+                        return Json(new { success = false, message = "Vui lòng chọn dự án" });
+                    }
+                    commonProject = _context.SVN_Projects.Find(request.CommonProjectId.Value);
+                    if (commonProject == null)
+                    {
+                        return Json(new { success = false, message = "Không tìm thấy dự án" });
+                    }
+                }
+
+                // 5. Lưu từng ngày
+                int savedCount = 0;
+                int updatedCount = 0;
+                var savedDates = new List<string>();
+
+                foreach (var dayData in request.Days)
+                {
+                    // Parse work date
+                    DateTime workDate;
+                    if (!DateTime.TryParse(dayData.Date, out workDate))
+                    {
+                        continue;  // Skip invalid dates
+                    }
+
+                    // Xác định project cho ngày này
+                    SVN_Projects project;
+                    if (request.ProjectMode == 1)
+                    {
+                        project = commonProject;
+                    }
+                    else
+                    {
+                        if (!dayData.ProjectId.HasValue)
+                        {
+                            continue;  // Skip days without project
+                        }
+                        project = _context.SVN_Projects.Find(dayData.ProjectId.Value);
+                        if (project == null)
+                        {
+                            continue;  // Skip if project not found
+                        }
+                    }
+
+                    // Tính tuần và năm
+                    var culture = System.Globalization.CultureInfo.CurrentCulture;
+                    var weekNo = culture.Calendar.GetWeekOfYear(
+                        workDate,
+                        System.Globalization.CalendarWeekRule.FirstDay,
+                        DayOfWeek.Monday
+                    );
+                    var year = workDate.Year;
+
+                    // Kiểm tra bản ghi đã tồn tại chưa
+                    var existing = _context.SVN_StaffDetail
+                        .FirstOrDefault(s =>
+                            s.SVNStaff == employee.emp_code &&
+                            s.WorkDate.Date == workDate.Date &&
+                            s.Project == project.NameProject);
+
+                    if (existing != null)
+                    {
+                        // Cập nhật
+                        existing.WorkHours = dayData.WorkHours;
+                        existing.CreateDate = DateTime.Now;
+                        existing.CreateBy = currentUser;
+                        updatedCount++;
+                    }
+                    else
+                    {
+                        // Tạo mới
+                        var staffDetail = new SVN_StaffDetail
+                        {
+                            SVNStaff = employee.emp_code,
+                            NameStaff = fullName,
+                            Department = department?.dept_name ?? "N/A",
+                            Project = project.NameProject,
+                            WorkDate = workDate,
+                            WeekNo = weekNo,
+                            Year = year,
+                            WorkHours = dayData.WorkHours,
+                            CreateBy = currentUser,
+                            CreateDate = DateTime.Now
+                        };
+                        _context.SVN_StaffDetail.Add(staffDetail);
+                        savedCount++;
+                    }
+
+                    savedDates.Add(workDate.ToString("dd/MM/yyyy"));
+                }
+
+                // 6. Lưu tất cả vào database
+                _context.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Lưu dữ liệu thành công",
+                    data = new
+                    {
+                        employee = fullName,
+                        department = department?.dept_name,
+                        savedCount = savedCount,
+                        updatedCount = updatedCount,
+                        totalDays = savedCount + updatedCount,
+                        dates = savedDates
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving multiple days data");
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
         [HttpGet("Staff")]
         public IActionResult Staff()
         {
