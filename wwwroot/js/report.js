@@ -699,7 +699,8 @@ function showDepartmentDetail(project, department) {
                             <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">SVN</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số giờ</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số ngày</th>
-                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">%</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">% Bộ phận</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">% Dự án</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -707,6 +708,7 @@ function showDepartmentDetail(project, department) {
 
         staffData.forEach(staff => {
             const dayPercentage = totalDays > 0 ? ((staff.days / totalDays) * 100).toFixed(1) : 0;
+            const hoursPercentage = totalHours > 0 ? ((staff.hours / totalHours) * 100).toFixed(1) : 0;
             
             html += `
                 <tr class="hover:bg-gray-50 cursor-pointer transition-colors" 
@@ -718,6 +720,11 @@ function showDepartmentDetail(project, department) {
                     <td class="px-4 py-3 text-center">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
                             ${dayPercentage}%
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                            ${hoursPercentage}%
                         </span>
                     </td>
                 </tr>
@@ -908,7 +915,8 @@ function showProjectDetail(row) {
                             <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">SVN</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số giờ</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số ngày</th>
-                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">%</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">% Bộ phận</th>
+                            <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">% Dự án</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -916,6 +924,7 @@ function showProjectDetail(row) {
 
         staffData.forEach(staff => {
             const dayPercentage = totalDays > 0 ? ((staff.days / totalDays) * 100).toFixed(1) : 0;
+            const hoursPercentage = row.totalHours > 0 ? ((staff.hours / row.totalHours) * 100).toFixed(1) : 0;
             
             html += `
                 <tr class="hover:bg-gray-50">
@@ -926,6 +935,11 @@ function showProjectDetail(row) {
                     <td class="px-4 py-3 text-center">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
                             ${dayPercentage}%
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                            ${hoursPercentage}%
                         </span>
                     </td>
                 </tr>
