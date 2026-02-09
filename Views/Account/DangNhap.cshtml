@@ -13,8 +13,7 @@
                 Welcome to <br /><span class="text-red-500">Heatmap Sigma</span>
             </h1>
             <p class="text-gray-200 text-xl max-w-lg leading-relaxed font-medium opacity-90">
-                Hệ thống quản lý và phân tích dữ liệu chuyên nghiệp. <br /> Đăng nhập để truy cập vào bảng điều khiển
-                của bạn.
+                Hệ thống quản lý và phân tích dữ liệu chuyên nghiệp. <br /> Đăng nhập để truy cập vào bảng điều khiển.
             </p>
         </div>
         <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-red-400/20 rounded-full blur-[100px]"></div>
@@ -94,7 +93,7 @@
                 <div class="flex items-center justify-between px-2">
                     <label class="flex items-center cursor-pointer group">
                         <input type="checkbox" name="RememberMe" id="chkRememberMe" @(ViewBag.RememberMe == true ?
-                                                                                                                                                                                                                                                                                                                                        "checked" : "")
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    "checked" : "")
                                class="w-5 h-5 text-red-600 rounded-lg border-gray-200 focus:ring-red-500 transition-all" />
                         <span
                             class="ml-3 text-[11px] text-gray-400 font-black uppercase tracking-widest group-hover:text-gray-600 transition-colors">Nhớ
@@ -167,146 +166,146 @@
 
                     @section Scripts {
                         <script>
-                                                        let captchaCode = '';
+                                                                                let captchaCode = '';
 
-                                                        // Tạo CAPTCHA
-                                                        function generateCaptcha() {
-                                                            const canvas = document.getElementById('captchaCanvas');
-                                                            const ctx = canvas.getContext('2d');
+                                                                                // Tạo CAPTCHA
+                                                                                function generateCaptcha() {
+                                                                                    const canvas = document.getElementById('captchaCanvas');
+                                                                                    const ctx = canvas.getContext('2d');
 
-                                                            // Clear canvas
-                                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                                                                    // Clear canvas
+                                                                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                                                            // Background với gradient
-                                                            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                                                            gradient.addColorStop(0, '#f8f9fa');
-                                                            gradient.addColorStop(1, '#e9ecef');
-                                                            ctx.fillStyle = gradient;
-                                                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                                                                    // Background với gradient
+                                                                                    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                                                                                    gradient.addColorStop(0, '#f8f9fa');
+                                                                                    gradient.addColorStop(1, '#e9ecef');
+                                                                                    ctx.fillStyle = gradient;
+                                                                                    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                                                            // Random lines (noise)
-                                                            for (let i = 0; i < 3; i++) {
-                                                                ctx.strokeStyle = `rgba(220, 53, 69, ${Math.random() * 0.3})`;
-                                                                ctx.beginPath();
-                                                                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
-                                                                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
-                                                                ctx.stroke();
-                                                            }
+                                                                                    // Random lines (noise)
+                                                                                    for (let i = 0; i < 3; i++) {
+                                                                                        ctx.strokeStyle = `rgba(220, 53, 69, ${Math.random() * 0.3})`;
+                                                                                        ctx.beginPath();
+                                                                                        ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                                                                                        ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                                                                                        ctx.stroke();
+                                                                                    }
 
-                                                            // Generate random 6-character code
-                                                            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-                                                            captchaCode = '';
-                                                            for (let i = 0; i < 6; i++) {
-                                                                captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
-                                                            }
+                                                                                    // Generate random 6-character code
+                                                                                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                                                                                    captchaCode = '';
+                                                                                    for (let i = 0; i < 6; i++) {
+                                                                                        captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
+                                                                                    }
 
-                                                            // Draw text with random rotation
-                                                            ctx.font = 'bold 32px Arial';
-                                                            ctx.textBaseline = 'middle';
+                                                                                    // Draw text with random rotation
+                                                                                    ctx.font = 'bold 32px Arial';
+                                                                                    ctx.textBaseline = 'middle';
 
-                                                            for (let i = 0; i < captchaCode.length; i++) {
-                                                                ctx.save();
-                                                                const x = 20 + i * 30;
-                                                                const y = canvas.height / 2;
-                                                                const angle = (Math.random() - 0.5) * 0.4;
+                                                                                    for (let i = 0; i < captchaCode.length; i++) {
+                                                                                        ctx.save();
+                                                                                        const x = 20 + i * 30;
+                                                                                        const y = canvas.height / 2;
+                                                                                        const angle = (Math.random() - 0.5) * 0.4;
 
-                                                                ctx.translate(x, y);
-                                                                ctx.rotate(angle);
+                                                                                        ctx.translate(x, y);
+                                                                                        ctx.rotate(angle);
 
-                                                                // Shadow
-                                                                ctx.shadowColor = 'rgba(0,0,0,0.2)';
-                                                                ctx.shadowBlur = 3;
-                                                                ctx.shadowOffsetX = 2;
-                                                                ctx.shadowOffsetY = 2;
+                                                                                        // Shadow
+                                                                                        ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                                                                                        ctx.shadowBlur = 3;
+                                                                                        ctx.shadowOffsetX = 2;
+                                                                                        ctx.shadowOffsetY = 2;
 
-                                                                // Random color
-                                                                const colors = ['#dc3545', '#495057', '#6c757d'];
-                                                                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-                                                                ctx.fillText(captchaCode[i], 0, 0);
+                                                                                        // Random color
+                                                                                        const colors = ['#dc3545', '#495057', '#6c757d'];
+                                                                                        ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                                                                                        ctx.fillText(captchaCode[i], 0, 0);
 
-                                                                ctx.restore();
-                                                            }
+                                                                                        ctx.restore();
+                                                                                    }
 
-                                                            // Random dots
-                                                            for (let i = 0; i < 30; i++) {
-                                                                ctx.fillStyle = `rgba(108, 117, 125, ${Math.random() * 0.5})`;
-                                                                ctx.beginPath();
-                                                                ctx.arc(
-                                                                    Math.random() * canvas.width,
-                                                                    Math.random() * canvas.height,
-                                                                    Math.random() * 2,
-                                                                    0,
-                                                                    Math.PI * 2
-                                                                );
-                                                                ctx.fill();
-                                                            }
+                                                                                    // Random dots
+                                                                                    for (let i = 0; i < 30; i++) {
+                                                                                        ctx.fillStyle = `rgba(108, 117, 125, ${Math.random() * 0.5})`;
+                                                                                        ctx.beginPath();
+                                                                                        ctx.arc(
+                                                                                            Math.random() * canvas.width,
+                                                                                            Math.random() * canvas.height,
+                                                                                            Math.random() * 2,
+                                                                                            0,
+                                                                                            Math.PI * 2
+                                                                                        );
+                                                                                        ctx.fill();
+                                                                                    }
 
-                                                            // Lưu vào hidden field
-                                                            document.getElementById('hiddenCaptcha').value = captchaCode;
-                                                        }
+                                                                                    // Lưu vào hidden field
+                                                                                    document.getElementById('hiddenCaptcha').value = captchaCode;
+                                                                                }
 
-                                                        // Load captcha khi trang load
-                                                        window.onload = function () {
-                                                            generateCaptcha();
-                                                        };
+                                                                                // Load captcha khi trang load
+                                                                                window.onload = function () {
+                                                                                    generateCaptcha();
+                                                                                };
 
-                                                        function togglePassword(inputId, eyeId, eyeOffId) {
-                                                            const passwordInput = document.getElementById(inputId);
-                                                            const eyeIcon = document.getElementById(eyeId);
-                                                            const eyeOffIcon = document.getElementById(eyeOffId);
+                                                                                function togglePassword(inputId, eyeId, eyeOffId) {
+                                                                                    const passwordInput = document.getElementById(inputId);
+                                                                                    const eyeIcon = document.getElementById(eyeId);
+                                                                                    const eyeOffIcon = document.getElementById(eyeOffId);
 
-                                                            if (passwordInput.type === 'password') {
-                                                                passwordInput.type = 'text';
-                                                                eyeIcon.classList.add('hidden');
-                                                                eyeOffIcon.classList.remove('hidden');
-                                                            } else {
-                                                                passwordInput.type = 'password';
-                                                                eyeIcon.classList.remove('hidden');
-                                                                eyeOffIcon.classList.add('hidden');
-                                                            }
-                                                        }
+                                                                                    if (passwordInput.type === 'password') {
+                                                                                        passwordInput.type = 'text';
+                                                                                        eyeIcon.classList.add('hidden');
+                                                                                        eyeOffIcon.classList.remove('hidden');
+                                                                                    } else {
+                                                                                        passwordInput.type = 'password';
+                                                                                        eyeIcon.classList.remove('hidden');
+                                                                                        eyeOffIcon.classList.add('hidden');
+                                                                                    }
+                                                                                }
 
-                                                        function showErrorModal(message) {
-                                                            const modal = document.getElementById('errorModal');
-                                                            document.getElementById('errorModalMessage').innerText = message;
-                                                            modal.style.display = 'flex';
-                                                        }
+                                                                                function showErrorModal(message) {
+                                                                                    const modal = document.getElementById('errorModal');
+                                                                                    document.getElementById('errorModalMessage').innerText = message;
+                                                                                    modal.style.display = 'flex';
+                                                                                }
 
-                                                        function closeErrorModal() {
-                                                            const modal = document.getElementById('errorModal');
-                                                            modal.style.display = 'none';
-                                                        }
+                                                                                function closeErrorModal() {
+                                                                                    const modal = document.getElementById('errorModal');
+                                                                                    modal.style.display = 'none';
+                                                                                }
 
-                                                        function validatePassword(pass) {
-                                                            if (pass.length <= 6) return "Mật khẩu phải có ít nhất 7 ký tự!";
-                                                            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return "Mật khẩu phải bao gồm cả chữ và số!";
-                                                            if (!/[^\w\s]/.test(pass)) return "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
-                                                            return null;
-                                                        }
+                                                                                function validatePassword(pass) {
+                                                                                    if (pass.length <= 6) return "Mật khẩu phải có ít nhất 7 ký tự!";
+                                                                                    if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return "Mật khẩu phải bao gồm cả chữ và số!";
+                                                                                    if (!/[^\w\s]/.test(pass)) return "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+                                                                                    return null;
+                                                                                }
 
-                                                        function openConfirmModal() {
-                                                            const tk = document.getElementById('txtTaiKhoan').value.trim();
-                                                            const p = document.getElementById('passwordInput').value;
-                                                            const captchaInput = document.getElementById('txtCaptcha').value.trim();
+                                                                                function openConfirmModal() {
+                                                                                    const tk = document.getElementById('txtTaiKhoan').value.trim();
+                                                                                    const p = document.getElementById('passwordInput').value;
+                                                                                    const captchaInput = document.getElementById('txtCaptcha').value.trim();
 
-                                                            if (!tk || !p) { showErrorModal("Vui lòng điền đầy đủ thông tin!"); return; }
+                                                                                    if (!tk || !p) { showErrorModal("Vui lòng điền đầy đủ thông tin!"); return; }
 
-                                                            if (!captchaInput) { showErrorModal("Vui lòng nhập mã xác nhận!"); return; }
+                                                                                    if (!captchaInput) { showErrorModal("Vui lòng nhập mã xác nhận!"); return; }
 
-                                                            const err = validatePassword(p);
-                                                            if (err) { showErrorModal(err); return; }
+                                                                                    const err = validatePassword(p);
+                                                                                    if (err) { showErrorModal(err); return; }
 
-                                                            const modal = document.getElementById('confirmModal');
-                                                            modal.style.display = 'flex';
-                                                        }
+                                                                                    const modal = document.getElementById('confirmModal');
+                                                                                    modal.style.display = 'flex';
+                                                                                }
 
-                                                        function closeConfirmModal() {
-                                                            const modal = document.getElementById('confirmModal');
-                                                            modal.style.display = 'none';
-                                                        }
+                                                                                function closeConfirmModal() {
+                                                                                    const modal = document.getElementById('confirmModal');
+                                                                                    modal.style.display = 'none';
+                                                                                }
 
-                                                        function submitForm() {
-                                                            document.getElementById('loginForm').submit();
-                                                        }
+                                                                                function submitForm() {
+                                                                                    document.getElementById('loginForm').submit();
+                                                                                }
                         </script>
                     }
