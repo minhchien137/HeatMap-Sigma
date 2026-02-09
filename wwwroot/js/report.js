@@ -141,11 +141,6 @@ function updateKPIs(kpis) {
     document.getElementById('kpi_avgUtilization').textContent = kpis.avgUtilization.toFixed(1) + '%';
     document.getElementById('kpi_activeProjects').textContent = kpis.activeProjects;
     document.getElementById('kpi_staffCount').textContent = kpis.staffCount;
-
-    // Animate numbers
-    animateValue('kpi_totalHours', 0, kpis.totalHours, 1000);
-    animateValue('kpi_activeProjects', 0, kpis.activeProjects, 1000);
-    animateValue('kpi_staffCount', 0, kpis.staffCount, 1000);
 }
 
 // Update trend chart
@@ -1019,7 +1014,7 @@ function exportReport() {
 
 // Utility functions
 function formatNumber(num) {
-    return num.toLocaleString('vi-VN', { maximumFractionDigits: 1 });
+    return num.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function animateValue(id, start, end, duration) {
