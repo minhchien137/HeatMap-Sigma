@@ -117,14 +117,16 @@ public class DetailDataDto
         private readonly ApplicationDbContext _context;
         private readonly ZKBioTimeDbContext _zkContext;
         private readonly IReportService _reportService;
+        private readonly ILogService _logService;
 
 
-        public HeatmapController(ILogger<HeatmapController> logger, ApplicationDbContext context, ZKBioTimeDbContext zkContext, IReportService reportService)
+        public HeatmapController(ILogger<HeatmapController> logger, ApplicationDbContext context, ZKBioTimeDbContext zkContext, IReportService reportService, ILogService logService)
         {
             _logger = logger;
             _context = context;
             _zkContext = zkContext;
             _reportService = reportService;
+            _logService = logService;
         }
 
         // Helper method để lấy SVNCode từ Session
@@ -921,9 +923,9 @@ public class DetailDataDto
             }
         }
 
-       
+
         [HttpGet("ExportHistoryToExcel")]
-        public IActionResult ExportHistoryToExcel(
+        public async Task<IActionResult> ExportHistoryToExcel(
             string department = "",
             string project = "",
             string year = "",
@@ -938,6 +940,7 @@ public class DetailDataDto
                     return RedirectToAction("DangNhap", "Account");
                 }
 
+                var svnCode = GetCurrentSVNCode();
                 // Query dữ liệu với filters
                 var query = _context.SVN_StaffDetail.AsQueryable();
 
@@ -991,7 +994,37 @@ public class DetailDataDto
                 }
 
                 var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+
+                var filterDescription = new List<string>();
+                if (!string.IsNullOrEmpty(department))
+                {
+                    filterDescription.Add($"Bộ phận: {department}");
+                }
+                if (!string.IsNullOrEmpty(project))
+                {
+                    filterDescription.Add($"Dự án: {project}");
+                }
+                if (!string.IsNullOrEmpty(year))
+                {
+                    filterDescription.Add($"Năm: {year}");
+                }
+                if (!string.IsNullOrEmpty(week))
+                {
+                    filterDescription.Add($"Tuần: {week}");
+                }
+                if (!string.IsNullOrEmpty(search))
+                {
+                    filterDescription.Add($"Tìm kiếm: {search}");
+                }
+
+                var description = filterDescription.Count > 0
+                ? $"Xuất {data.Count} bản ghi lịch sử nhập với bộ lọc: {string.Join(", ", filterDescription)}"
+                : $"Xuất tất cả {data.Count} bản ghi lịch sử";
+
+                await _logService.LogAction(svnCode, LogActionTypes.ExportHistoryExcel, description);
                 return File(bytes, "text/csv", $"Lich_su_nhap_lieu_{DateTime.Now:yyyyMMddHHmmss}.csv");
+                
+                
             }
             catch (Exception ex)
             {
@@ -1000,6 +1033,7 @@ public class DetailDataDto
             }
         }
 
+        
 
         #region Report Methods - Using ReportService
 

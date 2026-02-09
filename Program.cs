@@ -23,7 +23,11 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+/*-------Report Service------ */
 builder.Services.AddScoped<IReportService, ReportService>();
+
+/*-------Log Service------ */
+builder.Services.AddScoped<ILogService, LogService>();
 
 
 var app = builder.Build();
