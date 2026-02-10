@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\HeatmapSystem\\HeatmapSystem\\HeatmapSystem.csproj": {}
+    "C:\\HeatMap-Sigma\\HeatmapSystem.csproj": {}
   },
   "projects": {
-    "C:\\HeatmapSystem\\HeatmapSystem\\HeatmapSystem.csproj": {
+    "C:\\HeatMap-Sigma\\HeatmapSystem.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\HeatmapSystem\\HeatmapSystem\\HeatmapSystem.csproj",
+        "projectUniqueName": "C:\\HeatMap-Sigma\\HeatmapSystem.csproj",
         "projectName": "HeatmapSystem",
-        "projectPath": "C:\\HeatmapSystem\\HeatmapSystem\\HeatmapSystem.csproj",
+        "projectPath": "C:\\HeatMap-Sigma\\HeatmapSystem.csproj",
         "packagesPath": "C:\\Users\\Minh Chien\\.nuget\\packages\\",
-        "outputPath": "C:\\HeatmapSystem\\HeatmapSystem\\obj\\",
+        "outputPath": "C:\\HeatMap-Sigma\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -73,6 +73,24 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[9.0.12, 9.0.12]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[9.0.12, 9.0.12]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[9.0.12, 9.0.12]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[9.0.12, 9.0.12]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -81,7 +99,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
