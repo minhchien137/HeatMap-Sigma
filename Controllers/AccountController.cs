@@ -4,6 +4,8 @@ using HeatmapSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace HeatmapSystem.Controllers
 {
@@ -20,14 +22,73 @@ namespace HeatmapSystem.Controllers
         }
 
         [HttpGet("DangNhap")]
-        public IActionResult DangNhap()
+        public async Task<IActionResult> DangNhap()
         {
-            if (HttpContext.Session.GetString("SVNCode") != null)
+            // THAY ĐỔI: Kiểm tra session trước
+            var svnCode = HttpContext.Session.GetString("SVNCode");
+            
+            // Nếu đã có session, redirect về Home
+            if (!string.IsNullOrEmpty(svnCode))
             {
                 return RedirectToAction("Home", "Heatmap");
             }
 
-            // Kiểm tra cookie "Remember Me"
+            // THÊM: Tự động đăng nhập từ cookie "RememberMe"
+            if (Request.Cookies.ContainsKey("RememberMe"))
+            {
+                var rememberCookie = Request.Cookies["RememberMe"];
+                if (!string.IsNullOrEmpty(rememberCookie))
+                {
+                    try
+                    {
+                        var parts = rememberCookie.Split('|');
+                        if (parts.Length == 2)
+                        {
+                            var taiKhoan = parts[0];
+                            var passwordHash = parts[1];
+                            
+                            // Tìm user trong database
+                            var user = await _context.SVN_User
+                                .FirstOrDefaultAsync(u => u.SVNCode == taiKhoan);
+                            
+                            // Kiểm tra password hash khớp không
+                            if (user != null && ComputeHash(user.Password) == passwordHash)
+                            {
+                                // Tự động đăng nhập
+                                user.LastLogin = DateTime.Now;
+                                await _context.SaveChangesAsync();
+                                
+                                HttpContext.Session.SetString("SVNCode", user.SVNCode);
+                                
+                                // Ghi log tự động đăng nhập
+                                var autoLoginLog = new SVN_Logs
+                                {
+                                    SVNCode = user.SVNCode,
+                                    TimeAccess = DateTime.Now,
+                                    ActionType = "AutoLogin",
+                                    Description = "Tự động đăng nhập từ cookie RememberMe"
+                                };
+                                _context.SVN_Logs.Add(autoLoginLog);
+                                await _context.SaveChangesAsync();
+                                
+                                return RedirectToAction("Home", "Heatmap");
+                            }
+                            else
+                            {
+                                // Cookie không hợp lệ, xóa đi
+                                Response.Cookies.Delete("RememberMe");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Lỗi khi tự động đăng nhập từ cookie");
+                        Response.Cookies.Delete("RememberMe");
+                    }
+                }
+            }
+
+            // Nếu có cookie, điền sẵn thông tin vào form
             if (Request.Cookies.ContainsKey("RememberMe"))
             {
                 var rememberCookie = Request.Cookies["RememberMe"];
@@ -37,7 +98,6 @@ namespace HeatmapSystem.Controllers
                     if (parts.Length == 2)
                     {
                         ViewBag.TaiKhoan = parts[0];
-                        ViewBag.Password = parts[1];
                         ViewBag.RememberMe = true;
                     }
                 }
@@ -120,18 +180,21 @@ namespace HeatmapSystem.Controllers
 
                 HttpContext.Session.SetString("SVNCode", user.SVNCode);
 
-                // Xử lý Remember Me
+                // THAY ĐỔI: Xử lý Remember Me - lưu password hash thay vì plain text
                 if (RememberMe)
                 {
+                    // Tạo hash của mật khẩu để lưu vào cookie (an toàn hơn)
+                    var passwordHash = ComputeHash(Password);
+                    
                     // Lưu cookie với thời hạn 30 ngày
                     var cookieOptions = new CookieOptions
                     {
                         Expires = DateTime.Now.AddDays(30),
                         HttpOnly = true,
-                        Secure = true,
+                        Secure = true, // Chỉ gửi qua HTTPS
                         SameSite = SameSiteMode.Strict
                     };
-                    Response.Cookies.Append("RememberMe", $"{TaiKhoan}|{Password}", cookieOptions);
+                    Response.Cookies.Append("RememberMe", $"{TaiKhoan}|{passwordHash}", cookieOptions);
                 }
                 else
                 {
@@ -179,7 +242,7 @@ namespace HeatmapSystem.Controllers
                 if (string.IsNullOrWhiteSpace(TaiKhoan) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(ConfirmPassword))
                 {
                     TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
-                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
+                    ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
 
@@ -187,21 +250,21 @@ namespace HeatmapSystem.Controllers
                 if (string.IsNullOrWhiteSpace(CaptchaInput) || string.IsNullOrWhiteSpace(CaptchaCode))
                 {
                     TempData["Error"] = "Vui lòng nhập mã xác nhận!";
-                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
+                    ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
 
                 if (CaptchaInput.ToUpper() != CaptchaCode.ToUpper())
                 {
                     TempData["Error"] = "Mã xác nhận không đúng!";
-                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
+                    ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
 
                 if (Password != ConfirmPassword)
                 {
                     TempData["Error"] = "Mật khẩu không khớp!";
-                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
+                    ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
 
@@ -212,7 +275,7 @@ namespace HeatmapSystem.Controllers
                 if (existingUser != null)
                 {
                     TempData["Error"] = "Tài khoản đã tồn tại!";
-                    ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
+                    ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
 
@@ -245,7 +308,7 @@ namespace HeatmapSystem.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi đăng ký");
                 TempData["Error"] = "Có lỗi xảy ra, vui lòng thử lại!";
-                ViewBag.TaiKhoan = TaiKhoan; // Thêm dòng này
+                ViewBag.TaiKhoan = TaiKhoan;
                 return View();
             }
         }
@@ -343,6 +406,20 @@ namespace HeatmapSystem.Controllers
                 // Đổi mật khẩu
                 user.Password = NewPassword;
                 await _context.SaveChangesAsync();
+                
+                // THÊM: Cập nhật cookie RememberMe nếu có
+                if (Request.Cookies.ContainsKey("RememberMe"))
+                {
+                    var passwordHash = ComputeHash(NewPassword);
+                    var cookieOptions = new CookieOptions
+                    {
+                        Expires = DateTime.Now.AddDays(30),
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict
+                    };
+                    Response.Cookies.Append("RememberMe", $"{svnCode}|{passwordHash}", cookieOptions);
+                }
 
                 // Ghi log thành công
                 var successLog = new SVN_Logs
@@ -385,7 +462,23 @@ namespace HeatmapSystem.Controllers
             }
 
             HttpContext.Session.Clear();
+            
+            // THÊM: Có thể giữ cookie RememberMe để lần sau tự động đăng nhập
+            // Hoặc xóa nếu muốn đăng xuất hoàn toàn
+            // Response.Cookies.Delete("RememberMe");
+            
             return RedirectToAction("DangNhap");
+        }
+        
+        // THÊM: Hàm tạo hash cho password
+        private string ComputeHash(string input)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var bytes = Encoding.UTF8.GetBytes(input);
+                var hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
         }
     }
 }

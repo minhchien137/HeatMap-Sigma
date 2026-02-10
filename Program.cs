@@ -19,10 +19,22 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("ZKBioTimeConnect
 // Thêm Session để lưu thông tin đăng nhập
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    // THAY ĐỔI: Tăng timeout lên 7 ngày thay vì 30 phút
+    options.IdleTimeout = TimeSpan.FromDays(7);
+    
+    // THÊM: Session cookie timeout - tương tự IdleTimeout
+    options.Cookie.MaxAge = TimeSpan.FromDays(7);
+    
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    
+    // THÊM: Cookie name để dễ quản lý
+    options.Cookie.Name = ".HeatmapSystem.Session";
+    
+    // THÊM: Bảo mật - chỉ gửi cookie qua HTTPS (nếu production)
+    // options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
+
 /*-------Report Service------ */
 builder.Services.AddScoped<IReportService, ReportService>();
 
