@@ -153,6 +153,7 @@ public class DetailDataDto
             return View("Error!");
         }
 
+        [RequireUpdate]
         [HttpGet("Import")]
         public IActionResult Import()
         {
@@ -275,6 +276,7 @@ public class DetailDataDto
             public decimal WorkHours { get; set; }
         }
 
+        [RequireUpdate]
         [HttpPost("SaveStaffDetail")]
         public IActionResult SaveStaffDetail([FromBody] SaveStaffDetailRequest request)
         {
@@ -483,6 +485,8 @@ public class DetailDataDto
             public List<DayDataRequest> Days { get; set; }
         }
 
+
+        [RequireUpdate]
         [HttpPost("SaveMultipleDays")]
         public IActionResult SaveMultipleDays([FromBody] SaveMultipleDaysRequest request)
         {
@@ -705,6 +709,7 @@ public class DetailDataDto
             }
         }
 
+        [RequireRead]
         [HttpGet("Staff")]
         public IActionResult Staff()
         {
@@ -716,7 +721,7 @@ public class DetailDataDto
 
             return View();
         }
-
+        [RequireUpdate]
         [HttpGet("GetStaffData")]
         public IActionResult GetStaffData()
         {
@@ -751,7 +756,7 @@ public class DetailDataDto
         }
 
         /*------------------- Lịch sự nhập liệu -----------------------*/
-
+        [RequireRead]
         [HttpGet("History")]
         public IActionResult History()
         {
@@ -763,7 +768,7 @@ public class DetailDataDto
 
             return View();
         }
-
+        [RequireUpdate]
         [HttpGet("GetHistoryData")]
         public IActionResult GetHistoryData()
         {
@@ -832,7 +837,7 @@ public class DetailDataDto
                 return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
             }
         }
-
+        [RequireUpdate]
         [HttpGet("GetStaffDetailById/{id}")]
         public IActionResult GetStaffDetailById(int id)
         {
@@ -881,6 +886,7 @@ public class DetailDataDto
             public decimal WorkHours { get; set; }
         }
 
+        [RequireUpdate]
         [HttpPut("UpdateStaffDetail")]
         public IActionResult UpdateStaffDetail([FromBody] UpdateStaffDetailRequest request)
         {
@@ -924,7 +930,7 @@ public class DetailDataDto
             }
         }
 
-
+        [RequireUpdate]
         [HttpGet("ExportHistoryToExcel")]
         public async Task<IActionResult> ExportHistoryToExcel(
             string department = "",
@@ -1037,7 +1043,7 @@ public class DetailDataDto
         
 
         #region Report Methods - Using ReportService
-
+        [RequireUpdate]
         [HttpGet("Report")]
         public IActionResult Report()
         {
@@ -1170,6 +1176,7 @@ public class DetailDataDto
             }
         }
 
+        [RequireUpdate]
         [HttpGet("ExportReport")]
         public IActionResult ExportReport(
             string timeRange = "current_week",

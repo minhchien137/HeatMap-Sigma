@@ -31,8 +31,26 @@ namespace HeatmapSystem.Models
         [Column("IsAdmin")]
         public bool IsAdmin { get; set; } = false;
 
+
+        [Column("Permission")]
+        [StringLength(20)]
+        public string Permission { get; set; } = "None";
+
+
+        /* Helper properties*/
+
         [NotMapped]
         public string RoleName => IsAdmin ? "Admin" : "User";
 
+
+        [NotMapped]
+        public bool HasReadPermission => IsAdmin || Permission == "Read" || Permission == "Update";
+
+        [NotMapped]
+        public bool HasUpdatePermission => IsAdmin || Permission == "Update";
+
+         [NotMapped]
+        public bool HasNoPermission => !IsAdmin && Permission == "None";
+        
     }
 }

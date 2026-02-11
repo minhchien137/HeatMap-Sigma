@@ -82,7 +82,8 @@ namespace HeatmapSystem.Controllers
                                     await _context.SaveChangesAsync();
                                     
                                     HttpContext.Session.SetString("SVNCode", user.SVNCode);
-                                    HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower()); // LƯU IsAdmin VÀO SESSION
+                                    HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower());
+                                    HttpContext.Session.SetString("Permission", user.Permission ?? "None"); // LƯU PERMISSION VÀO SESSION
                                     
                                     // Ghi log
                                     var autoLoginLog = new SVN_Logs
@@ -237,7 +238,8 @@ namespace HeatmapSystem.Controllers
                 await _context.SaveChangesAsync();
 
                 HttpContext.Session.SetString("SVNCode", user.SVNCode);
-                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower()); // LƯU IsAdmin VÀO SESSION
+                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower());
+                HttpContext.Session.SetString("Permission", user.Permission ?? "None"); // LƯU PERMISSION VÀO SESSION
 
                 // ✅ Tạo Refresh Token nếu chọn "Remember Me"
                 if (RememberMe)
