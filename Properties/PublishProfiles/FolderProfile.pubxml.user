@@ -1,9 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
 <Project>
-  <PropertyGroup>
-    <_PublishTargetUrl>C:\HeatMap-Sigma\bin\Release\net9.0\publish\</_PublishTargetUrl>
-    <History>True|2026-02-10T06:57:53.5460608Z||;</History>
-    <LastFailureDetails />
-  </PropertyGroup>
 </Project>

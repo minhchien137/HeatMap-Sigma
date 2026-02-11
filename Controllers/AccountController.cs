@@ -33,7 +33,18 @@ namespace HeatmapSystem.Controllers
             
             if (!string.IsNullOrEmpty(svnCode))
             {
-                return RedirectToAction("Home", "Heatmap");
+                // Kiểm tra IsAdmin để redirect
+                var isAdminStr = HttpContext.Session.GetString("IsAdmin");
+                bool isAdmin = isAdminStr == "true";
+                
+                if (isAdmin) // Admin
+                {
+                    return RedirectToAction("Users", "Admin");
+                }
+                else // User
+                {
+                    return RedirectToAction("Home", "Heatmap");
+                }
             }
 
             // ✅ Tự động đăng nhập từ Refresh Token
@@ -53,7 +64,6 @@ namespace HeatmapSystem.Controllers
                         if (isValid)
                         {
                             // Lấy thông tin user từ token
-                            // FIX: Không dùng t.IsValid trong query
                             var authToken = await _context.AuthTokens
                                 .FirstOrDefaultAsync(t => t.RefreshToken == refreshToken 
                                                        && !t.IsRevoked 
@@ -72,6 +82,7 @@ namespace HeatmapSystem.Controllers
                                     await _context.SaveChangesAsync();
                                     
                                     HttpContext.Session.SetString("SVNCode", user.SVNCode);
+                                    HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower()); // LƯU IsAdmin VÀO SESSION
                                     
                                     // Ghi log
                                     var autoLoginLog = new SVN_Logs
@@ -87,7 +98,15 @@ namespace HeatmapSystem.Controllers
                                     // Ghi login attempt thành công
                                     await _authService.RecordLoginAttempt(user.SVNCode, ipAddress, true);
                                     
-                                    return RedirectToAction("Home", "Heatmap");
+                                    // REDIRECT THEO IsAdmin
+                                    if (user.IsAdmin) // Admin
+                                    {
+                                        return RedirectToAction("Users", "Admin");
+                                    }
+                                    else // User
+                                    {
+                                        return RedirectToAction("Home", "Heatmap");
+                                    }
                                 }
                             }
                         }
@@ -191,7 +210,7 @@ namespace HeatmapSystem.Controllers
 
                 // ✅ Verify password với BCrypt
                 bool isPasswordValid = _authService.VerifyPassword(Password, user.Password);
-                
+
                 if (!isPasswordValid)
                 {
                     // Ghi log thất bại
@@ -218,46 +237,49 @@ namespace HeatmapSystem.Controllers
                 await _context.SaveChangesAsync();
 
                 HttpContext.Session.SetString("SVNCode", user.SVNCode);
+                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower()); // LƯU IsAdmin VÀO SESSION
 
-                // ✅ Tạo Refresh Token nếu chọn Remember Me
+                // ✅ Tạo Refresh Token nếu chọn "Remember Me"
                 if (RememberMe)
                 {
                     var refreshToken = await _authService.GenerateRefreshToken(
                         user.SVNCode, 
                         ipAddress, 
                         userAgent);
-                    
-                    // Lưu vào cookie (30 ngày)
-                    var cookieOptions = new CookieOptions
-                    {
-                        Expires = DateTime.Now.AddDays(30),
-                        HttpOnly = true,
-                        Secure = true, // Chỉ gửi qua HTTPS
-                        SameSite = SameSiteMode.Strict
-                    };
-                    Response.Cookies.Append("RefreshToken", refreshToken, cookieOptions);
-                }
-                else
-                {
-                    // Xóa refresh token cookie nếu có
-                    Response.Cookies.Delete("RefreshToken");
-                }
 
-                // ✅ Ghi login attempt thành công
-                await _authService.RecordLoginAttempt(TaiKhoan, ipAddress, true);
+                    // Lưu vào cookie (30 ngày)
+                    Response.Cookies.Append("RefreshToken", refreshToken, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTime.Now.AddDays(30)
+                    });
+                }
 
                 // Ghi log thành công
                 var successLog = new SVN_Logs
                 {
-                    SVNCode = user.SVNCode,
+                    SVNCode = TaiKhoan,
                     TimeAccess = DateTime.Now,
                     ActionType = "Login",
-                    Description = $"Đăng nhập thành công từ IP {ipAddress}"
+                    Description = $"Đăng nhập thành công{(RememberMe ? " (Remember Me)" : "")} (IP: {ipAddress})"
                 };
                 _context.SVN_Logs.Add(successLog);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Home", "Heatmap");
+                // Ghi login attempt thành công
+                await _authService.RecordLoginAttempt(TaiKhoan, ipAddress, true);
+
+                // REDIRECT THEO IsAdmin
+                if (user.IsAdmin) // Admin - chỉ vào trang Admin
+                {
+                    return RedirectToAction("Users", "Admin");
+                }
+                else // User thường - vào trang Heatmap
+                {
+                    return RedirectToAction("Home", "Heatmap");
+                }
             }
             catch (Exception ex)
             {
@@ -271,10 +293,6 @@ namespace HeatmapSystem.Controllers
         [HttpGet("DangKy")]
         public IActionResult DangKy()
         {
-            if (HttpContext.Session.GetString("SVNCode") != null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
             return View();
         }
 
@@ -288,7 +306,10 @@ namespace HeatmapSystem.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(TaiKhoan) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(ConfirmPassword))
+                // Validation cơ bản
+                if (string.IsNullOrWhiteSpace(TaiKhoan) || 
+                    string.IsNullOrWhiteSpace(Password) || 
+                    string.IsNullOrWhiteSpace(ConfirmPassword))
                 {
                     TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
                     ViewBag.TaiKhoan = TaiKhoan;
@@ -310,34 +331,6 @@ namespace HeatmapSystem.Controllers
                     return View();
                 }
 
-                if (Password != ConfirmPassword)
-                {
-                    TempData["Error"] = "Mật khẩu xác nhận không khớp!";
-                    ViewBag.TaiKhoan = TaiKhoan;
-                    return View();
-                }
-
-                if (Password.Length <= 6)
-                {
-                    TempData["Error"] = "Mật khẩu phải lớn hơn 6 ký tự!";
-                    ViewBag.TaiKhoan = TaiKhoan;
-                    return View();
-                }
-
-                if (!Regex.IsMatch(Password, "[a-zA-Z]") || !Regex.IsMatch(Password, "[0-9]"))
-                {
-                    TempData["Error"] = "Mật khẩu phải bao gồm cả chữ và số!";
-                    ViewBag.TaiKhoan = TaiKhoan;
-                    return View();
-                }
-
-                if (!Regex.IsMatch(Password, @"[^\w\s]"))
-                {
-                    TempData["Error"] = "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
-                    ViewBag.TaiKhoan = TaiKhoan;
-                    return View();
-                }
-
                 // Kiểm tra tài khoản đã tồn tại
                 var existingUser = await _context.SVN_User
                     .FirstOrDefaultAsync(u => u.SVNCode == TaiKhoan);
@@ -349,33 +342,66 @@ namespace HeatmapSystem.Controllers
                     return View();
                 }
 
-                // ✅ Hash password bằng BCrypt
+                // Validate độ dài mật khẩu
+                if (Password.Length < 6)
+                {
+                    TempData["Error"] = "Mật khẩu phải có ít nhất 6 ký tự!";
+                    ViewBag.TaiKhoan = TaiKhoan;
+                    return View();
+                }
+
+                // Validate mật khẩu chứa chữ và số
+                if (!Regex.IsMatch(Password, "[a-zA-Z]") || !Regex.IsMatch(Password, "[0-9]"))
+                {
+                    TempData["Error"] = "Mật khẩu phải bao gồm cả chữ và số!";
+                    ViewBag.TaiKhoan = TaiKhoan;
+                    return View();
+                }
+
+                // Validate mật khẩu có ký tự đặc biệt
+                if (!Regex.IsMatch(Password, @"[^\w\s]"))
+                {
+                    TempData["Error"] = "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+                    ViewBag.TaiKhoan = TaiKhoan;
+                    return View();
+                }
+
+                // Kiểm tra confirm password
+                if (Password != ConfirmPassword)
+                {
+                    TempData["Error"] = "Mật khẩu xác nhận không khớp!";
+                    ViewBag.TaiKhoan = TaiKhoan;
+                    return View();
+                }
+
+                // ✅ Hash password với BCrypt
                 var hashedPassword = _authService.HashPassword(Password);
 
-                // Tạo user mới
+                // Tạo user mới - MẶC ĐỊNH IsAdmin = false (USER THƯỜNG)
                 var newUser = new SVN_User
                 {
                     SVNCode = TaiKhoan,
-                    Password = hashedPassword, // ✅ Lưu password đã hash
-                    CreateDate = DateTime.Now
+                    Password = hashedPassword,
+                    CreateDate = DateTime.Now,
+                    IsAdmin = false  // MẶC ĐỊNH LÀ USER THƯỜNG
                 };
 
                 _context.SVN_User.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                // Ghi log đăng ký thành công
+                // Ghi log
                 var ipAddress = GetClientIpAddress();
                 var registerLog = new SVN_Logs
                 {
                     SVNCode = TaiKhoan,
                     TimeAccess = DateTime.Now,
                     ActionType = "Register",
-                    Description = $"Đăng ký tài khoản mới thành công (IP: {ipAddress})"
+                    Description = $"Đăng ký tài khoản mới (IP: {ipAddress})"
                 };
                 _context.SVN_Logs.Add(registerLog);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+                TempData["Success"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
                 return RedirectToAction("DangNhap");
             }
             catch (Exception ex)
@@ -397,44 +423,32 @@ namespace HeatmapSystem.Controllers
                 return RedirectToAction("DangNhap");
             }
 
-            var user = await _context.SVN_User.FirstOrDefaultAsync(u => u.SVNCode == svnCode);
-            
+            var user = await _context.SVN_User
+                .FirstOrDefaultAsync(u => u.SVNCode == svnCode);
+
             if (user == null)
             {
                 HttpContext.Session.Clear();
                 return RedirectToAction("DangNhap");
             }
 
-            // ✅ Lấy danh sách active tokens của user
-            // FIX: Không dùng t.IsValid vì là computed property
+            // Lấy danh sách active refresh tokens
             var activeTokens = await _context.AuthTokens
                 .Where(t => t.SVNCode == svnCode 
                          && !t.IsRevoked 
                          && !t.IsUsed 
                          && t.ExpiresAt > DateTime.Now)
                 .OrderByDescending(t => t.CreatedAt)
-                .Select(t => new
-                {
-                    t.Id,
-                    t.CreatedAt,
-                    t.ExpiresAt,
-                    t.IpAddress,
-                    t.UserAgent,
-                    t.IsRevoked
-                })
                 .ToListAsync();
 
             ViewBag.ActiveTokens = activeTokens;
-            ViewBag.TokenCount = activeTokens.Count;
+            ViewBag.CurrentRefreshToken = Request.Cookies["RefreshToken"];
 
             return View(user);
         }
 
         [HttpPost("ChangePassword")]
-        public async Task<IActionResult> ChangePassword(
-            string CurrentPassword, 
-            string NewPassword, 
-            string ConfirmNewPassword)
+        public async Task<IActionResult> ChangePassword(string CurrentPassword, string NewPassword, string ConfirmPassword)
         {
             try
             {
@@ -445,19 +459,21 @@ namespace HeatmapSystem.Controllers
                     return RedirectToAction("DangNhap");
                 }
 
-                if (string.IsNullOrWhiteSpace(CurrentPassword) || string.IsNullOrWhiteSpace(NewPassword) || string.IsNullOrWhiteSpace(ConfirmNewPassword))
+                if (string.IsNullOrWhiteSpace(CurrentPassword) || 
+                    string.IsNullOrWhiteSpace(NewPassword) || 
+                    string.IsNullOrWhiteSpace(ConfirmPassword))
                 {
                     TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
                     return RedirectToAction("Account");
                 }
 
-                if (NewPassword != ConfirmNewPassword)
+                if (NewPassword != ConfirmPassword)
                 {
-                    TempData["Error"] = "Mật khẩu mới không khớp!";
+                    TempData["Error"] = "Mật khẩu xác nhận không khớp!";
                     return RedirectToAction("Account");
                 }
 
-                if (NewPassword.Length <= 6)
+                if (NewPassword.Length < 6)
                 {
                     TempData["Error"] = "Mật khẩu mới phải lớn hơn 6 ký tự!";
                     return RedirectToAction("Account");
