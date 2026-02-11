@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HeatmapSystem.Controllers
 {
     [Route("[controller]")]
-    [AdminOnly] // CHỈ ADMIN MỚI VÀO ĐƯỢC
+    [AdminOnly] 
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -259,6 +259,75 @@ namespace HeatmapSystem.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi xóa user");
+                TempData["Error"] = "Có lỗi xảy ra, vui lòng thử lại!";
+                return RedirectToAction("Users");
+            }
+        }
+
+
+        // Set Permission cho user
+
+        [HttpPost("SetPermission")]
+        public async Task<IActionResult> SetPermission(string SVNCode, string Permission)
+        {
+            try
+            {
+                // Validate input
+                if (string.IsNullOrWhiteSpace(SVNCode) || string.IsNullOrWhiteSpace(Permission))
+                {
+                    TempData["Error"] = "Dữ liệu không hợp lệ!";
+                    return RedirectToAction("Users");
+                }
+
+                // Validate Permission value
+                var validPermissions = new[] { "None", "Read", "Update" };
+                if (!validPermissions.Contains(Permission))
+                {
+                    TempData["Error"] = "Quyền không hợp lệ!";
+                    return RedirectToAction("Users");
+                }
+
+                // Tìm user
+                var user = await _context.SVN_User
+                    .FirstOrDefaultAsync(u => u.SVNCode == SVNCode);
+
+                if (user == null)
+                {
+                    TempData["Error"] = "Không tìm thấy tài khoản!";
+                    return RedirectToAction("Users");
+                }
+
+                // Không cho phép set permission cho Admin
+                if (user.IsAdmin)
+                {
+                    TempData["Error"] = "Không thể thay đổi quyền của Admin!";
+                    return RedirectToAction("Users");
+                }
+
+                var oldPermission = user.Permission;
+                user.Permission = Permission;
+                await _context.SaveChangesAsync();
+
+                // Ghi log
+                var adminUser = HttpContext.Session.GetString("SVNCode") ?? "ADMIN";
+                var permissionLog = new SVN_Logs
+                {
+                    SVNCode = SVNCode,
+                    TimeAccess = DateTime.Now,
+                    ActionType = "AdminSetPermission",
+                    Description = $"Admin [{adminUser}] đã thay đổi quyền từ [{oldPermission}] sang [{Permission}]"
+                };
+                _context.SVN_Logs.Add(permissionLog);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Admin set permission for user {SVNCode}: {oldPermission} -> {Permission}");
+
+                TempData["Success"] = $"✅ Đã cập nhật quyền cho [{SVNCode}] thành [{Permission}]";
+                return RedirectToAction("Users");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi set permission");
                 TempData["Error"] = "Có lỗi xảy ra, vui lòng thử lại!";
                 return RedirectToAction("Users");
             }

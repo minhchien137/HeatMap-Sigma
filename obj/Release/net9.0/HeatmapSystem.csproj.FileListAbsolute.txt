@@ -227,3 +227,4 @@ C:\HeatMap-Sigma\obj\Release\net9.0\refint\HeatmapSystem.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\HeatmapSystem.pdb
 C:\HeatMap-Sigma\obj\Release\net9.0\HeatmapSystem.genruntimeconfig.cache
 C:\HeatMap-Sigma\obj\Release\net9.0\ref\HeatmapSystem.dll
+C:\HeatMap-Sigma\bin\Release\net9.0\BCrypt.Net-Next.dll

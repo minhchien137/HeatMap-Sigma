@@ -93,6 +93,9 @@
                                     Mã SVN
                                 </th>
                                 <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Quyền
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
                                     Ngày tạo
                                 </th>
                                 <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
@@ -112,8 +115,43 @@
                             {
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4">
-                                        <p class="text-base font-bold text-gray-900">@user.SVNCode</p>
+                                        <div>
+                                            <p class="text-base font-bold text-gray-900">@user.SVNCode</p>
+                                            @if (user.IsAdmin)
+                                            {
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 mt-1">
+                                                    👑 Admin
+                                                </span>
+                                            }
+                                        </div>
                                     </td>
+                                   <td class="px-6 py-4">
+                                        @if (user.IsAdmin)
+                                        {
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
+                                                Full Access
+                                            </span>
+                                        }
+                                        else if (user.Permission == "Update")
+                                        {
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                                ✏️ Update
+                                            </span>
+                                        }
+                                        else if (user.Permission == "Read")
+                                        {
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                                                👁️ Read
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
+                                                🚫 No Access
+                                            </span>
+                                        }
+                                    </td>
+
                                     <td class="px-6 py-4">
                                         <p class="text-sm text-gray-600">
                                             @(user.CreateDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")
@@ -139,6 +177,18 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center space-x-2">
+                                            @if (!user.IsAdmin)
+                                            {
+                                                <button onclick="openPermissionModal('@user.SVNCode', '@user.Permission')"
+                                                        class="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 transition-all">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none"
+                                                         viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                                    </svg>
+                                                    Phân quyền
+                                                </button>
+                                            }
                                             <button onclick="openResetModal('@user.SVNCode')"
                                                     class="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none"
@@ -456,6 +506,73 @@
     </div>
 </div>
 
+<!-- Set Permission Modal -->
+<div id="permissionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center">
+    <div class="bg-white rounded-[2.5rem] p-10 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-black mb-2 text-gray-900">Phân quyền</h3>
+            <p class="text-gray-500">Cấp quyền truy cập cho người dùng</p>
+        </div>
+
+        <form id="permissionForm" method="post" action="/Admin/SetPermission">
+            <input type="hidden" id="permissionSVNCode" name="SVNCode" />
+
+            <div class="mb-6 p-4 bg-gray-50 rounded-2xl">
+                <p class="text-sm text-gray-500 mb-1">Tài khoản:</p>
+                <p id="displayPermissionSVNCode" class="text-lg font-bold text-gray-900"></p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+                    Chọn quyền
+                </label>
+                <select name="Permission" id="permissionSelect" required
+                        class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-base text-gray-700">
+                    <option value="None">🚫 None - Không có quyền (chỉ xem Home)</option>
+                    <option value="Read">👁️ Read - Chỉ xem dữ liệu</option>
+                    <option value="Update">✏️ Update - Full quyền (xem, sửa, xóa)</option>
+                </select>
+            </div>
+
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 mb-6">
+                <div class="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="text-sm font-bold text-blue-800 mb-1">Giải thích quyền:</p>
+                        <p class="text-xs text-blue-700">
+                            <strong>None:</strong> Chỉ xem trang Home, không thao tác gì<br />
+                            <strong>Read:</strong> Xem được dữ liệu, KHÔNG sửa/xóa<br />
+                            <strong>Update:</strong> Full quyền (xem, tạo, sửa, xóa)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="button" onclick="closePermissionModal()"
+                        class="flex-1 py-4 border-2 border-gray-200 text-gray-600 rounded-2xl font-bold hover:bg-gray-50 transition-all">
+                    Hủy
+                </button>
+                <button type="submit"
+                        class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">
+                    Xác nhận
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
     .tab-button {
         position: relative;
@@ -521,10 +638,30 @@
         document.getElementById('resetForm').reset();
     }
 
-    // Close modal when clicking outside
+    function openPermissionModal(svnCode, currentPermission) {
+        document.getElementById('permissionSVNCode').value = svnCode;
+        document.getElementById('displayPermissionSVNCode').textContent = svnCode;
+        document.getElementById('permissionSelect').value = currentPermission;
+        document.getElementById('permissionModal').classList.remove('hidden');
+        document.getElementById('permissionModal').style.display = 'flex';
+    }
+
+    function closePermissionModal() {
+        document.getElementById('permissionModal').classList.add('hidden');
+        document.getElementById('permissionModal').style.display = 'none';
+        document.getElementById('permissionForm').reset();
+    }
+
+    // Close modals when clicking outside
     document.getElementById('resetPasswordModal')?.addEventListener('click', function (e) {
         if (e.target === this) {
             closeResetModal();
+        }
+    });
+
+    document.getElementById('permissionModal')?.addEventListener('click', function (e) {
+        if (e.target === this) {
+            closePermissionModal();
         }
     });
 
