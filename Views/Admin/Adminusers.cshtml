@@ -12,13 +12,19 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-5xl font-black mb-2 text-gray-900">
-                    Quản lý <span class="text-red-600">người dùng</span>
+                    Quản lý <span class="text-red-600">hệ thống</span>
                 </h1>
-                <p class="text-lg text-gray-500 font-medium">Xem và quản lý tài khoản người dùng</p>
+                <p class="text-lg text-gray-500 font-medium">Người dùng và lịch sử hoạt động</p>
             </div>
-            <div class="bg-white px-6 py-3 rounded-2xl shadow-lg">
-                <p class="text-sm text-gray-500">Tổng số tài khoản</p>
-                <p class="text-3xl font-black text-red-600">@Model.Count</p>
+            <div class="flex space-x-4">
+                <div class="bg-white px-6 py-3 rounded-2xl shadow-lg">
+                    <p class="text-sm text-gray-500">Tổng tài khoản</p>
+                    <p class="text-3xl font-black text-red-600">@Model.Count</p>
+                </div>
+                <div class="bg-white px-6 py-3 rounded-2xl shadow-lg">
+                    <p class="text-sm text-gray-500">Tổng logs</p>
+                    <p class="text-3xl font-black text-blue-600">@ViewBag.TotalLogs</p>
+                </div>
             </div>
         </div>
     </div>
@@ -53,92 +59,333 @@
             </div>
         }
 
-        <!-- Users Table -->
-        <div
-            class="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-100">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
-                                Mã SVN
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
-                                Ngày tạo
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
-                                Đăng nhập cuối
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
-                                Mật khẩu
-                            </th>
-                            <th
-                                class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest text-gray-500">
-                                Thao tác
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @foreach (var user in Model)
-                        {
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4">
-                                    <p class="text-base font-bold text-gray-900">@user.SVNCode</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-sm text-gray-600">
-                                        @(user.CreateDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")
-                                    </p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-sm text-gray-600">
-                                        @(user.LastLogin?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")
-                                    </p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none"
-                                                 viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            Đã mã hóa
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <button onclick="openResetModal('@user.SVNCode')"
-                                                class="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none"
-                                                 viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                            </svg>
-                                            Reset MK
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+        <!-- Tab Navigation -->
+        <div class="mb-8 flex space-x-4">
+            <button onclick="switchTab('users')" id="usersTab"
+                    class="tab-button active px-8 py-4 bg-white rounded-2xl font-bold shadow-lg transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Danh sách Users
+            </button>
+            <button onclick="switchTab('logs')" id="logsTab"
+                    class="tab-button px-8 py-4 bg-white rounded-2xl font-bold shadow-lg transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Lịch sử Log
+            </button>
+        </div>
 
-            @if (Model.Count == 0)
-            {
-                <div class="text-center py-16">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none"
+        <!-- Users Tab Content -->
+        <div id="usersContent" class="tab-content">
+            <div
+                class="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Mã SVN
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Ngày tạo
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Đăng nhập cuối
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Mật khẩu
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Thao tác
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach (var user in Model)
+                            {
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <p class="text-base font-bold text-gray-900">@user.SVNCode</p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-sm text-gray-600">
+                                            @(user.CreateDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-sm text-gray-600">
+                                            @(user.LastLogin?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <span
+                                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none"
+                                                     viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                                Đã mã hóa
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <button onclick="openResetModal('@user.SVNCode')"
+                                                    class="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none"
+                                                     viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                Reset MK
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.Count == 0)
+                {
+                    <div class="text-center py-16">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <p class="text-gray-400 font-bold">Chưa có người dùng nào</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Logs Tab Content -->
+        <div id="logsContent" class="tab-content hidden">
+            <!-- Filter Panel -->
+            <div class="bg-white rounded-[2.5rem] shadow-lg border border-gray-100 p-8 mb-6">
+                <h3 class="text-xl font-black text-gray-900 mb-6 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-600" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
-                    <p class="text-gray-400 font-bold">Chưa có người dùng nào</p>
+                    Bộ lọc
+                </h3>
+
+                <form method="get" action="/Admin/Users" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+                            Mã SVN
+                        </label>
+                        <input type="text" name="svnCodeFilter" value="@ViewBag.SvnCodeFilter"
+                               class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all"
+                               placeholder="Nhập mã SVN..." />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+                            Loại hành động
+                        </label>
+                        <select name="actionTypeFilter"
+                                class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all">
+                            <option value="">-- Tất cả --</option>
+                            @foreach (var actionType in ViewBag.ActionTypes)
+                            {
+                                @if (ViewBag.ActionTypeFilter == actionType)
+                                {
+                                    <option value="@actionType" selected>@actionType</option>
+                                }
+                                else
+                                {
+                                    <option value="@actionType">@actionType</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+                            Từ ngày
+                        </label>
+                        <input type="date" name="fromDate" value="@ViewBag.FromDate"
+                               class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+                            Đến ngày
+                        </label>
+                        <input type="date" name="toDate" value="@ViewBag.ToDate"
+                               class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all" />
+                    </div>
+
+                    <div class="md:col-span-2 lg:col-span-4 flex space-x-4">
+                        <button type="submit"
+                                class="px-8 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-100 hover:bg-red-700 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Tìm kiếm
+                        </button>
+                        <a href="/Admin/Users"
+                           class="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Reset bộ lọc
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Logs Table -->
+            <div
+                class="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
+                
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50">
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm font-bold text-gray-600">
+                            Hiển thị @ViewBag.Logs.Count trong tổng số @ViewBag.TotalLogs logs
+                        </p>
+                        <p class="text-sm font-bold text-gray-600">
+                            Trang @ViewBag.CurrentPage / @ViewBag.TotalPages
+                        </p>
+                    </div>
                 </div>
-            }
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    #
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Mã SVN
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Thời gian
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Loại hành động
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
+                                    Mô tả
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @if (ViewBag.Logs.Count > 0)
+                            {
+                                @foreach (var log in ViewBag.Logs)
+                                {
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm text-gray-500 font-mono">#@log.IdLogs</p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-base font-bold text-gray-900">@log.SVNCode</p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm text-gray-600">
+                                                @log.TimeAccess.ToString("dd/MM/yyyy")
+                                            </p>
+                                            <p class="text-xs text-gray-400">
+                                                @log.TimeAccess.ToString("HH:mm:ss")
+                                            </p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            @{
+                                                var badgeClass = "bg-blue-100 text-blue-800";
+                                                if (log.ActionType?.Contains("Login") == true)
+                                                {
+                                                    badgeClass = "bg-green-100 text-green-800";
+                                                }
+                                                else if (log.ActionType?.Contains("Reset") == true || log.ActionType?.Contains("Delete") == true)
+                                                {
+                                                    badgeClass = "bg-red-100 text-red-800";
+                                                }
+                                                else if (log.ActionType?.Contains("Logout") == true)
+                                                {
+                                                    badgeClass = "bg-orange-100 text-orange-800";
+                                                }
+                                            }
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold @badgeClass">
+                                                @log.ActionType
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm text-gray-600">@log.Description</p>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="px-6 py-16 text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mx-auto mb-4"
+                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p class="text-gray-400 font-bold">Không có log nào</p>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <div class="px-8 py-6 border-t border-gray-100 bg-gray-50">
+                        <div class="flex justify-center items-center space-x-2">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <a href="/Admin/Users?page=@(ViewBag.CurrentPage - 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                                   class="px-4 py-2 bg-white border-2 border-gray-200 rounded-xl font-bold text-gray-700 hover:border-red-600 hover:text-red-600 transition-all">
+                                    ← Trước
+                                </a>
+                            }
+
+                            @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                            {
+                                <a href="/Admin/Users?page=@i&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                                   class="px-4 py-2 @(i == ViewBag.CurrentPage ? "bg-red-600 text-white" : "bg-white border-2 border-gray-200 text-gray-700 hover:border-red-600 hover:text-red-600") rounded-xl font-bold transition-all">
+                                    @i
+                                </a>
+                            }
+
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <a href="/Admin/Users?page=@(ViewBag.CurrentPage + 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                                   class="px-4 py-2 bg-white border-2 border-gray-200 rounded-xl font-bold text-gray-700 hover:border-red-600 hover:text-red-600 transition-all">
+                                    Sau →
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
+
     </div>
 </div>
 
@@ -209,7 +456,58 @@
     </div>
 </div>
 
+<style>
+    .tab-button {
+        position: relative;
+        opacity: 0.6;
+    }
+
+    .tab-button.active {
+        opacity: 1;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .tab-button:not(.active):hover {
+        opacity: 0.8;
+    }
+
+    .tab-content {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
 <script>
+    function switchTab(tab) {
+        // Update tab buttons
+        document.getElementById('usersTab').classList.remove('active');
+        document.getElementById('logsTab').classList.remove('active');
+
+        // Update content visibility
+        document.getElementById('usersContent').classList.add('hidden');
+        document.getElementById('logsContent').classList.add('hidden');
+
+        if (tab === 'users') {
+            document.getElementById('usersTab').classList.add('active');
+            document.getElementById('usersContent').classList.remove('hidden');
+        } else if (tab === 'logs') {
+            document.getElementById('logsTab').classList.add('active');
+            document.getElementById('logsContent').classList.remove('hidden');
+        }
+    }
+
     function openResetModal(svnCode) {
         document.getElementById('resetSVNCode').value = svnCode;
         document.getElementById('displaySVNCode').textContent = svnCode;
@@ -227,6 +525,15 @@
     document.getElementById('resetPasswordModal')?.addEventListener('click', function (e) {
         if (e.target === this) {
             closeResetModal();
+        }
+    });
+
+    // Check if there are filter params in URL - if so, switch to logs tab automatically
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('svnCodeFilter') || urlParams.has('actionTypeFilter') || 
+            urlParams.has('fromDate') || urlParams.has('toDate') || urlParams.has('page')) {
+            switchTab('logs');
         }
     });
 </script>

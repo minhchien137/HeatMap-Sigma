@@ -14,18 +14,25 @@ namespace HeatmapSystem.Models
         [Key]
         [Required]
         [Column("SVNCode")]
-        [StringLength(50)] 
+        [StringLength(50)]
         public string SVNCode { get; set; }
 
         [Required]
         [Column("Password")]
-        [StringLength(200)] 
+        [StringLength(200)]
         public string Password { get; set; }
 
-        [Column("CreateDate")] 
+        [Column("CreateDate")]
         public DateTime? CreateDate { get; set; } = DateTime.Now;
 
         [Column("LastLogin")]
         public DateTime? LastLogin { get; set; }
+
+        [Column("IsAdmin")]
+        public bool IsAdmin { get; set; } = false;
+
+        [NotMapped]
+        public string RoleName => IsAdmin ? "Admin" : "User";
+
     }
 }

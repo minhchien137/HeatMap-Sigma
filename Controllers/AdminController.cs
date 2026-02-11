@@ -2,12 +2,14 @@ using System;
 using System.Linq;
 using HeatmapSystem.Models;
 using HeatmapSystem.Services;
+using HeatmapSystem.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HeatmapSystem.Controllers
 {
     [Route("[controller]")]
+    [AdminOnly] // CHỈ ADMIN MỚI VÀO ĐƯỢC
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -25,10 +27,16 @@ namespace HeatmapSystem.Controllers
         }
 
  
-        // Trang quản lý users
+        // Trang quản lý users và logs
 
         [HttpGet("Users")]
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users(
+            string svnCodeFilter = null,
+            string actionTypeFilter = null,
+            DateTime? fromDate = null,
+            DateTime? toDate = null,
+            int page = 1,
+            int pageSize = 50)
         {
             // TODO: Thêm kiểm tra quyền admin ở đây nếu cần
             // var currentUser = HttpContext.Session.GetString("SVNCode");
@@ -37,6 +45,65 @@ namespace HeatmapSystem.Controllers
             var users = await _context.SVN_User
                 .OrderByDescending(u => u.CreateDate)
                 .ToListAsync();
+
+            // Lấy logs với điều kiện lọc
+            var logsQuery = _context.SVN_Logs.AsQueryable();
+
+            // Filter by SVNCode
+            if (!string.IsNullOrWhiteSpace(svnCodeFilter))
+            {
+                logsQuery = logsQuery.Where(l => l.SVNCode.Contains(svnCodeFilter));
+            }
+
+            // Filter by ActionType
+            if (!string.IsNullOrWhiteSpace(actionTypeFilter))
+            {
+                logsQuery = logsQuery.Where(l => l.ActionType == actionTypeFilter);
+            }
+
+            // Filter by date range
+            if (fromDate.HasValue)
+            {
+                logsQuery = logsQuery.Where(l => l.TimeAccess >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                var toDateEnd = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                logsQuery = logsQuery.Where(l => l.TimeAccess <= toDateEnd);
+            }
+
+            // Tổng số logs sau khi filter
+            var totalLogs = await logsQuery.CountAsync();
+
+            // Lấy logs theo trang
+            var logs = await logsQuery
+                .OrderByDescending(l => l.TimeAccess)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Lấy danh sách ActionType unique để dùng cho filter dropdown
+            var actionTypes = await _context.SVN_Logs
+                .Select(l => l.ActionType)
+                .Distinct()
+                .Where(a => !string.IsNullOrEmpty(a))
+                .OrderBy(a => a)
+                .ToListAsync();
+
+            // Pass data to view
+            ViewBag.Logs = logs;
+            ViewBag.TotalLogs = totalLogs;
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalLogs / pageSize);
+            ViewBag.ActionTypes = actionTypes;
+            
+            // Preserve filter values
+            ViewBag.SvnCodeFilter = svnCodeFilter;
+            ViewBag.ActionTypeFilter = actionTypeFilter;
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
 
             return View("AdminUsers", users);
         }
