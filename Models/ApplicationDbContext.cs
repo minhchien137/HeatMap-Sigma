@@ -16,5 +16,11 @@ namespace HeatmapSystem.Models
         public DbSet<SVN_StaffDetail> SVN_StaffDetail { get; set; }
 
         public DbSet<SVN_Department> SVN_Department { get; set; }
+
+        // authencation
+        public DbSet<AuthToken> AuthTokens { get; set; }
+        public DbSet<LoginAttempt> LoginAttempts { get; set; }
+
+
     }
 }
