@@ -19,10 +19,10 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("ZKBioTimeConnect
 // Thêm Session để lưu thông tin đăng nhập
 builder.Services.AddSession(options =>
 {
-    // THAY ĐỔI: Tăng timeout lên 7 ngày thay vì 30 phút
+    // Tăng timeout lên 7 ngày thay vì 30 phút
     options.IdleTimeout = TimeSpan.FromDays(7);
     
-    // THÊM: Session cookie timeout - tương tự IdleTimeout
+    // Session cookie timeout - tương tự IdleTimeout
     options.Cookie.MaxAge = TimeSpan.FromDays(7);
     
     options.Cookie.HttpOnly = true;
@@ -41,6 +41,11 @@ builder.Services.AddScoped<IReportService, ReportService>();
 /*-------Log Service------ */
 builder.Services.AddScoped<ILogService, LogService>();
 
+/*-------Auth Service ------ */
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+/*-------Token Cleanup Service ------ */
+builder.Services.AddHostedService<TokenCleanupService>();
 
 var app = builder.Build();
 
@@ -51,7 +56,6 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
 
 
 app.UseHttpsRedirection();
