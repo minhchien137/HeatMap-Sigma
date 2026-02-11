@@ -151,7 +151,7 @@ namespace HeatmapSystem.Controllers
                 var isLocked = await _authService.IsAccountLocked(TaiKhoan, ipAddress);
                 if (isLocked)
                 {
-                    TempData["Error"] = "Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau 15 phút.";
+                    TempData["Error"] = "Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau 5 phút.";
                     ViewBag.TaiKhoan = TaiKhoan;
                     
                     // Ghi log
@@ -233,7 +233,7 @@ namespace HeatmapSystem.Controllers
                     return View();
                 }
 
-                // ✅ Đăng nhập thành công
+                // Đăng nhập thành công
                 user.LastLogin = DateTime.Now;
                 await _context.SaveChangesAsync();
 
@@ -241,7 +241,7 @@ namespace HeatmapSystem.Controllers
                 HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower());
                 HttpContext.Session.SetString("Permission", user.Permission ?? "None"); // LƯU PERMISSION VÀO SESSION
 
-                // ✅ Tạo Refresh Token nếu chọn "Remember Me"
+                // Tạo Refresh Token nếu chọn "Remember Me"
                 if (RememberMe)
                 {
                     var refreshToken = await _authService.GenerateRefreshToken(
@@ -273,12 +273,11 @@ namespace HeatmapSystem.Controllers
                 // Ghi login attempt thành công
                 await _authService.RecordLoginAttempt(TaiKhoan, ipAddress, true);
 
-                // REDIRECT THEO IsAdmin
-                if (user.IsAdmin) // Admin - chỉ vào trang Admin
+                if (user.IsAdmin) 
                 {
                     return RedirectToAction("Users", "Admin");
                 }
-                else // User thường - vào trang Heatmap
+                else 
                 {
                     return RedirectToAction("Home", "Heatmap");
                 }
@@ -376,10 +375,10 @@ namespace HeatmapSystem.Controllers
                     return View();
                 }
 
-                // ✅ Hash password với BCrypt
+                //  Hash password với BCrypt
                 var hashedPassword = _authService.HashPassword(Password);
 
-                // Tạo user mới - MẶC ĐỊNH IsAdmin = false (USER THƯỜNG)
+              
                 var newUser = new SVN_User
                 {
                     SVNCode = TaiKhoan,
@@ -567,7 +566,7 @@ namespace HeatmapSystem.Controllers
                 _context.SVN_Logs.Add(logoutLog);
                 await _context.SaveChangesAsync();
 
-                // ✅ Thu hồi refresh token hiện tại khi đăng xuất
+                // Thu hồi refresh token hiện tại khi đăng xuất
                 var refreshToken = Request.Cookies["RefreshToken"];
                 if (!string.IsNullOrEmpty(refreshToken))
                 {
@@ -581,7 +580,7 @@ namespace HeatmapSystem.Controllers
             return RedirectToAction("DangNhap");
         }
 
-        // ✅ Thu hồi một refresh token cụ thể
+        //  Thu hồi một refresh token cụ thể
         [HttpPost("RevokeToken")]
         public async Task<IActionResult> RevokeToken(int tokenId)
         {
@@ -625,7 +624,7 @@ namespace HeatmapSystem.Controllers
             }
         }
 
-        // ✅ Thu hồi tất cả token
+        // Thu hồi tất cả token
         [HttpPost("RevokeAllTokens")]
         public async Task<IActionResult> RevokeAllTokens()
         {
@@ -652,9 +651,8 @@ namespace HeatmapSystem.Controllers
             }
         }
 
-        /// <summary>
-        /// Lấy IP address của client
-        /// </summary>
+
+        // Lấy IP address của client
         private string GetClientIpAddress()
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
