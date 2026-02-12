@@ -809,34 +809,51 @@ public class DetailDataDto
             }
         }
 
+        [RequireUpdate]
         [HttpDelete("DeleteStaffDetail/{id}")]
-        public IActionResult DeleteStaffDetail(int id)
+        public async Task<IActionResult> DeleteStaffDetail(int id)
         {
             try
             {
-                // Kiểm tra authentication
                 if (!IsAuthenticated())
                 {
-                    return Json(new { success = false, message = "Phiên đăng nhập hết hạn" });
+                    return Json(new { success = false, message = "Unauthorized" });
                 }
 
-                var record = _context.SVN_StaffDetail.Find(id);
-                if (record == null)
+                // Tìm bản ghi cần xóa
+                var staffDetail = await _context.SVN_StaffDetail.FindAsync(id);
+
+                if (staffDetail == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy bản ghi" });
                 }
 
-                _context.SVN_StaffDetail.Remove(record);
-                _context.SaveChanges();
+                // Lấy thông tin để log
+                var svnCode = GetCurrentSVNCode();
+                var staffInfo = $"{staffDetail.NameStaff} ({staffDetail.SVNStaff})";
+                var projectInfo = $"{staffDetail.Project} - Tuần {staffDetail.WeekNo}/{staffDetail.Year}";
 
-                return Json(new { success = true, message = "Xóa thành công" });
+                // Xóa bản ghi
+                _context.SVN_StaffDetail.Remove(staffDetail);
+                await _context.SaveChangesAsync();
+
+        
+                await _logService.LogAction(
+                    svnCode,
+                    LogActionTypes.DeleteData,
+                    $"Xóa bản ghi lịch sử: {staffInfo} - {projectInfo} ({staffDetail.WorkHours}h)"
+                );
+
+                return Json(new { success = true, message = "Xóa bản ghi thành công" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting staff detail {Id}", id);
-                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+                _logger.LogError(ex, "Error deleting staff detail with ID: {Id}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bản ghi" });
             }
         }
+
+        
         [RequireUpdate]
         [HttpGet("GetStaffDetailById/{id}")]
         public IActionResult GetStaffDetailById(int id)
