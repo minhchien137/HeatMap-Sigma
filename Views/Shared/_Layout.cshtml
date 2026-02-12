@@ -13,81 +13,108 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+          rel="stylesheet">
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #f8fafc;
         }
 
         .bg-heatmap-gradient {
-            background: linear-gradient(145deg, #450a0a 0%, #991b1b 50%, #dc2626 100%);
+        background: linear-gradient(145deg, #450a0a 0%, #991b1b 50%, #dc2626 100%);
         }
 
         .animate-fade-in {
-            animation: fadeIn 0.8s ease-out forwards;
+        animation: fadeIn 0.8s ease-out forwards;
         }
 
-        @@keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
+        @@keyframes   fadeIn {
+        from {
+        opacity: 0;
+        transform: translateY(15px);
+        }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        to {
+        opacity: 1;
+        transform: translateY(0);
+        }
         }
 
         /* Breadcrumb animation */
         .breadcrumb-item {
-            animation: slideInUp 0.6s ease-out;
+        animation: slideInUp 0.6s ease-out;
         }
 
-        @@keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
+        @@keyframes   slideInUp {
+        from {
+        opacity: 0;
+        transform: translateY(10px);
+        }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        to {
+        opacity: 1;
+        transform: translateY(0);
+        }
         }
 
         /* HEATMAP title styling */
         .heatmap-title {
-            letter-spacing: 0.8em;
+        letter-spacing: 0.8em;
         }
 
         .breadcrumb-wrapper {
-            letter-spacing: 0.15em;
+        letter-spacing: 0.15em;
         }
 
         /* Navigation button styling */
         .nav-btn {
-            transition: all 0.2s ease;
+        transition: all 0.2s ease;
         }
 
         .nav-btn:hover {
-            transform: scale(1.1);
-            color: #dc2626;
+        transform: scale(1.1);
+        color: #dc2626;
         }
 
         .nav-btn:active {
-            transform: scale(0.95);
+        transform: scale(0.95);
         }
 
         .nav-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
+        opacity: 0.3;
+        cursor: not-allowed;
         }
 
         .nav-btn:disabled:hover {
-            transform: scale(1);
-            color: inherit;
+        transform: scale(1);
+        color: inherit;
+        }
+
+        /* MOBILE RESPONSIVE HEADER */
+        @@media   (max-width: 768px) {
+        .heatmap-title {
+        letter-spacing: 0.3em;
+        font-size: 1.25rem !important;
+        }
+
+        .breadcrumb-wrapper {
+        letter-spacing: 0.05em;
+        }
+
+        /* Hide breadcrumb on very small screens */
+        @@media     (max-width: 480px) {
+        .breadcrumb-container {
+        display: none !important;
+        }
+        }
+        }
+
+        /* Tablet and mobile adjustments */
+        @@media    (max-width: 1024px) {
+        header {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        }
         }
     </style>
 </head>
@@ -98,52 +125,75 @@
         class="bg-white/95 backdrop-blur-md border-b border-gray-100 py-3 px-4 md:px-8 lg:px-12 sticky top-0 z-50 shadow-sm">
         <div class="relative flex items-center justify-between">
 
+            <!-- Logo -->
             <div class="flex items-center flex-shrink-0">
                 <a href="/" class="flex items-center transition-transform hover:scale-105 active:scale-95">
-                    <img src="~/images/logo.png" alt="Heatmap Logo" class="h-16 md:h-18 lg:h-18 w-auto object-contain"
-                        onerror="this.onerror=null; this.src='https://placehold.co/180x90/dc2626/white?text=LOGO'" />
+                    <img src="~/images/logo.png" alt="Heatmap Logo"
+                         class="h-12 sm:h-14 md:h-16 lg:h-18 w-auto object-contain"
+                         onerror="this.onerror=null; this.src='https://placehold.co/180x90/dc2626/white?text=LOGO'" />
                 </a>
             </div>
 
-            <!-- Breadcrumb với nút Back và Forward -->
-            <div class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1">
-                <div class="flex items-center gap-3 breadcrumb-item">
+            <!-- Breadcrumb với nút Back và Forward - Hidden on very small screens -->
+            <div class="breadcrumb-container absolute left-1/2 transform -translate-x-1/2 hidden sm:block">
+                <div class="flex items-center gap-2 md:gap-3 breadcrumb-item">
                     <!-- Nút Back -->
                     <button onclick="goBack()"
-                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-lg transition-all"
-                        title="Quay lại">
+                            class="nav-btn text-gray-600 hover:text-red-600 font-bold text-base md:text-lg transition-all"
+                            title="Quay lại">
                         &lt;
                     </button>
 
                     <!-- Breadcrumb -->
                     <div class="text-gray-500 text-xs md:text-sm font-semibold breadcrumb-wrapper whitespace-nowrap">
                         <span class="text-red-600 font-bold">Heatmap</span>
-                        <span class="mx-2 text-gray-300">/</span>
+                        <span class="mx-1 md:mx-2 text-gray-300">/</span>
                         <span id="currentPage" class="text-gray-700">@ViewData["PageName"]</span>
                     </div>
 
                     <!-- Nút Forward -->
                     <button onclick="goForward()"
-                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-lg transition-all"
-                        title="Tiến tới">
+                            class="nav-btn text-gray-600 hover:text-red-600 font-bold text-base md:text-lg transition-all"
+                            title="Tiến tới">
                         &gt;
                     </button>
                 </div>
             </div>
 
+            <!-- Heatmap Title -->
             <div class="flex items-center">
-                <div class="text-black font-black text-xl md:text-3xl uppercase heatmap-title select-none">
+                <div class="text-black font-black text-xl md:text-2xl lg:text-3xl uppercase heatmap-title select-none">
                     Heatmap
                 </div>
             </div>
         </div>
+
+        <!-- Mobile breadcrumb - shown below header on small screens -->
+        <div class="sm:hidden mt-2 pt-2 border-t border-gray-100">
+            <div class="flex items-center justify-center gap-2">
+                <button onclick="goBack()"
+                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-sm transition-all" title="Quay lại">
+                    &lt;
+                </button>
+                <div class="text-gray-500 text-xs font-semibold breadcrumb-wrapper">
+                    <span class="text-red-600 font-bold">Heatmap</span>
+                    <span class="mx-1 text-gray-300">/</span>
+                    <span class="text-gray-700">@ViewData["PageName"]</span>
+                </div>
+                <button onclick="goForward()"
+                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-sm transition-all" title="Tiến tới">
+                    &gt;
+                </button>
+            </div>
+        </div>
     </header>
 
-    <main role="main" class="flex-grow flex items-center justify-center p-6 md:p-12 lg:p-16">
+    <main role="main" class="flex-grow flex items-center justify-center p-4 md:p-8 lg:p-12">
         @RenderBody()
     </main>
 
-    <footer class="py-12 text-center text-gray-400 text-[10px] md:text-xs uppercase tracking-[0.4em] font-black">
+    <footer
+        class="py-8 md:py-12 text-center text-gray-400 text-[10px] md:text-xs uppercase tracking-[0.3em] md:tracking-[0.4em] font-black">
         &copy; @DateTime.Now.Year HEATMAP SIGMA • Coldzy
     </footer>
 
@@ -151,23 +201,23 @@
     <script>
         // Hàm quay lại trang trước
         function goBack() {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                // Nếu không có lịch sử, về trang chủ
-                window.location.href = '/';
-            }
+        if (window.history.length > 1) {
+        window.history.back();
+        } else {
+        // Nếu không có lịch sử, về trang chủ
+        window.location.href = '/';
+        }
         }
 
         // Hàm tiến tới trang sau
         function goForward() {
-            window.history.forward();
+        window.history.forward();
         }
 
         // Cập nhật trạng thái nút dựa trên history
         window.addEventListener('DOMContentLoaded', function () {
-            // Có thể thêm logic để disable/enable buttons dựa trên history state
-            // Ví dụ: kiểm tra xem có thể back/forward không
+        // Có thể thêm logic để disable/enable buttons dựa trên history state
+        // Ví dụ: kiểm tra xem có thể back/forward không
         });
     </script>
 
