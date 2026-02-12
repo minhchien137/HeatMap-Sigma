@@ -2,7 +2,7 @@
 let allData = [];
 let filteredData = [];
 let currentPage = 1;
-let recordsPerPage = 25;
+let recordsPerPage = 50;
 let sortColumn = 'emp_code';
 let sortDirection = 'asc';
 
@@ -111,22 +111,36 @@ function updateStats() {
 // Display data in table
 function displayData() {
     const tbody = document.getElementById('dataTableBody');
+    const mobileContainer = document.getElementById('mobileCardsContainer');
+    
+    if (!tbody) {
+        console.error('Table body element not found');
+        return;
+    }
+    
+    // Clear both containers
     tbody.innerHTML = '';
+    if (mobileContainer) {
+        mobileContainer.innerHTML = '';
+    }
     
     if (filteredData.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="8" class="text-center py-20">
-                    <div class="flex flex-col items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
-                        <p class="text-gray-400 text-lg font-bold">Không có dữ liệu</p>
-                        <p class="text-gray-400 text-sm mt-2">Thử điều chỉnh bộ lọc hoặc tìm kiếm</p>
-                    </div>
-                </td>
-            </tr>
+        const emptyMessage = `
+            <div class="text-center py-12 sm:py-20">
+                <div class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <p class="text-gray-400 text-base sm:text-lg font-bold">Không có dữ liệu</p>
+                    <p class="text-gray-400 text-xs sm:text-sm mt-2">Thử điều chỉnh bộ lọc hoặc tìm kiếm</p>
+                </div>
+            </div>
         `;
+        
+        tbody.innerHTML = `<tr><td colspan="8">${emptyMessage}</td></tr>`;
+        if (mobileContainer) {
+            mobileContainer.innerHTML = emptyMessage;
+        }
         document.getElementById('showingRecords').textContent = '0';
         updatePagination();
         return;
@@ -157,7 +171,7 @@ function displayData() {
     document.getElementById('showingRecords').textContent = 
         `${startIndex + 1}-${endIndex} trong tổng số ${sortedData.length}`;
     
-    // Render rows
+    // Render desktop table rows
     pageData.forEach((item) => {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50 transition-colors';
@@ -189,6 +203,49 @@ function displayData() {
         tbody.appendChild(row);
     });
     
+    // Render mobile cards
+    if (mobileContainer) {
+        pageData.forEach((item) => {
+            const genderText = item.gender === 'M' ? 'Nam' : item.gender === 'F' ? 'Nữ' : '';
+            const statusBadge = item.status === 0 
+                ? '<span class="badge badge-green">Đang làm việc</span>'
+                : '<span class="badge badge-gray">Đã nghỉ việc</span>';
+            
+            const card = document.createElement('div');
+            card.className = 'p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors';
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg font-bold text-xs">
+                            ${item.emp_code || 'N/A'}
+                        </span>
+                    </div>
+                    ${statusBadge}
+                </div>
+                <h4 class="font-bold text-gray-900 text-base mb-3">${item.full_name || 'N/A'}</h4>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold mb-0.5">GIỚI TÍNH</p>
+                        <p class="text-gray-700">${genderText || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold mb-0.5">NGÀY SINH</p>
+                        <p class="text-gray-700">${formatDate(item.birthday)}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold mb-0.5">BỘ PHẬN</p>
+                        <p class="text-gray-700">${item.department || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold mb-0.5">THÀNH PHỐ</p>
+                        <p class="text-gray-700">${item.city || 'N/A'}</p>
+                    </div>
+                </div>
+            `;
+            mobileContainer.appendChild(card);
+        });
+    }
+    
     updatePagination();
 }
 
@@ -208,6 +265,12 @@ function formatDate(dateString) {
 function updatePagination() {
     const totalPages = Math.ceil(filteredData.length / recordsPerPage);
     const container = document.getElementById('paginationContainer');
+    
+    if (!container) {
+        console.error('Pagination container not found');
+        return;
+    }
+    
     container.innerHTML = '';
     
     if (totalPages <= 1) return;
@@ -308,6 +371,11 @@ function changeRecordsPerPage() {
 // Show error message
 function showError(message) {
     const tbody = document.getElementById('dataTableBody');
+    if (!tbody) {
+        console.error('Table body element not found');
+        return;
+    }
+    
     tbody.innerHTML = `
         <tr>
             <td colspan="8" class="text-center py-20">

@@ -467,7 +467,6 @@ C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\w6ohzfaglw-{0}-96i34tg6ca
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\rd19wqedbx-{0}-pyuzdksahd-pyuzdksahd.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\4kktefoskr-{0}-ewdjcyejf3-ewdjcyejf3.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\qm4rtb18tf-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
-C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\bzk3knobuc-{0}-iwq3tjrl4w-iwq3tjrl4w.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\l1r04a6yyv-{0}-t1cqhe9u97-t1cqhe9u97.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\zyqyjdh14v-{0}-c2jlpeoesf-c2jlpeoesf.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\1c9tj322ah-{0}-sejl45xvog-sejl45xvog.gz
@@ -542,3 +541,4 @@ C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\HeatmapSystem.pdb
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\HeatmapSystem.genruntimeconfig.cache
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\ref\HeatmapSystem.dll
 C:\HeatMap-Sigma\bin\Release\net9.0\win-x64\BCrypt.Net-Next.dll
+C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\compressed\bzk3knobuc-{0}-yu701198ry-yu701198ry.gz
