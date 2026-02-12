@@ -10,7 +10,14 @@ let deleteRecordId = null;
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
+    handleResize();
+    window.addEventListener('resize', handleResize);
 });
+
+// Handle responsive layout changes
+function handleResize() {
+    displayData();
+}
 
 // Load data from server
 async function loadData() {
@@ -193,13 +200,35 @@ function sortTable(column) {
     displayData();
 }
 
-// Display data in table
+// Display data in table or card view based on screen size
 function displayData() {
-    const tbody = document.getElementById('dataTableBody');
     const start = (currentPage - 1) * recordsPerPage;
     const end = start + recordsPerPage;
     const pageData = filteredData.slice(start, end);
 
+    // Check if we should show mobile view
+    const isMobile = window.innerWidth < 1024;
+
+    if (isMobile) {
+        displayMobileView(pageData, start);
+    } else {
+        displayTableView(pageData, start);
+    }
+
+    // Update showing records text
+    const showing = pageData.length > 0 
+        ? `${start + 1}-${Math.min(end, filteredData.length)} / ${filteredData.length}`
+        : '0';
+    document.getElementById('showingRecords').textContent = showing;
+
+    // Update pagination
+    renderPagination();
+}
+
+// Display desktop table view
+function displayTableView(pageData, start) {
+    const tbody = document.getElementById('dataTableBody');
+    
     if (pageData.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -231,34 +260,109 @@ function displayData() {
                     <td class="table-cell">
                         <span class="badge badge-green">${item.department}</span>
                     </td>
-                    <td class="table-cell">
-                        <span class="badge badge-red">${item.project}</span>
-                    </td>
+                    <td class="table-cell">${item.project}</td>
+                    <td class="table-cell text-center font-bold">${item.year}</td>
                     <td class="table-cell text-center">
-                        ${formatDate(workDate)}
+                        <span class="badge badge-red">Tuần ${item.weekNo}</span>
                     </td>
-                    <td class="table-cell text-center font-semibold">${item.weekNo}</td>
-                    <td class="table-cell text-center">${item.year}</td>
-                    <td class="table-cell text-center">
-                        <span class="font-bold text-red-600">${item.workHours}h</span>
-                    </td>
+                    <td class="table-cell text-center">${formatDate(workDate)}</td>
+                    <td class="table-cell text-center font-bold text-red-600">${item.workHours}h</td>
                     <td class="table-cell text-gray-600">${item.createBy}</td>
                     <td class="table-cell text-center text-sm text-gray-500">
                         ${formatDateTime(createDate)}
+                    </td>
+                    <td class="table-cell text-center">
+                        <button onclick="openDeleteModal(${item.id})" class="action-icon bg-red-50 text-red-600 hover:bg-red-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             `;
         }).join('');
     }
+}
 
-    // Update showing records text
-    const showing = pageData.length > 0 
-        ? `${start + 1}-${Math.min(end, filteredData.length)} / ${filteredData.length}`
-        : '0';
-    document.getElementById('showingRecords').textContent = showing;
-
-    // Update pagination
-    renderPagination();
+// Display mobile card view
+function displayMobileView(pageData, start) {
+    const mobileView = document.getElementById('mobileDataView');
+    
+    if (pageData.length === 0) {
+        mobileView.innerHTML = `
+            <div class="text-center py-12 px-4">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="text-gray-500 text-base font-semibold">Không tìm thấy dữ liệu</p>
+                <p class="text-gray-400 text-sm mt-2">Thử điều chỉnh bộ lọc của bạn</p>
+            </div>
+        `;
+    } else {
+        mobileView.innerHTML = pageData.map((item, index) => {
+            const workDate = new Date(item.workDate);
+            const createDate = new Date(item.createDate);
+            
+            return `
+                <div class="mobile-card">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <span class="badge badge-blue mb-2">${item.svnStaff}</span>
+                            <h4 class="font-bold text-gray-900 text-sm sm:text-base">${item.nameStaff}</h4>
+                        </div>
+                        <button onclick="openDeleteModal(${item.id})" class="action-icon bg-red-50 text-red-600 hover:bg-red-100 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Bộ phận:</span>
+                            <span class="mobile-card-value">
+                                <span class="badge badge-green">${item.department}</span>
+                            </span>
+                        </div>
+                        
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Dự án:</span>
+                            <span class="mobile-card-value font-medium">${item.project}</span>
+                        </div>
+                        
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Thời gian:</span>
+                            <span class="mobile-card-value">
+                                <span class="badge badge-red">Tuần ${item.weekNo} - ${item.year}</span>
+                            </span>
+                        </div>
+                        
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Ngày làm việc:</span>
+                            <span class="mobile-card-value font-medium">${formatDate(workDate)}</span>
+                        </div>
+                        
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Giờ làm việc:</span>
+                            <span class="mobile-card-value font-bold text-red-600">${item.workHours}h</span>
+                        </div>
+                        
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Người tạo:</span>
+                            <span class="mobile-card-value text-gray-600">${item.createBy}</span>
+                        </div>
+                        
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Ngày tạo:</span>
+                            <span class="mobile-card-value text-xs sm:text-sm text-gray-500">${formatDateTime(createDate)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 }
 
 // Format date
@@ -303,7 +407,7 @@ function renderPagination() {
     `;
 
     // Page numbers
-    const maxVisible = 5;
+    const maxVisible = window.innerWidth < 640 ? 3 : 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     let endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
@@ -356,8 +460,14 @@ function goToPage(page) {
     currentPage = page;
     displayData();
     
-    // Scroll to top of table
-    document.querySelector('.bg-white.rounded-\\[2\\.5rem\\]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Scroll to top of table/cards
+    const scrollTarget = window.innerWidth < 1024 
+        ? document.getElementById('mobileDataView')
+        : document.querySelector('.bg-white.rounded-\\[2\\.5rem\\]');
+    
+    if (scrollTarget) {
+        scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 // Change records per page
@@ -367,22 +477,19 @@ function changeRecordsPerPage() {
     displayData();
 }
 
-// ✅ XUẤT EXCEL - ĐÃ SỬA ĐỔI ĐỂ GỌI API SERVER
-// Export to Excel - Gọi API server thay vì xuất ở client
+// Export to Excel
 function exportToExcel() {
     if (filteredData.length === 0) {
         showError('Không có dữ liệu để xuất');
         return;
     }
 
-    // Lấy giá trị từ các bộ lọc
     const department = document.getElementById('filterDepartment').value;
     const project = document.getElementById('filterProject').value;
     const year = document.getElementById('filterYear').value;
     const week = document.getElementById('filterWeek').value;
     const search = document.getElementById('searchInput').value;
 
-    // Tạo URL với query parameters
     const params = new URLSearchParams();
     if (department) params.append('department', department);
     if (project) params.append('project', project);
@@ -390,30 +497,30 @@ function exportToExcel() {
     if (week) params.append('week', week);
     if (search) params.append('search', search);
 
-    // Gọi API server để xuất Excel
-    // API này sẽ tự động ghi log vào bảng SVN_Logs
     const url = `/Heatmap/ExportHistoryToExcel?${params.toString()}`;
-    
-    // Tải file
     window.location.href = url;
     
-    // Hiển thị thông báo thành công
     setTimeout(() => {
         showSuccess('Đang tải xuống file Excel...');
     }, 100);
 }
-// ✅ KẾT THÚC PHẦN SỬA ĐỔI
 
 // Show error message
 function showError(message) {
-    alert(message);
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg z-50 text-sm sm:text-base max-w-xs sm:max-w-md';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
 
 // Show success message
 function showSuccess(message) {
-    // Tạo toast notification đơn giản
     const toast = document.createElement('div');
-    toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+    toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg z-50 text-sm sm:text-base max-w-xs sm:max-w-md';
     toast.textContent = message;
     document.body.appendChild(toast);
     
@@ -428,6 +535,7 @@ function openDeleteModal(id) {
     const modal = document.getElementById('deleteModal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
 }
 
 function closeDeleteModal() {
@@ -435,6 +543,7 @@ function closeDeleteModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     deleteRecordId = null;
+    document.body.style.overflow = '';
 }
 
 async function confirmDelete() {
@@ -452,7 +561,8 @@ async function confirmDelete() {
         const result = await response.json();
         if (result.success) {
             closeDeleteModal();
-            loadData(); // Reload data
+            showSuccess('Đã xóa bản ghi thành công');
+            loadData();
         } else {
             showError(result.message || 'Xóa thất bại');
         }

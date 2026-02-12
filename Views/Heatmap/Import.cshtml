@@ -557,11 +557,9 @@
                                             <script>
                                                 // Tạo biến global chứa projects data để file import.js sử dụng
                                                 window.projectsData = [
-                                                                                                                                            @foreach (var project in ViewBag.Projects)
+                                                                                                                                                                                        @foreach (var project in ViewBag.Projects)
                                                     {
                                                         <text>{IdProject: @project.IdProject, NameProject: "@project.NameProject" },</text>
-                                                                                                                                            }
-                                                                                                                                        ];
-                                            </script>
-
-                                            <script src="~/js/import.js"></script>
+                                                                                                                                                                                        }
+                                                                                                                                                                                    ];
+       
