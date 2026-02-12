@@ -76,7 +76,7 @@ function populateFilters() {
         option.textContent = dept;
         departmentSelect.appendChild(option);
     });
-
+    
     // Project filter
     const projects = [...new Set(allData.map(item => item.project))].sort();
     const projectSelect = document.getElementById('filterProject');
@@ -86,7 +86,7 @@ function populateFilters() {
         option.textContent = proj;
         projectSelect.appendChild(option);
     });
-
+    
     // Year filter
     const years = [...new Set(allData.map(item => item.year))].sort((a, b) => b - a);
     const yearSelect = document.getElementById('filterYear');
@@ -96,8 +96,8 @@ function populateFilters() {
         option.textContent = year;
         yearSelect.appendChild(option);
     });
-
-
+    
+    
     // Week filter (1-53) with date ranges
     const weekSelect = document.getElementById('filterWeek');
     const currentYear = new Date().getFullYear();
@@ -122,10 +122,10 @@ function applyFilters() {
     const year = document.getElementById('filterYear').value;
     const week = document.getElementById('filterWeek').value;
     const searchText = document.getElementById('searchInput').value.toLowerCase();
-
+    
     filteredData = allData.filter(item => {
         let matches = true;
-
+        
         if (department && item.department !== department) matches = false;
         if (project && item.project !== project) matches = false;
         if (year && item.year.toString() !== year) matches = false;
@@ -135,10 +135,10 @@ function applyFilters() {
             const searchableText = `${item.svnStaff} ${item.nameStaff}`.toLowerCase();
             if (!searchableText.includes(searchText)) matches = false;
         }
-
+        
         return matches;
     });
-
+    
     currentPage = 1;
     updateStats();
     displayData();
@@ -180,23 +180,23 @@ function sortTable(column) {
         sortColumn = column;
         sortDirection = 'asc';
     }
-
+    
     filteredData.sort((a, b) => {
         let aVal = a[column.charAt(0).toLowerCase() + column.slice(1)];
         let bVal = b[column.charAt(0).toLowerCase() + column.slice(1)];
-
+        
         if (column === 'WorkDate') {
             aVal = new Date(aVal);
             bVal = new Date(bVal);
         }
-
+        
         if (sortDirection === 'asc') {
             return aVal > bVal ? 1 : -1;
         } else {
             return aVal < bVal ? 1 : -1;
         }
     });
-
+    
     displayData();
 }
 
@@ -205,22 +205,22 @@ function displayData() {
     const start = (currentPage - 1) * recordsPerPage;
     const end = start + recordsPerPage;
     const pageData = filteredData.slice(start, end);
-
+    
     // Check if we should show mobile view
     const isMobile = window.innerWidth < 1024;
-
+    
     if (isMobile) {
         displayMobileView(pageData, start);
     } else {
         displayTableView(pageData, start);
     }
-
+    
     // Update showing records text
     const showing = pageData.length > 0 
-        ? `${start + 1}-${Math.min(end, filteredData.length)} / ${filteredData.length}`
-        : '0';
+    ? `${start + 1}-${Math.min(end, filteredData.length)} / ${filteredData.length}`
+    : '0';
     document.getElementById('showingRecords').textContent = showing;
-
+    
     // Update pagination
     renderPagination();
 }
@@ -272,7 +272,7 @@ function displayTableView(pageData, start) {
                         ${formatDateTime(createDate)}
                     </td>
                     <td class="table-cell text-center">
-                        <button onclick="openDeleteModal(${item.id})" class="action-icon bg-red-50 text-red-600 hover:bg-red-100">
+                        <button onclick="openDeleteModal(${item.staffDetailId})" class="action-icon bg-red-50 text-red-600 hover:bg-red-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -312,7 +312,7 @@ function displayMobileView(pageData, start) {
                             <span class="badge badge-blue mb-2">${item.svnStaff}</span>
                             <h4 class="font-bold text-gray-900 text-sm sm:text-base">${item.nameStaff}</h4>
                         </div>
-                        <button onclick="openDeleteModal(${item.id})" class="action-icon bg-red-50 text-red-600 hover:bg-red-100 flex-shrink-0">
+                        <button onclick="openDeleteModal(${item.staffDetailId})" class="action-icon bg-red-50 text-red-600 hover:bg-red-100 flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -392,9 +392,9 @@ function renderPagination() {
         container.innerHTML = '';
         return;
     }
-
+    
     let html = '';
-
+    
     // Previous button
     html += `
         <button onclick="goToPage(${currentPage - 1})" 
@@ -405,23 +405,23 @@ function renderPagination() {
             </svg>
         </button>
     `;
-
+    
     // Page numbers
     const maxVisible = window.innerWidth < 640 ? 3 : 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-
+    
     if (endPage - startPage < maxVisible - 1) {
         startPage = Math.max(1, endPage - maxVisible + 1);
     }
-
+    
     if (startPage > 1) {
         html += `<button onclick="goToPage(1)" class="pagination-btn">1</button>`;
         if (startPage > 2) {
             html += `<span class="pagination-btn" disabled>...</span>`;
         }
     }
-
+    
     for (let i = startPage; i <= endPage; i++) {
         html += `
             <button onclick="goToPage(${i})" 
@@ -430,14 +430,14 @@ function renderPagination() {
             </button>
         `;
     }
-
+    
     if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
             html += `<span class="pagination-btn" disabled>...</span>`;
         }
         html += `<button onclick="goToPage(${totalPages})" class="pagination-btn">${totalPages}</button>`;
     }
-
+    
     // Next button
     html += `
         <button onclick="goToPage(${currentPage + 1})" 
@@ -448,7 +448,7 @@ function renderPagination() {
             </svg>
         </button>
     `;
-
+    
     container.innerHTML = html;
 }
 
@@ -462,8 +462,8 @@ function goToPage(page) {
     
     // Scroll to top of table/cards
     const scrollTarget = window.innerWidth < 1024 
-        ? document.getElementById('mobileDataView')
-        : document.querySelector('.bg-white.rounded-\\[2\\.5rem\\]');
+    ? document.getElementById('mobileDataView')
+    : document.querySelector('.bg-white.rounded-\\[2\\.5rem\\]');
     
     if (scrollTarget) {
         scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -483,20 +483,20 @@ function exportToExcel() {
         showError('Không có dữ liệu để xuất');
         return;
     }
-
+    
     const department = document.getElementById('filterDepartment').value;
     const project = document.getElementById('filterProject').value;
     const year = document.getElementById('filterYear').value;
     const week = document.getElementById('filterWeek').value;
     const search = document.getElementById('searchInput').value;
-
+    
     const params = new URLSearchParams();
     if (department) params.append('department', department);
     if (project) params.append('project', project);
     if (year) params.append('year', year);
     if (week) params.append('week', week);
     if (search) params.append('search', search);
-
+    
     const url = `/Heatmap/ExportHistoryToExcel?${params.toString()}`;
     window.location.href = url;
     
@@ -548,16 +548,16 @@ function closeDeleteModal() {
 
 async function confirmDelete() {
     if (!deleteRecordId) return;
-
+    
     try {
         const response = await fetch(`/Heatmap/DeleteStaffDetail/${deleteRecordId}`, {
             method: 'DELETE'
         });
-
+        
         if (!response.ok) {
             throw new Error('Delete failed');
         }
-
+        
         const result = await response.json();
         if (result.success) {
             closeDeleteModal();
