@@ -151,7 +151,7 @@ namespace HeatmapSystem.Controllers
                 var isLocked = await _authService.IsAccountLocked(TaiKhoan, ipAddress);
                 if (isLocked)
                 {
-                    TempData["Error"] = "Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau 5 phút.";
+                    TempData["Error"] = "Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau 10 phút.";
                     ViewBag.TaiKhoan = TaiKhoan;
                     
                     // Ghi log
