@@ -807,6 +807,8 @@ public class DetailDataDto
                         nameStaff = s.NameStaff,
                         department = s.Department,
                         project = s.Project,
+                        projectPhase = s.ProjectPhase,
+                        phase = s.Phase,
                         workDate = s.WorkDate,
                         weekNo = s.WeekNo,
                         year = s.Year,
