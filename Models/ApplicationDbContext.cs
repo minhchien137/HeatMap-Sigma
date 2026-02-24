@@ -1,3 +1,4 @@
+using HeatMap_Sigma.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HeatmapSystem.Models
@@ -16,6 +17,8 @@ namespace HeatmapSystem.Models
         public DbSet<SVN_StaffDetail> SVN_StaffDetail { get; set; }
 
         public DbSet<SVN_Department> SVN_Department { get; set; }
+
+        public DbSet<SVN_ProjectPhase> SVN_ProjectPhase { get; set; }
 
         // authencation
         public DbSet<AuthToken> AuthTokens { get; set; }

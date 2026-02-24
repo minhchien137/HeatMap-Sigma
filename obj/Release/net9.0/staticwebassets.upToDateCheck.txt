@@ -1,4 +1,3 @@
-wwwroot\css\history.css
 wwwroot\css\import.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
@@ -71,14 +70,14 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
-C:\HeatMap-Sigma\wwwroot\css\history.css
 C:\HeatMap-Sigma\wwwroot\css\import.css
 C:\HeatMap-Sigma\wwwroot\css\site.css
 C:\HeatMap-Sigma\wwwroot\favicon.ico
-C:\HeatMap-Sigma\wwwroot\js\history.js
+C:\HeatMap-Sigma\wwwroot\js\staff.js
 C:\HeatMap-Sigma\wwwroot\js\import.js
 C:\HeatMap-Sigma\wwwroot\js\report.js
 C:\HeatMap-Sigma\wwwroot\js\site.js
+C:\HeatMap-Sigma\wwwroot\js\history.js
 C:\HeatMap-Sigma\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 C:\HeatMap-Sigma\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 C:\HeatMap-Sigma\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -138,4 +137,3 @@ C:\HeatMap-Sigma\wwwroot\lib\jquery\dist\jquery.slim.js
 C:\HeatMap-Sigma\wwwroot\lib\jquery\dist\jquery.slim.min.js
 C:\HeatMap-Sigma\wwwroot\lib\jquery\dist\jquery.slim.min.map
 C:\HeatMap-Sigma\wwwroot\lib\jquery\LICENSE.txt
-C:\HeatMap-Sigma\wwwroot\js\staff.js

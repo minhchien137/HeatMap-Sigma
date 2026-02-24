@@ -182,6 +182,10 @@ public class DetailDataDto
             var projects = _context.SVN_Projects.ToList();
             ViewBag.Projects = projects;
 
+            // Project Phase từ Database
+            var projectPhases = _context.SVN_ProjectPhase.ToList();
+            ViewBag.ProjectPhases = projectPhases;
+
             return View();
         }
 
@@ -274,6 +278,8 @@ public class DetailDataDto
             public int ProjectId { get; set; }
             public string WorkDate { get; set; }
             public decimal WorkHours { get; set; }
+            public string ProjectPhase { get; set; }
+            public string Phase { get; set; }
         }
 
         [RequireUpdate]
@@ -423,6 +429,8 @@ public class DetailDataDto
                 {
                     // Cập nhật bản ghi hiện có
                     existing.WorkHours = request.WorkHours;
+                    existing.ProjectPhase = request.ProjectPhase ?? "";
+                    existing.Phase = request.Phase ?? "";
                     existing.CreateDate = DateTime.Now;
                     existing.CreateBy = currentUser;
                 }
@@ -435,6 +443,8 @@ public class DetailDataDto
                         NameStaff = fullName,
                         Department = department?.dept_name ?? "N/A",
                         Project = project.NameProject,
+                        ProjectPhase = request.ProjectPhase ?? "",
+                        Phase = request.Phase ?? "",
                         WorkDate = workDate,
                         WeekNo = weekNo,
                         Year = year,
@@ -482,6 +492,8 @@ public class DetailDataDto
             public int EmployeeId { get; set; }
             public int ProjectMode { get; set; }  // 1 = một dự án chung, 2 = dự án riêng
             public int? CommonProjectId { get; set; }  // Dùng khi ProjectMode = 1
+            public string ProjectPhase { get; set; }
+            public string Phase { get; set; }
             public List<DayDataRequest> Days { get; set; }
         }
 
@@ -657,6 +669,8 @@ public class DetailDataDto
                     {
                         // Cập nhật
                         existing.WorkHours = dayData.WorkHours;
+                        existing.ProjectPhase = request.ProjectPhase ?? "";
+                        existing.Phase = request.Phase ?? "";
                         existing.CreateDate = DateTime.Now;
                         existing.CreateBy = currentUser;
                         updatedCount++;
@@ -670,6 +684,8 @@ public class DetailDataDto
                             NameStaff = fullName,
                             Department = department?.dept_name ?? "N/A",
                             Project = project.NameProject,
+                            ProjectPhase = request.ProjectPhase ?? "",
+                            Phase = request.Phase ?? "",
                             WorkDate = workDate,
                             WeekNo = weekNo,
                             Year = year,

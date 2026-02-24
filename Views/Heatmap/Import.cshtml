@@ -76,6 +76,28 @@
                             </select>
                         </div>
 
+                        <div class="group">
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project Phase</label>
+                            <select id="projectPhase1" class="input-field">
+                                <option value="">-- Chọn Project phase --</option>
+                                @foreach (var pp in ViewBag.ProjectPhases)
+                                {
+                                    <option value="@pp.ProjectPhase">@pp.ProjectPhase</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="group">
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Phase</label> 
+                            <select id="phase1" class="input-field">
+                                <option value="">-- Chọn Phase --</option>
+                                @foreach (var p in  ViewBag.ProjectPhases)
+                                {
+                                    <option value="@p.ProjectPhase">@p.ProjectPhase</option>
+                                }   
+                            </select>
+                        </div>                                                                        
+
                         <!-- Tuần -->
                         <div class="group">
                             <label
@@ -186,6 +208,30 @@
                                             {
                                                 <option value="@project.IdProject">@project.NameProject
                                                     @(!string.IsNullOrEmpty(project.NameCustomer) ? $"({project.NameCustomer})" : "")</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <!-- Project Phase -->
+                                        <div class="group">
+                                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project Phase</label>
+                                            <select id="projectPhase2" class="input-field">
+                                                <option value="">-- Chọn Project Phase --</option>
+                                                @foreach (var pp in ViewBag.ProjectPhases)
+                                                {
+                                                    <option value="@pp.ProjectPhase">@pp.ProjectPhase</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <!-- Phase -->
+                                        <div class="group">
+                                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Phase</label>
+                                            <select id="phase2" class="input-field">
+                                                <option value="">-- Chọn Phase --</option>
+                                                @foreach (var pp in ViewBag.ProjectPhases)
+                                                {
+                                                    <option value="@pp.ProjectPhase">@pp.ProjectPhase</option>
                                                 }
                                             </select>
                                         </div>
@@ -564,4 +610,4 @@
                                                                                                                                                                                     ];
                                             </script>
 
-                                            <script src="~/js/import.js"></script>
+                                            <script src="~/js/import.js"></script> 

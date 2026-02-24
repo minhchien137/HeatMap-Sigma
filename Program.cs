@@ -49,6 +49,22 @@ builder.Services.AddHostedService<TokenCleanupService>();
 
 var app = builder.Build();
 
+
+app.Use(async (context, next) =>
+{
+    // Allow all HTTP methods
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        context.Response.StatusCode = 200;
+        return;
+    }
+    await next();
+});
+
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
