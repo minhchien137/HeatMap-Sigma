@@ -449,7 +449,7 @@ namespace HeatmapSystem.Controllers
         }
 
         [HttpPost("ChangePassword")]
-        public async Task<IActionResult> ChangePassword(string CurrentPassword, string NewPassword, string ConfirmPassword)
+        public async Task<IActionResult> ChangePassword(string CurrentPassword, string NewPassword, string ConfirmNewPassword)
         {
             try
             {
@@ -462,13 +462,13 @@ namespace HeatmapSystem.Controllers
 
                 if (string.IsNullOrWhiteSpace(CurrentPassword) || 
                     string.IsNullOrWhiteSpace(NewPassword) || 
-                    string.IsNullOrWhiteSpace(ConfirmPassword))
+                    string.IsNullOrWhiteSpace(ConfirmNewPassword))
                 {
                     TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
                     return RedirectToAction("Account");
                 }
 
-                if (NewPassword != ConfirmPassword)
+                if (NewPassword != ConfirmNewPassword)
                 {
                     TempData["Error"] = "Mật khẩu xác nhận không khớp!";
                     return RedirectToAction("Account");
