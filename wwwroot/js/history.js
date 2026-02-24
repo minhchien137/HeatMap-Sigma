@@ -98,6 +98,26 @@ function populateFilters() {
     });
     
     
+    // ProjectPhase filter
+    const projectPhases = [...new Set(allData.map(item => item.projectPhase).filter(v => v))].sort();
+    const projectPhaseSelect = document.getElementById('filterProjectPhase');
+    projectPhases.forEach(pp => {
+        const option = document.createElement('option');
+        option.value = pp;
+        option.textContent = pp;
+        projectPhaseSelect.appendChild(option);
+    });
+    
+    // Phase filter
+    const phases = [...new Set(allData.map(item => item.phase).filter(v => v))].sort();
+    const phaseSelect = document.getElementById('filterPhase');
+    phases.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p;
+        option.textContent = p;
+        phaseSelect.appendChild(option);
+    });
+    
     // Week filter (1-53) with date ranges
     const weekSelect = document.getElementById('filterWeek');
     const currentYear = new Date().getFullYear();
@@ -119,6 +139,8 @@ function populateFilters() {
 function applyFilters() {
     const department = document.getElementById('filterDepartment').value;
     const project = document.getElementById('filterProject').value;
+    const projectPhase = document.getElementById('filterProjectPhase').value;
+    const phase = document.getElementById('filterPhase').value;
     const year = document.getElementById('filterYear').value;
     const week = document.getElementById('filterWeek').value;
     const searchText = document.getElementById('searchInput').value.toLowerCase();
@@ -128,6 +150,8 @@ function applyFilters() {
         
         if (department && item.department !== department) matches = false;
         if (project && item.project !== project) matches = false;
+        if (projectPhase && item.projectPhase !== projectPhase) matches = false;
+        if (phase && item.phase !== phase) matches = false;
         if (year && item.year.toString() !== year) matches = false;
         if (week && item.weekNo.toString() !== week) matches = false;
         
@@ -148,6 +172,8 @@ function applyFilters() {
 function resetFilters() {
     document.getElementById('filterDepartment').value = '';
     document.getElementById('filterProject').value = '';
+    document.getElementById('filterProjectPhase').value = '';
+    document.getElementById('filterPhase').value = '';
     document.getElementById('filterYear').value = '';
     document.getElementById('filterWeek').value = '';
     document.getElementById('searchInput').value = '';
@@ -232,7 +258,7 @@ function displayTableView(pageData, start) {
     if (pageData.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="11" class="text-center py-20">
+                <td colspan="13" class="text-center py-20">
                     <div class="flex flex-col items-center justify-center">
                         <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,6 +287,8 @@ function displayTableView(pageData, start) {
                         <span class="badge badge-green">${item.department}</span>
                     </td>
                     <td class="table-cell">${item.project}</td>
+                    <td class="table-cell text-center"><span class="badge badge-blue">${item.projectPhase || '-'}</span></td>
+                    <td class="table-cell text-center"><span class="badge badge-green">${item.phase || '-'}</span></td>
                     <td class="table-cell text-center font-bold">${item.year}</td>
                     <td class="table-cell text-center">
                         <span class="badge badge-red">Tuần ${item.weekNo}</span>
@@ -330,6 +358,16 @@ function displayMobileView(pageData, start) {
                         <div class="mobile-card-row">
                             <span class="mobile-card-label">Dự án:</span>
                             <span class="mobile-card-value font-medium">${item.project}</span>
+                        </div>
+            
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Project Phase:</span>
+                            <span class="mobile-card-value"><span class="badge badge-blue">${item.projectPhase || '-'}</span></span>
+                        </div>
+            
+                        <div class="mobile-card-row">
+                            <span class="mobile-card-label">Phase:</span>
+                            <span class="mobile-card-value"><span class="badge badge-green">${item.phase || '-'}</span></span>
                         </div>
                         
                         <div class="mobile-card-row">
