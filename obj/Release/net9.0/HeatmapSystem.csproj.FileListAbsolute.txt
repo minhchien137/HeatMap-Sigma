@@ -145,11 +145,9 @@ C:\HeatMap-Sigma\obj\Release\net9.0\rjsmcshtml.dswa.cache.json
 C:\HeatMap-Sigma\obj\Release\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\HeatMap-Sigma\obj\Release\net9.0\scopedcss\bundle\HeatmapSystem.styles.css
 C:\HeatMap-Sigma\obj\Release\net9.0\scopedcss\projectbundle\HeatmapSystem.bundle.scp.css
-C:\HeatMap-Sigma\obj\Release\net9.0\compressed\6xm66gpnzh-{0}-5ipweew5fc-5ipweew5fc.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\compressed\istj2ho2hu-{0}-5ipweew5fc-5ipweew5fc.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\compressed\1zgvm3jnww-{0}-b9sayid5wm-b9sayid5wm.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\compressed\xaibt1zv8p-{0}-61n19gt1b8-61n19gt1b8.gz
-C:\HeatMap-Sigma\obj\Release\net9.0\compressed\w6ohzfaglw-{0}-96i34tg6ca-96i34tg6ca.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\compressed\rd19wqedbx-{0}-pyuzdksahd-pyuzdksahd.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\compressed\4kktefoskr-{0}-ewdjcyejf3-ewdjcyejf3.gz
 C:\HeatMap-Sigma\obj\Release\net9.0\compressed\qm4rtb18tf-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
@@ -228,3 +226,4 @@ C:\HeatMap-Sigma\obj\Release\net9.0\HeatmapSystem.genruntimeconfig.cache
 C:\HeatMap-Sigma\obj\Release\net9.0\ref\HeatmapSystem.dll
 C:\HeatMap-Sigma\bin\Release\net9.0\BCrypt.Net-Next.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\compressed\bzk3knobuc-{0}-yu701198ry-yu701198ry.gz
+C:\HeatMap-Sigma\obj\Release\net9.0\compressed\w6ohzfaglw-{0}-h3hyzjavoa-h3hyzjavoa.gz

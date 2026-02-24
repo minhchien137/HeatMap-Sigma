@@ -32,6 +32,16 @@ namespace HeatmapSystem.Models
         public string Project { get; set; }
 
         [Required]
+        [Column("ProjectPhase")]
+        [StringLength(10)]
+        public string ProjectPhase { get; set; }
+
+        [Required]
+        [Column("Phase")]
+        [StringLength(10)]
+        public string Phase { get; set; }
+
+        [Required]
         [Column("WorkDate")]
         public DateTime WorkDate { get; set; }
 
