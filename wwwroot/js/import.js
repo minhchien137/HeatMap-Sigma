@@ -861,8 +861,8 @@ function copyFirstDayDataToAll() {
     // Validate first day data
     if (
         !firstState ||
-        !firstState.hours ||
-        !firstState.minutes ||
+        firstState.hours === undefined || firstState.hours === null || firstState.hours === '' ||
+        firstState.minutes === undefined || firstState.minutes === null || firstState.minutes === '' ||
         (projectMode === 2 && !firstState.project)
     ) {
         showErrorModal('Vui lòng nhập đầy đủ thông tin cho ngày đầu tiên');
