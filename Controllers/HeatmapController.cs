@@ -1119,12 +1119,28 @@ public class DetailDataDto
             }
         }
 
+        [HttpGet("GetPhaseList")]
+        public IActionResult GetPhaseList()
+        {
+            try
+            {
+                var phases = _reportService.GetPhaseList();
+                return Json(phases);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading phase list");
+                return Json(new { error = ex.Message });
+            }
+        }
+
         [HttpGet("GetReportData")]
         public IActionResult GetReportData(
             string timeRange = "current_week",
             string year = "",
             string department = "",
             string project = "",
+            string phase = "",
             string startDate = "",
             string endDate = "")
         {
@@ -1141,6 +1157,7 @@ public class DetailDataDto
                     Year = year,
                     Department = department,
                     Project = project,
+                    Phase = phase,
                     StartDate = startDate,
                     EndDate = endDate
                 };

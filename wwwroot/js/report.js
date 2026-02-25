@@ -8,7 +8,7 @@ let currentData = null;
 document.addEventListener('DOMContentLoaded', function () {
     initializeFilters();
     loadReportData();
-
+    
     // Time range change event
     document.getElementById('timeRange').addEventListener('change', function () {
         if (this.value === 'custom') {
@@ -32,10 +32,11 @@ function initializeFilters() {
         if (i === 0) option.selected = true;
         yearSelect.appendChild(option);
     }
-
+    
     // Load departments and projects
     loadDepartments();
     loadProjects();
+    loadPhases();
 }
 
 // Load departments
@@ -45,7 +46,6 @@ async function loadDepartments() {
         if (response.ok) {
             const departments = await response.json();
             const select = document.getElementById('departmentFilter');
-
             departments.forEach(dept => {
                 const option = document.createElement('option');
                 option.value = dept.name;
@@ -65,7 +65,6 @@ async function loadProjects() {
         if (response.ok) {
             const projects = await response.json();
             const select = document.getElementById('projectFilter');
-
             projects.forEach(project => {
                 const option = document.createElement('option');
                 option.value = project.name;
@@ -75,6 +74,26 @@ async function loadProjects() {
         }
     } catch (error) {
         console.error('Error loading projects:', error);
+    }
+}
+
+// Load phases
+async function loadPhases() {
+    try {
+        const response = await fetch('/Heatmap/GetPhaseList');
+        if (response.ok) {
+            const phases = await response.json();
+            const select = document.getElementById('phaseFilter');
+            if (!select) return;
+            phases.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.name;
+                option.textContent = p.name;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading phases:', error);
     }
 }
 
@@ -91,11 +110,11 @@ function refreshData() {
 // Load report data
 async function loadReportData() {
     const filters = getFilters();
-
+    
     try {
         const queryString = new URLSearchParams(filters).toString();
         const response = await fetch(`/Heatmap/GetReportData?${queryString}`);
-
+        
         if (response.ok) {
             currentData = await response.json();
             updateDashboard(currentData);
@@ -111,18 +130,20 @@ async function loadReportData() {
 // Get current filters
 function getFilters() {
     const timeRange = document.getElementById('timeRange').value;
+    const phaseEl = document.getElementById('phaseFilter');
     const filters = {
         timeRange: timeRange,
         year: document.getElementById('yearFilter').value,
         department: document.getElementById('departmentFilter').value,
-        project: document.getElementById('projectFilter').value
+        project: document.getElementById('projectFilter').value,
+        phase: phaseEl ? phaseEl.value : ''
     };
-
+    
     if (timeRange === 'custom') {
         filters.startDate = document.getElementById('startDate').value;
         filters.endDate = document.getElementById('endDate').value;
     }
-
+    
     return filters;
 }
 
@@ -133,11 +154,13 @@ function updateDashboard(data) {
     updateDepartmentChart(data.departmentData);
     updateHeatmap(data.heatmapData);
     updateDetailTable(data.detailData);
+    updatePhaseTable(data.phaseData);
 }
 
 // Update KPIs
 function updateKPIs(kpis) {
     document.getElementById('kpi_totalHours').textContent = formatNumber(kpis.totalHours);
+    document.getElementById('kpi_availableCapacity').textContent = formatNumber(kpis.availableCapacity);
     document.getElementById('kpi_avgUtilization').textContent = kpis.avgUtilization.toFixed(1) + '%';
     document.getElementById('kpi_activeProjects').textContent = kpis.activeProjects;
     document.getElementById('kpi_staffCount').textContent = kpis.staffCount;
@@ -146,16 +169,16 @@ function updateKPIs(kpis) {
 // Update trend chart
 function updateTrendChart(trendData) {
     const ctx = document.getElementById('trendChart').getContext('2d');
-
+    
     // Destroy existing chart
     if (trendChart) {
         trendChart.destroy();
     }
-
+    
     const labels = trendData.map(d => d.label);
     const hours = trendData.map(d => d.hours);
     const utilization = trendData.map(d => d.utilization);
-
+    
     trendChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -249,15 +272,15 @@ function updateTrendChart(trendData) {
 // Update department chart
 function updateDepartmentChart(departmentData) {
     const ctx = document.getElementById('departmentChart').getContext('2d');
-
+    
     // Destroy existing chart
     if (departmentChart) {
         departmentChart.destroy();
     }
-
+    
     const labels = departmentData.map(d => d.department);
     const hours = departmentData.map(d => d.hours);
-
+    
     departmentChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -335,7 +358,7 @@ function updateDepartmentChart(departmentData) {
 // Update heatmap
 function updateHeatmap(heatmapData) {
     const container = document.getElementById('heatmapContainer');
-
+    
     if (heatmapData.length === 0) {
         container.innerHTML = `
             <div class="text-center py-12 text-gray-400">
@@ -347,7 +370,7 @@ function updateHeatmap(heatmapData) {
         `;
         return;
     }
-
+    
     // Group by project
     const projectGroups = {};
     heatmapData.forEach(item => {
@@ -356,18 +379,18 @@ function updateHeatmap(heatmapData) {
         }
         projectGroups[item.project].push(item);
     });
-
+    
     // Get all unique weeks
     const weeks = [...new Set(heatmapData.map(item => item.week))].sort();
-
+    
     // Calculate max hours for color scaling
     const maxHours = Math.max(...heatmapData.map(item => item.hours));
-
+    
     let html = '<div class="space-y-4">';
-
+    
     Object.keys(projectGroups).forEach(project => {
         const projectData = projectGroups[project];
-
+        
         html += `
             <div class="border border-gray-200 rounded-xl overflow-hidden">
                 <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
@@ -376,13 +399,13 @@ function updateHeatmap(heatmapData) {
                 <div class="p-4">
                     <div class="grid grid-cols-${Math.min(weeks.length, 8)} gap-2">
         `;
-
+        
         weeks.forEach(week => {
             const cell = projectData.find(d => d.week === week);
             if (cell) {
                 const intensity = (cell.hours / maxHours) * 100;
                 const bgColor = `rgba(220, 38, 38, ${intensity / 100})`;
-
+                
                 html += `
                     <div class="heatmap-cell p-3 rounded-lg border border-gray-200 text-center" 
                          style="background-color: ${bgColor}"
@@ -401,14 +424,14 @@ function updateHeatmap(heatmapData) {
                 `;
             }
         });
-
+        
         html += `
                     </div>
                 </div>
             </div>
         `;
     });
-
+    
     html += '</div>';
     container.innerHTML = html;
 }
@@ -416,7 +439,7 @@ function updateHeatmap(heatmapData) {
 // Update detail table
 function updateDetailTable(detailData) {
     const tbody = document.getElementById('detailTableBody');
-
+    
     if (detailData.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -430,7 +453,7 @@ function updateDetailTable(detailData) {
         `;
         return;
     }
-
+    
     // Group by project
     const projectGroups = {};
     detailData.forEach(row => {
@@ -450,7 +473,7 @@ function updateDetailTable(detailData) {
         projectGroups[row.project].totalStaffCount += row.staffCount;
         projectGroups[row.project].totalHours += row.totalHours;
     });
-
+    
     let html = '';
     Object.values(projectGroups).forEach(group => {
         const avgHours = group.totalHours / group.totalStaffCount;
@@ -461,7 +484,7 @@ function updateDetailTable(detailData) {
         const departmentBadges = group.departments.map(d => 
             `<span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium mr-1">${d.department}</span>`
         ).join('');
-
+        
         html += `
             <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 font-bold text-gray-900">${group.project}</td>
@@ -489,7 +512,7 @@ function updateDetailTable(detailData) {
             </tr>
         `;
     });
-
+    
     tbody.innerHTML = html;
 }
 
@@ -514,9 +537,9 @@ function showCellDetail(cell) {
     const modal = document.getElementById('detailModal');
     const title = document.getElementById('modalTitle');
     const content = document.getElementById('modalContent');
-
+    
     title.textContent = `${cell.project} - ${cell.week}`;
-
+    
     // Fetch detailed staff data
     fetchCellStaffDetail(cell.project, cell.week, cell.department).then(staffData => {
         // Calculate total days for percentage
@@ -535,11 +558,11 @@ function showCellDetail(cell) {
                     </div>
                 </div>
             </div>
-
+        
             <h4 class="text-lg font-black text-gray-900 mb-4">Danh sách nhân viên</h4>
             <div class="space-y-2">
         `;
-
+        
         staffData.forEach(staff => {
             const dayPercentage = totalDays > 0 ? ((staff.days / totalDays) * 100).toFixed(1) : 0;
             
@@ -556,11 +579,11 @@ function showCellDetail(cell) {
                 </div>
             `;
         });
-
+        
         html += '</div>';
         content.innerHTML = html;
     });
-
+    
     modal.classList.remove('hidden');
 }
 
@@ -569,9 +592,9 @@ function showProjectDepartments(projectGroup) {
     const modal = document.getElementById('detailModal');
     const title = document.getElementById('modalTitle');
     const content = document.getElementById('modalContent');
-
+    
     title.textContent = projectGroup.project;
-
+    
     let html = `
         <div class="mb-6">
             <div class="grid grid-cols-3 gap-4">
@@ -589,17 +612,17 @@ function showProjectDepartments(projectGroup) {
                 </div>
             </div>
         </div>
-
+    
         <h4 class="text-lg font-black text-gray-900 mb-4">Phân bổ theo bộ phận</h4>
         <div class="space-y-3">
     `;
-
+    
     projectGroup.departments.forEach(dept => {
         const avgHours = dept.totalHours / dept.staffCount;
         const statusClass = getStatusClass(avgHours);
         const statusText = getStatusText(avgHours);
         const hoursPercentage = projectGroup.totalHours > 0 ? ((dept.totalHours / projectGroup.totalHours) * 100).toFixed(1) : 0;
-
+        
         html += `
             <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer"
                  onclick='showDepartmentDetail("${projectGroup.project}", "${dept.department}")'>
@@ -634,7 +657,7 @@ function showProjectDepartments(projectGroup) {
             </div>
         `;
     });
-
+    
     html += '</div>';
     content.innerHTML = html;
     modal.classList.remove('hidden');
@@ -645,9 +668,9 @@ function showDepartmentDetail(project, department) {
     const modal = document.getElementById('detailModal');
     const title = document.getElementById('modalTitle');
     const content = document.getElementById('modalContent');
-
+    
     title.textContent = `${project} - ${department}`;
-
+    
     // Show loading
     content.innerHTML = `
         <div class="text-center py-12">
@@ -655,7 +678,7 @@ function showDepartmentDetail(project, department) {
             <p class="mt-4 text-gray-500 font-medium">Đang tải dữ liệu...</p>
         </div>
     `;
-
+    
     // Fetch detailed staff data
     fetchProjectStaffDetail(project, department).then(staffData => {
         // Calculate total days for percentage
@@ -672,7 +695,7 @@ function showDepartmentDetail(project, department) {
                     Quay lại danh sách bộ phận
                 </button>
             </div>
-
+        
             <div class="mb-6">
                 <div class="grid grid-cols-3 gap-4">
                     <div class="bg-gray-50 rounded-xl p-4">
@@ -689,7 +712,7 @@ function showDepartmentDetail(project, department) {
                     </div>
                 </div>
             </div>
-
+        
             <h4 class="text-lg font-black text-gray-900 mb-4">Danh sách nhân viên</h4>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -705,7 +728,7 @@ function showDepartmentDetail(project, department) {
                     </thead>
                     <tbody class="divide-y divide-gray-100">
         `;
-
+        
         staffData.forEach(staff => {
             const dayPercentage = totalDays > 0 ? ((staff.days / totalDays) * 100).toFixed(1) : 0;
             const hoursPercentage = totalHours > 0 ? ((staff.hours / totalHours) * 100).toFixed(1) : 0;
@@ -730,13 +753,13 @@ function showDepartmentDetail(project, department) {
                 </tr>
             `;
         });
-
+        
         html += `
                     </tbody>
                 </table>
             </div>
         `;
-
+        
         content.innerHTML = html;
     });
 }
@@ -746,9 +769,9 @@ function showStaffDailyDetail(project, department, svnStaff, staffName) {
     const modal = document.getElementById('detailModal');
     const title = document.getElementById('modalTitle');
     const content = document.getElementById('modalContent');
-
+    
     title.textContent = `${staffName} (${svnStaff})`;
-
+    
     // Show loading
     content.innerHTML = `
         <div class="text-center py-12">
@@ -756,7 +779,7 @@ function showStaffDailyDetail(project, department, svnStaff, staffName) {
             <p class="mt-4 text-gray-500 font-medium">Đang tải dữ liệu...</p>
         </div>
     `;
-
+    
     // Fetch staff daily detail
     fetchStaffDailyDetail(project, department, svnStaff).then(dailyData => {
         const totalHours = dailyData.reduce((sum, day) => sum + day.hours, 0);
@@ -771,7 +794,7 @@ function showStaffDailyDetail(project, department, svnStaff, staffName) {
                     Quay lại danh sách nhân viên
                 </button>
             </div>
-
+        
             <div class="mb-6">
                 <div class="grid grid-cols-3 gap-4">
                     <div class="bg-gray-50 rounded-xl p-4">
@@ -788,7 +811,7 @@ function showStaffDailyDetail(project, department, svnStaff, staffName) {
                     </div>
                 </div>
             </div>
-
+        
             <h4 class="text-lg font-black text-gray-900 mb-4">Chi tiết theo ngày (${dailyData.length} ngày làm việc)</h4>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -802,7 +825,7 @@ function showStaffDailyDetail(project, department, svnStaff, staffName) {
                     </thead>
                     <tbody class="divide-y divide-gray-100">
         `;
-
+        
         dailyData.forEach(day => {
             html += `
                 <tr class="hover:bg-gray-50">
@@ -813,7 +836,7 @@ function showStaffDailyDetail(project, department, svnStaff, staffName) {
                 </tr>
             `;
         });
-
+        
         html += `
                     </tbody>
                     <tfoot class="bg-gray-50 border-t-2 border-gray-200">
@@ -826,7 +849,7 @@ function showStaffDailyDetail(project, department, svnStaff, staffName) {
                 </table>
             </div>
         `;
-
+        
         content.innerHTML = html;
     });
 }
@@ -880,9 +903,9 @@ function showProjectDetail(row) {
     const modal = document.getElementById('detailModal');
     const title = document.getElementById('modalTitle');
     const content = document.getElementById('modalContent');
-
+    
     title.textContent = `${row.project} - ${row.department}`;
-
+    
     // Fetch detailed staff data
     fetchProjectStaffDetail(row.project, row.department).then(staffData => {
         // Calculate total days for percentage
@@ -905,7 +928,7 @@ function showProjectDetail(row) {
                     </div>
                 </div>
             </div>
-
+        
             <h4 class="text-lg font-black text-gray-900 mb-4">Danh sách nhân viên</h4>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -921,7 +944,7 @@ function showProjectDetail(row) {
                     </thead>
                     <tbody class="divide-y divide-gray-100">
         `;
-
+        
         staffData.forEach(staff => {
             const dayPercentage = totalDays > 0 ? ((staff.days / totalDays) * 100).toFixed(1) : 0;
             const hoursPercentage = row.totalHours > 0 ? ((staff.hours / row.totalHours) * 100).toFixed(1) : 0;
@@ -945,16 +968,16 @@ function showProjectDetail(row) {
                 </tr>
             `;
         });
-
+        
         html += `
                     </tbody>
                 </table>
             </div>
         `;
-
+        
         content.innerHTML = html;
     });
-
+    
     modal.classList.remove('hidden');
 }
 
@@ -998,7 +1021,7 @@ function closeDetailModal() {
 // Toggle chart view
 function toggleChartView(view) {
     currentChartView = view;
-
+    
     // Update button states
     document.querySelectorAll('.chart-view-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -1006,7 +1029,7 @@ function toggleChartView(view) {
             btn.classList.add('active');
         }
     });
-
+    
     // Reload chart data
     if (currentData) {
         updateTrendChart(view === 'week' ? currentData.trendData : currentData.monthlyTrendData);
@@ -1037,7 +1060,7 @@ function animateValue(id, start, end, duration) {
     const increment = end > start ? 1 : -1;
     const stepTime = Math.abs(Math.floor(duration / range));
     let current = start;
-
+    
     const timer = setInterval(() => {
         current += increment;
         element.textContent = formatNumber(current);
@@ -1049,4 +1072,74 @@ function animateValue(id, start, end, duration) {
 
 function showError(message) {
     alert(message);
+}
+
+// ========================
+// PHASE PIVOT TABLE
+// ========================
+function formatHours(val) {
+    // Giữ nguyên số thập phân, bỏ .0 nếu là số nguyên
+    const n = Number(val);
+    return Number.isInteger(n) ? n.toString() : n.toString();
+}
+
+function updatePhaseTable(phaseData) {
+    const thead = document.getElementById('phaseTableHead');
+    const tbody = document.getElementById('phaseTableBody');
+    const tfoot = document.getElementById('phaseTableFoot');
+    
+    if (!phaseData || phaseData.length === 0) {
+        thead.innerHTML = '<tr><th colspan="10" class="phase-loading">Không có dữ liệu</th></tr>';
+        tbody.innerHTML = '';
+        tfoot.innerHTML = '';
+        return;
+    }
+    
+    const phases = [...new Set(phaseData.map(d => d.phase))].sort();
+    const departments = [...new Set(phaseData.map(d => d.department))].sort();
+    const grandTotal = phaseData.reduce((sum, d) => sum + Number(d.totalHours), 0);
+    
+    // ==== HEADER ====
+    let headHtml = '<tr>';
+    headHtml += `<th class="th-phase">By Phase</th>`;
+    departments.forEach(dept => { headHtml += `<th class="th-dept">${dept}</th>`; });
+    headHtml += `<th class="th-total">SVN</th>`;
+    headHtml += `<th class="th-pct">SVN %</th>`;
+    headHtml += '</tr>';
+    thead.innerHTML = headHtml;
+    
+    // ==== BODY ====
+    let bodyHtml = '';
+    phases.forEach(phase => {
+        const phaseTotal = phaseData
+        .filter(d => d.phase === phase)
+        .reduce((sum, d) => sum + Number(d.totalHours), 0);
+        const phasePct = grandTotal > 0 ? Math.round(phaseTotal / grandTotal * 100) : 0;
+        
+        bodyHtml += '<tr>';
+        bodyHtml += `<td class="td-phase">${phase || '—'}</td>`;
+        departments.forEach(dept => {
+            const found = phaseData.find(d => d.phase === phase && d.department === dept);
+            const val = found ? Number(found.totalHours) : 0;
+            bodyHtml += `<td>${val > 0 ? formatHours(val) : ''}</td>`;
+        });
+        bodyHtml += `<td class="td-total">${formatHours(phaseTotal)}</td>`;
+        bodyHtml += `<td class="td-pct">${phasePct}%</td>`;
+        bodyHtml += '</tr>';
+    });
+    tbody.innerHTML = bodyHtml;
+    
+    // ==== FOOTER ====
+    let footHtml = '<tr>';
+    footHtml += `<td class="td-phase"></td>`;
+    departments.forEach(dept => {
+        const deptTotal = phaseData
+        .filter(d => d.department === dept)
+        .reduce((sum, d) => sum + Number(d.totalHours), 0);
+        footHtml += `<td>${deptTotal > 0 ? formatHours(deptTotal) : ''}</td>`;
+    });
+    footHtml += `<td class="td-total">${formatHours(grandTotal)}</td>`;
+    footHtml += `<td class="td-pct">100%</td>`;
+    footHtml += '</tr>';
+    tfoot.innerHTML = footHtml;
 }
