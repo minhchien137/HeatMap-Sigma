@@ -11,6 +11,9 @@ namespace HeatmapSystem.Services
 
         List<ProjectListDto> GetProjectList();
 
+        /// Lấy danh sách phase
+        List<PhaseListDto> GetPhaseList();
+
 
         /// Lấy dữ liệu báo cáo tổng hợp
 
@@ -55,12 +58,18 @@ namespace HeatmapSystem.Services
         public string name { get; set; }
     }
 
+    public class PhaseListDto
+    {
+        public string name { get; set; }
+    }
+
     public class ReportFilterDto
     {
         public string TimeRange { get; set; }
         public string Year { get; set; }
         public string Department { get; set; }
         public string Project { get; set; }
+        public string Phase { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
     }
@@ -73,11 +82,21 @@ namespace HeatmapSystem.Services
         public List<DepartmentDataDto> departmentData { get; set; }
         public List<HeatmapDataDto> heatmapData { get; set; }
         public List<DetailDataDto> detailData { get; set; }
+        public List<PhaseDataDto> phaseData { get; set; }
+    }
+
+    public class PhaseDataDto
+    {
+        public string phase { get; set; }
+        public string department { get; set; }
+        public decimal totalHours { get; set; }
+        public int staffCount { get; set; }
     }
 
     public class KpiDto
     {
         public decimal totalHours { get; set; }
+        public decimal availableCapacity { get; set; }
         public decimal avgUtilization { get; set; }
         public int activeProjects { get; set; }
         public int staffCount { get; set; }

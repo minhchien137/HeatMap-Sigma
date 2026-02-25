@@ -53,6 +53,25 @@ namespace HeatmapSystem.Services
             }
         }
 
+        public List<PhaseListDto> GetPhaseList()
+        {
+            try
+            {
+                return _context.SVN_StaffDetail
+                    .Where(s => s.Phase != null && s.Phase != "")
+                    .Select(s => s.Phase)
+                    .Distinct()
+                    .OrderBy(p => p)
+                    .Select(p => new PhaseListDto { name = p })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting phase list");
+                throw;
+            }
+        }
+
         public ReportDataDto GetReportData(ReportFilterDto filter)
         {
             try
@@ -69,12 +88,13 @@ namespace HeatmapSystem.Services
                 // Build report
                 return new ReportDataDto
                 {
-                    kpis = CalculateKPIs(data),
+                    kpis = CalculateKPIs(data, fromDate, toDate),
                     trendData = CalculateTrendData(data, "week"),
                     monthlyTrendData = CalculateTrendData(data, "month"),
                     departmentData = CalculateDepartmentData(data),
                     heatmapData = CalculateHeatmapData(data),
-                    detailData = CalculateDetailData(data)
+                    detailData = CalculateDetailData(data),
+                    phaseData = CalculatePhaseData(data)
                 };
             }
             catch (Exception ex)
@@ -235,6 +255,11 @@ namespace HeatmapSystem.Services
                 query = query.Where(s => s.Project == filter.Project);
             }
 
+            if (!string.IsNullOrEmpty(filter.Phase))
+            {
+                query = query.Where(s => s.Phase == filter.Phase);
+            }
+
             return query;
         }
 
@@ -307,23 +332,30 @@ namespace HeatmapSystem.Services
             return (fromDate, toDate);
         }
 
-        private KpiDto CalculateKPIs(List<SVN_StaffDetail> data)
+        private KpiDto CalculateKPIs(List<SVN_StaffDetail> data, DateTime fromDate, DateTime toDate)
         {
             var totalHours = data.Sum(s => s.WorkHours ?? 0);
             var staffCount = data.Select(s => s.SVNStaff).Distinct().Count();
             var projectCount = data.Select(s => s.Project).Distinct().Count();
 
-            // Calculate average utilization (assuming 40 hours per week per person)
-            var weekCount = data.Select(s => s.WeekNo).Distinct().Count();
-            var totalPossibleHours = staffCount * 40m * weekCount;
-            var avgUtilization = totalPossibleHours > 0 ? (totalHours / totalPossibleHours * 100) : 0;
+            // Đếm số ngày làm việc thực tế trong khoảng (Thứ 2 -> Thứ 7, bỏ Chủ nhật)
+            int workingDays = 0;
+            for (var date = fromDate.Date; date <= toDate.Date; date = date.AddDays(1))
+            {
+                if (date.DayOfWeek != DayOfWeek.Sunday)
+                    workingDays++;
+            }
 
+            // Tổng giờ có thể làm = số nhân viên × số ngày làm việc × 8.5h/ngày
+            var totalPossibleHours = staffCount * workingDays * 8.5m;
+            var avgUtilization = totalPossibleHours > 0 ? (totalHours / totalPossibleHours * 100) : 0;
             return new KpiDto
             {
                 totalHours = totalHours,
                 avgUtilization = avgUtilization,
                 activeProjects = projectCount,
-                staffCount = staffCount
+                staffCount = staffCount,
+                availableCapacity = totalPossibleHours
             };
         }
 
@@ -339,7 +371,8 @@ namespace HeatmapSystem.Services
                     {
                         var totalHours = g.Sum(s => s.WorkHours ?? 0);
                         var staffCount = g.Select(s => s.SVNStaff).Distinct().Count();
-                        var possibleHours = staffCount * 40m;
+                        // 1 tuần có 6 ngày làm việc (T2-T7), mỗi ngày 8.5h
+                        var possibleHours = staffCount * 6 * 8.5m;
                         var utilization = possibleHours > 0 ? (totalHours / possibleHours * 100) : 0;
 
                         return new TrendDataDto
@@ -362,8 +395,8 @@ namespace HeatmapSystem.Services
                         var totalHours = g.Sum(s => s.WorkHours ?? 0);
                         var staffCount = g.Select(s => s.SVNStaff).Distinct().Count();
                         var daysInMonth = DateTime.DaysInMonth(g.Key.Year, g.Key.Month);
-                        var workDays = daysInMonth * 5 / 7; // Rough estimate
-                        var possibleHours = staffCount * 8m * workDays;
+                        var workDays = daysInMonth * 6 / 7; // Rough estimate
+                        var possibleHours = staffCount * 8.5m * workDays;
                         var utilization = possibleHours > 0 ? (totalHours / possibleHours * 100) : 0;
 
                         return new TrendDataDto
@@ -424,6 +457,24 @@ namespace HeatmapSystem.Services
                     totalHours = g.Sum(s => s.WorkHours ?? 0)
                 })
                 .OrderByDescending(d => d.totalHours)
+                .ToList();
+        }
+
+
+        // Tổng hợp dữ liệu giờ làm theo Phase và Department
+        private List<PhaseDataDto> CalculatePhaseData(List<SVN_StaffDetail> data)
+        {
+            return data
+                .GroupBy(s => new { s.Phase, s.Department })
+                .Select(g => new PhaseDataDto
+                {
+                    phase = g.Key.Phase,
+                    department = g.Key.Department,
+                    totalHours = g.Sum(s => s.WorkHours ?? 0),
+                    staffCount = g.Select(s => s.SVNStaff).Distinct().Count()
+                })
+                .OrderBy(p => p.phase)
+                .ThenBy(p => p.department)
                 .ToList();
         }
 
