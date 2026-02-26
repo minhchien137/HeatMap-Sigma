@@ -242,41 +242,59 @@
             </div>
         </div>
 
-        <!-- Heatmap Section -->
+        <!-- By Function / Utilization Table -->
         <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h2 class="text-xl font-black text-gray-900 mb-1">Bản đồ nhiệt phân bổ dự án</h2>
-                    <p class="text-sm text-gray-500">Xem trực quan phân bổ nguồn lực theo tuần và dự án</p>
+                    <h2 class="text-xl font-black text-gray-900">Công suất theo bộ phận (By Function)</h2>
+                    <p class="text-sm text-gray-500 mt-1">Phân tích công suất sử dụng theo bộ phận</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-gray-500">Thấp</span>
-                    <div class="flex gap-1">
-                        <div class="w-4 h-4 rounded bg-red-100"></div>
-                        <div class="w-4 h-4 rounded bg-red-300"></div>
-                        <div class="w-4 h-4 rounded bg-red-500"></div>
-                        <div class="w-4 h-4 rounded bg-red-700"></div>
-                    </div>
-                    <span class="text-xs font-bold text-gray-500">Cao</span>
+                <span id="functionWeekLabel" class="text-sm font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg"></span>
+                <div class="flex gap-2">
+                    <button id="btnFunctionTable" onclick="switchFunctionView('table')"
+                        class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white">
+                        By Table
+                    </button>
+                    <button id="btnFunctionChart" onclick="switchFunctionView('chart')"
+                        class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600">
+                        By Chart
+                    </button>
                 </div>
             </div>
-            <div id="heatmapContainer" class="overflow-x-auto">
-                <div class="text-center py-12 text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    <p class="font-medium">Đang tải dữ liệu...</p>
-                </div>
+            <!-- Table view -->
+            <div id="functionTableView" class="overflow-x-auto">
+                <table class="phase-pivot w-full text-sm" id="functionTable">
+                    <thead id="functionTableHead">
+                        <tr><th colspan="10" class="phase-loading">Đang tải dữ liệu...</th></tr>
+                    </thead>
+                    <tbody id="functionTableBody"></tbody>
+                    <tfoot id="functionTableFoot"></tfoot>
+                </table>
+            </div>
+            <!-- Chart view -->
+            <div id="functionChartView" class="hidden" style="position:relative; height:360px;">
+                <canvas id="functionChart"></canvas>
             </div>
         </div>
 
-        <!-- Phase Pivot Table — ngay dưới Heatmap -->
+        <!-- Phase Pivot Table -->
         <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
-            <div class="mb-5">
-                <h2 class="text-xl font-black text-gray-900">Phân bổ giờ theo Phase</h2>
-                <p class="text-sm text-gray-500 mt-1">Tổng giờ làm việc theo Phase × Bộ phận</p>
+            <div class="flex items-center justify-between mb-5">    
+                <div>
+                    <h2 class="text-xl font-black text-gray-900">Phân bổ giờ theo Phase (By Phase)</h2>
+                    <p class="text-sm text-gray-500 mt-1">Tổng giờ làm việc theo Phase × Bộ phận</p>
+                </div>
+                <span id="phaseWeekLabel" class="text-sm font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg"></span>
+                <div class="flex gap-2">
+                    <button id="btnByPhase" onclick="switchPhaseView('hours')"
+                        class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white">
+                        By Phase
+                    </button>
+                    <button id="btnByPhasePct" onclick="switchPhaseView('pct')"
+                        class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600">
+                        By Phase %
+                    </button>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="phase-pivot w-full text-sm">
@@ -365,7 +383,7 @@
     /* ===== PHASE PIVOT TABLE ===== */
     .phase-pivot { border-collapse: collapse; width: 100%; }
     .phase-pivot th,
-    .phase-pivot td { border: 1px solid #374151; padding: 10px 16px; white-space: nowrap; }
+    .phase-pivot td { border: 0; border-bottom: 1px solid #f3f4f6; padding: 12px 16px; white-space: nowrap; }
 
     /* Loading placeholder */
     .phase-loading {
@@ -377,32 +395,30 @@
 
     /* ─── HEADER ─── */
     .phase-pivot thead th {
-        background: #f9fafb; color: #000000;
-        font-weight: 700; font-size: 0.72rem;
-        text-transform: uppercase; letter-spacing: 0.07em;
+        background: #f9fafb; color: #6b7280;
+        font-weight: 700; font-size: 0.7rem;
+        text-transform: uppercase; letter-spacing: 0.08em;
         text-align: center;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid #f3f4f6;
     }
     .phase-pivot thead th.th-phase  { text-align: left; min-width: 90px; }
     .phase-pivot thead th.th-dept   { min-width: 85px; }
-    .phase-pivot thead th.th-total  { background: #f3f4f6; color: #374151; min-width: 80px; }
-    .phase-pivot thead th.th-pct    { background: #dc2626; color: #fff;    min-width: 65px; }
+    .phase-pivot thead th.th-total  { min-width: 80px; }
+    .phase-pivot thead th.th-pct    { color: #dc2626; min-width: 65px; }
 
     /* ─── BODY ─── */
-    .phase-pivot tbody td           { background: #fff; color: #111827; text-align: center; font-weight: 500; border-bottom: 1px solid #f3f4f6; }
-    .phase-pivot tbody td.td-phase  { background: #fff; color: #111827; text-align: left; font-weight: 700; }
-    .phase-pivot tbody td.td-total  { background: #f9fafb; color: #111827; font-weight: 700; }
-    .phase-pivot tbody td.td-pct    { background: #dc2626; color: #fff;   font-weight: 700; }
+    .phase-pivot tbody td           { background: #fff; color: #374151; text-align: center; font-weight: 500; font-size: 0.875rem; }
+    .phase-pivot tbody td.td-phase  { background: #fff; color: #111827; text-align: left;  font-weight: 700; }
+    .phase-pivot tbody td.td-total  { background: #fff; color: #111827; font-weight: 700; }
+    .phase-pivot tbody td.td-pct    { background: #fff; color: #dc2626; font-weight: 700; }
 
     /* ─── FOOTER ─── */
-    .phase-pivot tfoot td           { background: #f3f4f6; color: #111827; text-align: center; font-weight: 700; border-top: 2px solid #e5e7eb; }
+    .phase-pivot tfoot td           { background: #f9fafb; color: #6b7280; text-align: center; font-weight: 700; font-size: 0.875rem; border-top: 2px solid #f3f4f6; border-bottom: 0; }
     .phase-pivot tfoot td.td-phase  { text-align: left; }
-    .phase-pivot tfoot td.td-total  { background: #e5e7eb; color: #111827; }
-    .phase-pivot tfoot td.td-pct    { background: #dc2626; color: #fff; }
+    .phase-pivot tfoot td.td-total  { color: #111827; }
+    .phase-pivot tfoot td.td-pct    { color: #dc2626; }
 
     /* ─── HOVER ─── */
-    .phase-pivot tbody tr:hover td          { background: #fef2f2 !important; color: #111827  !important; }
-    .phase-pivot tbody tr:hover td.td-phase { background: #fef2f2 !important; color: #dc2626  !important; }
-    .phase-pivot tbody tr:hover td.td-total { background: #f3f4f6 !important; color: #111827  !important; }
-    .phase-pivot tbody tr:hover td.td-pct   { background: #b91c1c !important; color: #fff     !important; }
+    .phase-pivot tbody tr:hover td          { background: #fef2f2 !important; }
+    .phase-pivot tbody tr:hover td.td-pct   { color: #b91c1c !important; }
 </style>

@@ -1,4 +1,9 @@
 // Global variables
+let currentPhaseView = 'hours'; // 'hours' hoặc 'pct'
+let cachedPhaseData = [];
+let cachedFunctionData = null;
+let currentFunctionView = 'table';
+let functionChartInstance = null;
 let trendChart = null;
 let departmentChart = null;
 let currentChartView = 'week';
@@ -147,14 +152,71 @@ function getFilters() {
     return filters;
 }
 
+// Compute a human-readable date range label from current filters
+function getDateRangeLabel() {
+    const filters = getFilters();
+    const timeRange = filters.timeRange;
+    const fmt = (d) => d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    
+    let start, end;
+    const now = new Date();
+    
+    if (timeRange === 'custom') {
+        if (filters.startDate && filters.endDate) {
+            start = new Date(filters.startDate);
+            end   = new Date(filters.endDate);
+        }
+    } else if (timeRange === 'current_week' || timeRange === 'last_week') {
+        const day = now.getDay(); // 0=Sun
+        const diffToMon = (day === 0 ? -6 : 1 - day);
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diffToMon);
+        if (timeRange === 'last_week') monday.setDate(monday.getDate() - 7);
+        start = new Date(monday);
+        end   = new Date(monday);
+        end.setDate(monday.getDate() + 6);
+    } else if (timeRange === 'current_month') {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    } else if (timeRange === 'last_month') {
+        start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        end   = new Date(now.getFullYear(), now.getMonth(), 0);
+    } else if (timeRange === 'current_quarter') {
+        const q = Math.floor(now.getMonth() / 3);
+        start = new Date(now.getFullYear(), q * 3, 1);
+        end   = new Date(now.getFullYear(), q * 3 + 3, 0);
+    } else if (timeRange === 'current_year') {
+        const yr = parseInt(filters.year) || now.getFullYear();
+        start = new Date(yr, 0, 1);
+        end   = new Date(yr, 11, 31);
+    }
+    
+    if (start && end) {
+        return `${fmt(start)} – ${fmt(end)}`;
+    }
+    return '';
+}
+
+// Update week label on both section headers
+function updateWeekLabels() {
+    const label = getDateRangeLabel();
+    ['functionWeekLabel', 'phaseWeekLabel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = label ? `Week (${label})` : '';
+    });
+}
+
 // Update dashboard
 function updateDashboard(data) {
     updateKPIs(data.kpis);
     updateTrendChart(data.trendData);
     updateDepartmentChart(data.departmentData);
-    updateHeatmap(data.heatmapData);
+    cachedFunctionData = data.functionData;
+    updateFunctionTable(data.functionData, currentFunctionView);
     updateDetailTable(data.detailData);
-    updatePhaseTable(data.phaseData);
+    cachedPhaseData = data.phaseData;
+    updatePhaseTable(data.phaseData, currentPhaseView);
+    updateWeekLabels();
 }
 
 // Update KPIs
@@ -355,85 +417,178 @@ function updateDepartmentChart(departmentData) {
     });
 }
 
-// Update heatmap
-function updateHeatmap(heatmapData) {
-    const container = document.getElementById('heatmapContainer');
+// Switch function view
+function switchFunctionView(mode) {
+    currentFunctionView = mode;
+    const btnTable = document.getElementById('btnFunctionTable');
+    const btnChart = document.getElementById('btnFunctionChart');
+    const tableView = document.getElementById('functionTableView');
+    const chartView = document.getElementById('functionChartView');
     
-    if (heatmapData.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-12 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <p class="font-medium">Không có dữ liệu heatmap</p>
-            </div>
-        `;
+    if (mode === 'table') {
+        btnTable.className = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white';
+        btnChart.className = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600';
+        tableView.classList.remove('hidden');
+        chartView.classList.add('hidden');
+    } else {
+        btnChart.className = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white';
+        btnTable.className = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600';
+        tableView.classList.add('hidden');
+        chartView.classList.remove('hidden');
+        updateFunctionChart(cachedFunctionData);
+    }
+}
+
+// Update By Function Utilization Table
+function updateFunctionTable(funcData, mode = 'table') {
+    const thead = document.getElementById('functionTableHead');
+    const tbody = document.getElementById('functionTableBody');
+    const tfoot = document.getElementById('functionTableFoot');
+    
+    if (!funcData || !funcData.departments || funcData.departments.length === 0) {
+        thead.innerHTML = '<tr><th colspan="5" class="phase-loading">Không có dữ liệu</th></tr>';
+        tbody.innerHTML = '';
+        tfoot.innerHTML = '';
         return;
     }
     
-    // Group by project
-    const projectGroups = {};
-    heatmapData.forEach(item => {
-        if (!projectGroups[item.project]) {
-            projectGroups[item.project] = [];
-        }
-        projectGroups[item.project].push(item);
-    });
+    const depts = funcData.departments;
     
-    // Get all unique weeks
-    const weeks = [...new Set(heatmapData.map(item => item.week))].sort();
+    // Header
+    let headHtml = '<tr>';
+    headHtml += '<th class="th-phase">By Function</th>';
+    depts.forEach(d => { headHtml += `<th class="th-dept">${d}</th>`; });
+    headHtml += `<th class="th-total">Total</th>`;
+    headHtml += '</tr>';
+    thead.innerHTML = headHtml;
     
-    // Calculate max hours for color scaling
-    const maxHours = Math.max(...heatmapData.map(item => item.hours));
+    // Rows
+    const rows = [
+        { label: 'Available hrs', values: funcData.availableHrs, total: funcData.totalAvailable, fmt: v => formatNumber(v) },
+        { label: 'No. of HC',     values: funcData.headCount,    total: funcData.totalHC,        fmt: v => v },
+        { label: 'Utilize hour',  values: funcData.utilizeHour,  total: funcData.totalUtilize,   fmt: v => formatNumber(v) },
+        { label: 'Utilization rate', values: funcData.utilizationRate, total: funcData.totalRate, fmt: v => v + '%', isRate: true },
+    ];
     
-    let html = '<div class="space-y-4">';
-    
-    Object.keys(projectGroups).forEach(project => {
-        const projectData = projectGroups[project];
-        
-        html += `
-            <div class="border border-gray-200 rounded-xl overflow-hidden">
-                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                    <h4 class="font-black text-gray-900">${project}</h4>
-                </div>
-                <div class="p-4">
-                    <div class="grid grid-cols-${Math.min(weeks.length, 8)} gap-2">
-        `;
-        
-        weeks.forEach(week => {
-            const cell = projectData.find(d => d.week === week);
-            if (cell) {
-                const intensity = (cell.hours / maxHours) * 100;
-                const bgColor = `rgba(220, 38, 38, ${intensity / 100})`;
-                
-                html += `
-                    <div class="heatmap-cell p-3 rounded-lg border border-gray-200 text-center" 
-                         style="background-color: ${bgColor}"
-                         onclick='showCellDetail(${JSON.stringify(cell)})'>
-                        <div class="text-xs font-bold text-gray-700 mb-1">${week}</div>
-                        <div class="text-lg font-black text-gray-900">${formatNumber(cell.hours)}h</div>
-                        <div class="text-xs text-gray-600">${cell.staffCount} người</div>
-                    </div>
-                `;
-            } else {
-                html += `
-                    <div class="p-3 rounded-lg border border-gray-200 bg-gray-50 text-center opacity-50">
-                        <div class="text-xs font-bold text-gray-400 mb-1">${week}</div>
-                        <div class="text-xs text-gray-400">-</div>
-                    </div>
-                `;
-            }
+    let bodyHtml = '';
+    rows.forEach(row => {
+        bodyHtml += '<tr>';
+        bodyHtml += `<td class="td-phase">${row.label}</td>`;
+        row.values.forEach((val, i) => {
+            const display = row.fmt(val);
+            const cls = row.isRate ? (val > 100 ? 'style="color:#dc2626;font-weight:700"' : '') : '';
+            bodyHtml += `<td ${cls}>${display}</td>`;
         });
-        
-        html += `
-                    </div>
-                </div>
-            </div>
-        `;
+        const totalDisplay = row.fmt(row.total);
+        const totalCls = row.isRate ? (row.total > 100 ? 'style="color:#dc2626;font-weight:700"' : '') : '';
+        bodyHtml += `<td class="td-total" ${totalCls}>${totalDisplay}</td>`;
+        bodyHtml += '</tr>';
     });
+    tbody.innerHTML = bodyHtml;
     
-    html += '</div>';
-    container.innerHTML = html;
+    // Footer (working days info)
+    let footHtml = '<tr>';
+    footHtml += `<td class="td-phase" colspan="${depts.length + 2}" style="text-align:left;color:#9ca3af;font-size:0.75rem;font-weight:500">`;
+    footHtml += `Số ngày làm việc: ${funcData.workingDays} ngày · 8.5h/ngày`;
+    footHtml += '</td></tr>';
+    tfoot.innerHTML = footHtml;
+}
+
+// Update By Function Chart (combo: bar + line)
+function updateFunctionChart(funcData) {
+    const canvas = document.getElementById('functionChart');
+    if (!canvas || !funcData || !funcData.departments) return;
+    
+    if (functionChartInstance) {
+        functionChartInstance.destroy();
+        functionChartInstance = null;
+    }
+    
+    const labels = funcData.departments;
+    const hcData = funcData.headCount;
+    const utilizeData = funcData.utilizeHour.map(v => Number(v));
+    const rateData = funcData.utilizationRate.map(v => Number(v));
+    
+    functionChartInstance = new Chart(canvas, {
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'No. of HC',
+                    data: hcData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    yAxisID: 'y',
+                    order: 3,
+                    barPercentage: 0.5
+                },
+                {
+                    type: 'bar',
+                    label: 'Utilize hour',
+                    data: utilizeData,
+                    backgroundColor: 'rgba(251, 146, 60, 0.85)',
+                    yAxisID: 'y',
+                    order: 2,
+                    barPercentage: 0.5
+                },
+                {
+                    type: 'line',
+                    label: 'Utilization rate',
+                    data: rateData,
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22,163,74,0.1)',
+                    pointBackgroundColor: rateData.map(v => v > 100 ? '#dc2626' : '#16a34a'),
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    borderWidth: 2.5,
+                    tension: 0.3,
+                    yAxisID: 'y2',
+                    order: 1,
+                    datalabels: {
+                        align: 'top',
+                        color: ctx => ctx.dataset.data[ctx.dataIndex] > 100 ? '#dc2626' : '#16a34a',
+                        font: { weight: 'bold', size: 11 },
+                        formatter: v => v + '%'
+                    }
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 12 } } },
+                title: { display: false },
+                datalabels: {
+                    display: ctx => ctx.dataset.type !== 'line',
+                    anchor: 'end',
+                    align: 'top',
+                    color: '#374151',
+                    font: { weight: 'bold', size: 11 },
+                    formatter: v => v > 0 ? v : ''
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    position: 'left',
+                    title: { display: false },
+                    grid: { color: '#f3f4f6' }
+                },
+                y2: {
+                    beginAtZero: true,
+                    position: 'right',
+                    max: 160,
+                    ticks: {
+                        callback: v => v + '%',
+                        color: '#16a34a'
+                    },
+                    grid: { drawOnChartArea: false }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
 }
 
 // Update detail table
@@ -1083,7 +1238,26 @@ function formatHours(val) {
     return Number.isInteger(n) ? n.toString() : n.toString();
 }
 
-function updatePhaseTable(phaseData) {
+// Switch phase view mode
+function switchPhaseView(mode) {
+    currentPhaseView = mode;
+    
+    // Update button styles
+    const btnHours = document.getElementById('btnByPhase');
+    const btnPct   = document.getElementById('btnByPhasePct');
+    
+    if (mode === 'hours') {
+        btnHours.className = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white';
+        btnPct.className   = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600';
+    } else {
+        btnPct.className   = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white';
+        btnHours.className = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600';
+    }
+    
+    updatePhaseTable(cachedPhaseData, mode);
+}
+
+function updatePhaseTable(phaseData, mode = 'hours') {
     const thead = document.getElementById('phaseTableHead');
     const tbody = document.getElementById('phaseTableBody');
     const tfoot = document.getElementById('phaseTableFoot');
@@ -1121,10 +1295,24 @@ function updatePhaseTable(phaseData) {
         departments.forEach(dept => {
             const found = phaseData.find(d => d.phase === phase && d.department === dept);
             const val = found ? Number(found.totalHours) : 0;
-            bodyHtml += `<td>${val > 0 ? formatHours(val) : ''}</td>`;
+            if (mode === 'pct') {
+                // % theo cột: val / tổng giờ của dept đó
+                const deptTotal = phaseData
+                .filter(d => d.department === dept)
+                .reduce((sum, d) => sum + Number(d.totalHours), 0);
+                const pct = deptTotal > 0 ? Math.round(val / deptTotal * 100) : 0;
+                bodyHtml += `<td>${val > 0 ? pct + '%' : ''}</td>`;
+            } else {
+                bodyHtml += `<td>${val > 0 ? formatHours(val) : ''}</td>`;
+            }
         });
-        bodyHtml += `<td class="td-total">${formatHours(phaseTotal)}</td>`;
-        bodyHtml += `<td class="td-pct">${phasePct}%</td>`;
+        if (mode === 'pct') {
+            bodyHtml += `<td class="td-total">${formatHours(phaseTotal)}</td>`;
+            bodyHtml += `<td class="td-pct">${phasePct}%</td>`;
+        } else {
+            bodyHtml += `<td class="td-total">${formatHours(phaseTotal)}</td>`;
+            bodyHtml += `<td class="td-pct">${phasePct}%</td>`;
+        }
         bodyHtml += '</tr>';
     });
     tbody.innerHTML = bodyHtml;
@@ -1136,7 +1324,11 @@ function updatePhaseTable(phaseData) {
         const deptTotal = phaseData
         .filter(d => d.department === dept)
         .reduce((sum, d) => sum + Number(d.totalHours), 0);
-        footHtml += `<td>${deptTotal > 0 ? formatHours(deptTotal) : ''}</td>`;
+        if (mode === 'pct') {
+            footHtml += `<td>${deptTotal > 0 ? '100%' : ''}</td>`;
+        } else {
+            footHtml += `<td>${deptTotal > 0 ? formatHours(deptTotal) : ''}</td>`;
+        }
     });
     footHtml += `<td class="td-total">${formatHours(grandTotal)}</td>`;
     footHtml += `<td class="td-pct">100%</td>`;
