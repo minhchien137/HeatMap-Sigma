@@ -86,6 +86,11 @@ namespace HeatmapSystem.Services
                 var data = query.ToList();
 
                 // Build report
+                var (fromDate2, toDate2) = GetDateRange(filter);
+                int workingDays = 0;
+                for (var d = fromDate2.Date; d <= toDate2.Date; d = d.AddDays(1))
+                    if (d.DayOfWeek != DayOfWeek.Sunday) workingDays++;
+
                 return new ReportDataDto
                 {
                     kpis = CalculateKPIs(data, fromDate, toDate),
@@ -94,7 +99,8 @@ namespace HeatmapSystem.Services
                     departmentData = CalculateDepartmentData(data),
                     heatmapData = CalculateHeatmapData(data),
                     detailData = CalculateDetailData(data),
-                    phaseData = CalculatePhaseData(data)
+                    phaseData = CalculatePhaseData(data),
+                    functionData = CalculateFunctionData(data, workingDays)
                 };
             }
             catch (Exception ex)
@@ -476,6 +482,54 @@ namespace HeatmapSystem.Services
                 .OrderBy(p => p.phase)
                 .ThenBy(p => p.department)
                 .ToList();
+        }
+
+        private FunctionUtilizationDto CalculateFunctionData(List<SVN_StaffDetail> data, int workingDays)
+        {
+            // Group by department
+            var deptGroups = data
+                .GroupBy(s => s.Department)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            var departments = new List<string>();
+            var availableHrs = new List<decimal>();
+            var headCounts = new List<int>();
+            var utilizeHours = new List<decimal>();
+            var utilizationRates = new List<decimal>();
+
+            foreach (var g in deptGroups)
+            {
+                var hc = g.Select(s => s.SVNStaff).Distinct().Count();
+                var available = hc * workingDays * 8.5m;
+                var utilize = g.Sum(s => s.WorkHours ?? 0);
+                var rate = available > 0 ? Math.Round(utilize / available * 100, 0) : 0;
+
+                departments.Add(g.Key);
+                availableHrs.Add(available);
+                headCounts.Add(hc);
+                utilizeHours.Add(utilize);
+                utilizationRates.Add(rate);
+            }
+
+            var totalHC = data.Select(s => s.SVNStaff).Distinct().Count();
+            var totalAvailable = totalHC * workingDays * 8.5m;
+            var totalUtilize = data.Sum(s => s.WorkHours ?? 0);
+            var totalRate = totalAvailable > 0 ? Math.Round(totalUtilize / totalAvailable * 100, 0) : 0;
+
+            return new FunctionUtilizationDto
+            {
+                departments = departments,
+                availableHrs = availableHrs,
+                headCount = headCounts,
+                utilizeHour = utilizeHours,
+                utilizationRate = utilizationRates,
+                totalAvailable = totalAvailable,
+                totalHC = totalHC,
+                totalUtilize = totalUtilize,
+                totalRate = totalRate,
+                workingDays = workingDays
+            };
         }
 
         #endregion

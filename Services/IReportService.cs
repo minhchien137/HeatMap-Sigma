@@ -83,6 +83,21 @@ namespace HeatmapSystem.Services
         public List<HeatmapDataDto> heatmapData { get; set; }
         public List<DetailDataDto> detailData { get; set; }
         public List<PhaseDataDto> phaseData { get; set; }
+        public FunctionUtilizationDto functionData { get; set; }
+    }
+
+    public class FunctionUtilizationDto
+    {
+        public List<string> departments { get; set; }
+        public List<decimal> availableHrs { get; set; }
+        public List<int> headCount { get; set; }
+        public List<decimal> utilizeHour { get; set; }
+        public List<decimal> utilizationRate { get; set; }
+        public decimal totalAvailable { get; set; }
+        public int totalHC { get; set; }
+        public decimal totalUtilize { get; set; }
+        public decimal totalRate { get; set; }
+        public int workingDays { get; set; }
     }
 
     public class PhaseDataDto
