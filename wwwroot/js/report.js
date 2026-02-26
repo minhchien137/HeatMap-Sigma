@@ -1,9 +1,10 @@
 // Global variables
-let currentPhaseView = 'hours'; // 'hours' hoặc 'pct'
+let currentPhaseView = 'hours'; // 'hours' hoặc 'pct' hoặc 'chart'
 let cachedPhaseData = [];
 let cachedFunctionData = null;
 let currentFunctionView = 'table';
 let functionChartInstance = null;
+let phaseChartInstance = null;
 let trendChart = null;
 let departmentChart = null;
 let currentChartView = 'week';
@@ -192,17 +193,26 @@ function getDateRangeLabel() {
     }
     
     if (start && end) {
-        return `${fmt(start)} – ${fmt(end)}`;
+        // Tính ISO week number từ ngày bắt đầu
+        const getWeekNumber = (d) => {
+            const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            const dayNum = date.getUTCDay() || 7;
+            date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+            return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+        };
+        const weekNum = getWeekNumber(start);
+        return { weekNum, dateRange: `${fmt(start)} – ${fmt(end)}` };
     }
-    return '';
+    return null;
 }
 
 // Update week label on both section headers
 function updateWeekLabels() {
-    const label = getDateRangeLabel();
+    const result = getDateRangeLabel();
     ['functionWeekLabel', 'phaseWeekLabel'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.textContent = label ? `Week (${label})` : '';
+        if (el) el.textContent = result ? `Week ${result.weekNum} (${result.dateRange})` : '';
     });
 }
 
@@ -215,7 +225,11 @@ function updateDashboard(data) {
     updateFunctionTable(data.functionData, currentFunctionView);
     updateDetailTable(data.detailData);
     cachedPhaseData = data.phaseData;
-    updatePhaseTable(data.phaseData, currentPhaseView);
+    if (currentPhaseView === 'chart') {
+        updatePhaseChart(data.phaseData);
+    } else {
+        updatePhaseTable(data.phaseData, currentPhaseView);
+    }
     updateWeekLabels();
 }
 
@@ -1242,19 +1256,145 @@ function formatHours(val) {
 function switchPhaseView(mode) {
     currentPhaseView = mode;
     
-    // Update button styles
     const btnHours = document.getElementById('btnByPhase');
     const btnPct   = document.getElementById('btnByPhasePct');
+    const btnChart = document.getElementById('btnByPhaseChart');
+    const tableView = document.getElementById('phaseTableView');
+    const chartView = document.getElementById('phaseChartView');
     
-    if (mode === 'hours') {
-        btnHours.className = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white';
-        btnPct.className   = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600';
+    const activeClass   = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white';
+    const inactiveClass = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600';
+    
+    btnHours.className = mode === 'hours' ? activeClass : inactiveClass;
+    btnPct.className   = mode === 'pct'   ? activeClass : inactiveClass;
+    btnChart.className = mode === 'chart' ? activeClass : inactiveClass;
+    
+    if (mode === 'chart') {
+        tableView.classList.add('hidden');
+        chartView.classList.remove('hidden');
+        updatePhaseChart(cachedPhaseData);
     } else {
-        btnPct.className   = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white';
-        btnHours.className = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600';
+        chartView.classList.add('hidden');
+        tableView.classList.remove('hidden');
+        updatePhaseTable(cachedPhaseData, mode);
+    }
+}
+
+// Render Phase % stacked bar chart (nhất quán với bảng By Phase %)
+// X-axis = Department, mỗi bar stack theo Phase, giá trị = % giờ của phase trong dept đó
+function updatePhaseChart(phaseData) {
+    // BƯỚC 1: Luôn destroy chart cũ trước tiên, không return sớm
+    if (phaseChartInstance) {
+        phaseChartInstance.destroy();
+        phaseChartInstance = null;
     }
     
-    updatePhaseTable(cachedPhaseData, mode);
+    // BƯỚC 2: Đảm bảo container về trạng thái canvas sạch
+    const container = document.getElementById('phaseChartView');
+    if (container) {
+        container.innerHTML = '<canvas id="phaseChart" style="width:100%;height:100%;"></canvas>';
+    }
+    
+    const chartCanvas = document.getElementById('phaseChart');
+    
+    // BƯỚC 3: Nếu không có data thì hiện thông báo và dừng
+    if (!phaseData || phaseData.length === 0) {
+        if (container) {
+            container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9ca3af;font-size:0.875rem;font-weight:500;letter-spacing:0.05em;">KHÔNG CÓ DỮ LIỆU</div>`;
+        }
+        return;
+    }
+    
+    if (!chartCanvas) return;
+    
+    const phases      = [...new Set(phaseData.map(d => d.phase))].sort();
+    const departments = [...new Set(phaseData.map(d => d.department))].sort();
+    
+    // Palette cho từng phase
+    const palette = [
+        { bg: 'rgba(220, 38,  38,  0.85)', border: '#dc2626' },
+        { bg: 'rgba(37,  99,  235, 0.85)', border: '#2563eb' },
+        { bg: 'rgba(22,  163, 74,  0.85)', border: '#16a34a' },
+        { bg: 'rgba(234, 179, 8,   0.85)', border: '#ca8a04' },
+        { bg: 'rgba(168, 85,  247, 0.85)', border: '#9333ea' },
+        { bg: 'rgba(6,   182, 212, 0.85)', border: '#0891b2' },
+    ];
+    
+    // X-axis = Department + thêm cột SVN%
+    const grandTotal = phaseData.reduce((s, d) => s + Number(d.totalHours), 0);
+    const labels = [...departments, 'SVN %'];
+    
+    // Mỗi Phase là 1 dataset, X-axis là Department + SVN%
+    // Giá trị = % giờ của phase đó / tổng giờ của dept (giống bảng By Phase %)
+    const datasets = phases.map((phase, i) => {
+        const color = palette[i % palette.length];
+        const data = departments.map(dept => {
+            const deptTotal = phaseData
+            .filter(d => d.department === dept)
+            .reduce((s, d) => s + Number(d.totalHours), 0);
+            const found = phaseData.find(d => d.phase === phase && d.department === dept);
+            const val   = found ? Number(found.totalHours) : 0;
+            return deptTotal > 0 ? Math.round(val / deptTotal * 100) : 0;
+        });
+        // Thêm SVN%: % giờ của phase này / grand total
+        const phaseTotal = phaseData
+        .filter(d => d.phase === phase)
+        .reduce((s, d) => s + Number(d.totalHours), 0);
+        data.push(grandTotal > 0 ? Math.round(phaseTotal / grandTotal * 100) : 0);
+        return {
+            label: phase,
+            data,
+            backgroundColor: color.bg,
+            borderColor: color.border,
+            borderWidth: 1.5,
+            borderRadius: 4,
+            datalabels: {
+                display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+                color: '#fff',
+                font: { weight: 'bold', size: 12 },
+                formatter: v => v + '%'
+            }
+        };
+    });
+    
+    phaseChartInstance = new Chart(chartCanvas, {
+        type: 'bar',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 16 } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%`
+                    }
+                },
+                datalabels: {}
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { display: false },
+                    ticks: {
+                        color: ctx => ctx.tick.label === 'SVN %' ? '#dc2626' : '#374151',
+                        font: ctx => ({
+                            weight: ctx.tick.label === 'SVN %' ? 'bold' : 'normal',
+                            size: 12
+                        })
+                    }
+                },
+                y: {
+                    stacked: true,
+                    max: 100,
+                    ticks: { callback: v => v + '%' },
+                    grid: { color: '#f3f4f6' },
+                    title: { display: true, text: 'Phân bổ theo Phase (%)', font: { weight: 'bold' } }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
 }
 
 function updatePhaseTable(phaseData, mode = 'hours') {
