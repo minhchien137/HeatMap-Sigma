@@ -294,9 +294,14 @@
                         class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600">
                         By Phase %
                     </button>
+                    <button id="btnByPhaseChart" onclick="switchPhaseView('chart')"
+                        class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600">
+                        By Chart
+                    </button>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            <!-- Table view -->
+            <div id="phaseTableView" class="overflow-x-auto">
                 <table class="phase-pivot w-full text-sm">
                     <thead id="phaseTableHead">
                         <tr><th colspan="10" class="phase-loading">Đang tải dữ liệu...</th></tr>
@@ -304,6 +309,10 @@
                     <tbody id="phaseTableBody"></tbody>
                     <tfoot id="phaseTableFoot"></tfoot>
                 </table>
+            </div>
+            <!-- Chart view -->
+            <div id="phaseChartView" class="hidden" style="position:relative; height:380px;">
+                <canvas id="phaseChart"></canvas>
             </div>
         </div>
 
