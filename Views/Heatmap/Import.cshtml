@@ -61,6 +61,18 @@
                             </select>
                         </div>
 
+                        <!-- Customer -->
+                        <div class="group">
+                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Customer</label>
+                               <select id="customer1" class="input-field">
+                                <option value="">-- Chọn Customer --</option>
+                                @foreach (var customer in ViewBag.Customers)
+                                {
+                                    <option value="@customer.IdCustomer">@customer.NameCustomer</option>
+                                }
+                            </select>
+                        </div>
+
                         <!-- Project -->
                         <div class="group">
                             <label
@@ -69,13 +81,12 @@
                                 <option value="">-- Chọn dự án --</option>
                                 @foreach (var project in ViewBag.Projects)
                                 {
-                                    <option value="@project.IdProject">@project.NameProject
-                                        @(!string.IsNullOrEmpty(project.NameCustomer) ? $"({project.NameCustomer})" : "")
-                                    </option>
+                                    <option value="@project.IdProject">@project.NameProject</option>
                                 }
                             </select>
                         </div>
 
+                    
                         <div class="group">
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project Phase</label>
                             <select id="projectPhase1" class="input-field">
@@ -178,6 +189,18 @@
                                 class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
                                 <select id="employee2" class="input-field">
                                     <option value="">-- Chọn bộ phận trước --</option>
+                                </select>
+                            </div>
+
+                            <!-- Customer (Mode 2) -->
+                            <div class="group">
+                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Customer</label>
+                                <select id="customer2" class="input-field">
+                                    <option value="">-- Chọn Customer --</option>
+                                    @foreach (var customer in ViewBag.Customers)
+                                    {
+                                        <option value="@customer.IdCustomer">@customer.NameCustomer</option>
+                                    }
                                 </select>
                             </div>
 
@@ -603,11 +626,11 @@
                                             <script>
                                                 // Tạo biến global chứa projects data để file import.js sử dụng
                                                 window.projectsData = [
-                                                                                                                                                                                        @foreach (var project in ViewBag.Projects)
+                                                    @foreach (var project in ViewBag.Projects)
                                                     {
-                                                        <text>{IdProject: @project.IdProject, NameProject: "@project.NameProject" },</text>
-                                                                                                                                                                                        }
-                                                                                                                                                                                    ];
+                                                        <text>{IdProject: @project.IdProject, NameProject: "@project.NameProject", NameCustomer: "@(project.NameCustomer ?? "")" },</text>
+                                                    }
+                                                ];
                                             </script>
 
                                             <script src="~/js/import.js"></script> 

@@ -138,6 +138,18 @@ function setupDepartmentChangeListeners() {
         loadEmployeesAsCheckboxes(this.value);
     });
     
+    // Customer change → filter project dropdown
+    document.getElementById('customer1')?.addEventListener('change', function() {
+        filterProjectsByCustomer(this.value, 'project1');
+    });
+    
+    document.getElementById('customer2')?.addEventListener('change', function() {
+        // Filter commonProject dropdown
+        filterProjectsByCustomer(this.value, 'commonProject');
+        // Re-render day hours list để cập nhật dropdown dự án riêng từng ngày
+        updateDayHoursList();
+    });
+    
     // Week change listeners for Mode 2 and 3
     const week2Select = document.getElementById('week2');
     if (week2Select) {
@@ -162,7 +174,33 @@ function setupDepartmentChangeListeners() {
     }
 }
 
-// Load employees for dropdown
+// Filter project dropdown theo customer đã chọn
+function filterProjectsByCustomer(customerName, projectSelectId) {
+    const select = document.getElementById(projectSelectId);
+    if (!select) return;
+    
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">-- Chọn dự án --</option>';
+    
+    const filtered = customerName
+    ? window.projectsData.filter(p => p.NameCustomer === customerName)
+    : window.projectsData;
+    
+    filtered.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.IdProject;
+        option.textContent = p.NameProject;
+        if (p.IdProject == currentVal) option.selected = true;
+        select.appendChild(option);
+    });
+}
+
+// Lấy tên customer từ select id
+function getCustomerName(selectId) {
+    const sel = document.getElementById(selectId);
+    if (!sel || !sel.value) return '';
+    return sel.selectedOptions[0]?.text || '';
+}
 function loadEmployees(departmentId, targetSelectId) {
     const employeeSelect = document.getElementById(targetSelectId);
     employeeSelect.innerHTML = '<option value="">Đang tải...</option>';
@@ -330,18 +368,24 @@ function updateDayHoursList() {
         
         let projectDropdown = '';
         if (projectMode === 2) {
-            // Mode 2: Individual project per day
+            // Mode 2: Individual project per day - filter by customer2
+            const customerName = getCustomerName('customer2');
+            const projectOptions = (customerName
+                ? window.projectsData.filter(p => p.NameCustomer === customerName)
+                : window.projectsData
+            ).map(p =>
+                `<option value="${p.IdProject}" ${p.IdProject == existingData.project ? 'selected' : ''}>${p.NameProject}</option>`
+            ).join('');
+            
             projectDropdown = `
                 <select class="day-project input-field flex-1" data-date="${dateStr}" onchange="saveDayData('${dateStr}', this.value, null, null)">
                     <option value="">-- Chọn dự án --</option>
-                    ${window.projectsData.map(p => 
-            `<option value="${p.IdProject}" ${p.IdProject == existingData.project ? 'selected' : ''}>${p.NameProject}</option>`
-        ).join('')}
+                    ${projectOptions}
                 </select>
             `;
-    }
-    
-    dayRow.innerHTML = `
+        }
+        
+        dayRow.innerHTML = `
             <div class="flex-1">
                 <p class="font-bold text-gray-900">${dayName}</p>
                 <p class="text-sm text-gray-500">${dateStr}</p>
@@ -351,8 +395,8 @@ function updateDayHoursList() {
                 <select class="day-hour input-field" style="width: 80px;" data-date="${dateStr}" onchange="updateDayDecimal('${dateStr}')">
                     <option value="">Giờ</option>
                     ${Array.from({length: 24}, (_, h) => 
-    `<option value="${h}" ${h == existingData.hours ? 'selected' : ''}>${String(h).padStart(2, '0')}</option>`
-).join('')}
+        `<option value="${h}" ${h == existingData.hours ? 'selected' : ''}>${String(h).padStart(2, '0')}</option>`
+    ).join('')}
                 </select>
                 <select class="day-minute input-field" style="width: 80px;" data-date="${dateStr}" onchange="updateDayDecimal('${dateStr}')">
                     <option value="">Phút</option>
@@ -596,6 +640,7 @@ function handleSubmitMode1() {
         const data = {
             EmployeeId: parseInt(employee),
             ProjectId: parseInt(project),
+            Customer: getCustomerName('customer1'),
             ProjectPhase: projectPhase,
             Phase: phase,
             WorkDate: day,
@@ -722,6 +767,7 @@ function handleSubmitMode2() {
             EmployeeId: parseInt(employee),
             ProjectMode: projectMode,
             CommonProjectId: projectMode === 1 ? parseInt(document.getElementById('commonProject').value) : null,
+            Customer: getCustomerName('customer2'),
             ProjectPhase: projectPhase,
             Phase: phase,
             Days: days
@@ -766,6 +812,9 @@ function handleSubmitMode2() {
                 if (projectMode === 1) {
                     document.getElementById('commonProject').selectedIndex = 0;
                 }
+                // Reset customer và re-filter project list
+                document.getElementById('customer2').selectedIndex = 0;
+                filterProjectsByCustomer('', 'commonProject');
                 // Giữ tuần và reload danh sách ngày (bỏ tick)
                 const week2Select = document.getElementById('week2');
                 if (week2Select && week2Select.value) {

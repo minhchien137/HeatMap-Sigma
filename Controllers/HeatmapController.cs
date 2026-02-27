@@ -111,6 +111,13 @@ public class DetailDataDto
     }
 
 
+    // DTO class cho Customer (distinct từ SVN_Projects)
+    public class CustomerDto
+    {
+        public string IdCustomer { get; set; }
+        public string NameCustomer { get; set; }
+    }
+
     [Route("[controller]")]
     public class HeatmapController : Controller
     {
@@ -181,6 +188,16 @@ public class DetailDataDto
             // Dự án từ Database
             var projects = _context.SVN_Projects.ToList();
             ViewBag.Projects = projects;
+
+            // Customers (distinct từ SVN_Projects)
+            var customers = _context.SVN_Projects
+                .Where(p => !string.IsNullOrEmpty(p.NameCustomer))
+                .Select(p => p.NameCustomer)
+                .Distinct()
+                .OrderBy(c => c)
+                .Select(c => new CustomerDto { IdCustomer = c, NameCustomer = c })
+                .ToList();
+            ViewBag.Customers = customers;
 
             // Project Phase từ Database
             var projectPhases = _context.SVN_ProjectPhase.ToList();
@@ -276,6 +293,7 @@ public class DetailDataDto
         {
             public int EmployeeId { get; set; }
             public int ProjectId { get; set; }
+            public string Customer { get; set; }
             public string WorkDate { get; set; }
             public decimal WorkHours { get; set; }
             public string ProjectPhase { get; set; }
@@ -429,6 +447,7 @@ public class DetailDataDto
                 {
                     // Cập nhật bản ghi hiện có
                     existing.WorkHours = request.WorkHours;
+                    existing.Customer = request.Customer ?? project.NameCustomer ?? "";
                     existing.ProjectPhase = request.ProjectPhase ?? "";
                     existing.Phase = request.Phase ?? "";
                     existing.CreateDate = DateTime.Now;
@@ -442,6 +461,7 @@ public class DetailDataDto
                         SVNStaff = employee.emp_code,
                         NameStaff = fullName,
                         Department = department?.dept_name ?? "N/A",
+                        Customer = request.Customer ?? project.NameCustomer ?? "",
                         Project = project.NameProject,
                         ProjectPhase = request.ProjectPhase ?? "",
                         Phase = request.Phase ?? "",
@@ -492,6 +512,7 @@ public class DetailDataDto
             public int EmployeeId { get; set; }
             public int ProjectMode { get; set; }  // 1 = một dự án chung, 2 = dự án riêng
             public int? CommonProjectId { get; set; }  // Dùng khi ProjectMode = 1
+            public string Customer { get; set; }
             public string ProjectPhase { get; set; }
             public string Phase { get; set; }
             public List<DayDataRequest> Days { get; set; }
@@ -669,6 +690,7 @@ public class DetailDataDto
                     {
                         // Cập nhật
                         existing.WorkHours = dayData.WorkHours;
+                        existing.Customer = request.Customer ?? project.NameCustomer ?? "";
                         existing.ProjectPhase = request.ProjectPhase ?? "";
                         existing.Phase = request.Phase ?? "";
                         existing.CreateDate = DateTime.Now;
@@ -683,6 +705,7 @@ public class DetailDataDto
                             SVNStaff = employee.emp_code,
                             NameStaff = fullName,
                             Department = department?.dept_name ?? "N/A",
+                            Customer = request.Customer ?? project.NameCustomer ?? "",
                             Project = project.NameProject,
                             ProjectPhase = request.ProjectPhase ?? "",
                             Phase = request.Phase ?? "",
