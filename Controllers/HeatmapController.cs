@@ -1139,6 +1139,21 @@ public class DetailDataDto
             }
         }
 
+        [HttpGet("GetCustomerList")]
+        public IActionResult GetCustomerList()
+        {
+            try
+            {
+                var customers = _reportService.GetCustomerList();
+                return Json(customers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading customer list");
+                return Json(new { error = ex.Message });
+            }
+        }
+
         [HttpGet("GetProjectList")]
         public IActionResult GetProjectList()
         {
@@ -1173,6 +1188,7 @@ public class DetailDataDto
         public IActionResult GetReportData(
             string timeRange = "current_week",
             string year = "",
+            string customer = "",
             string department = "",
             string project = "",
             string phase = "",
@@ -1190,6 +1206,7 @@ public class DetailDataDto
                 {
                     TimeRange = timeRange,
                     Year = year,
+                    Customer = customer,
                     Department = department,
                     Project = project,
                     Phase = phase,

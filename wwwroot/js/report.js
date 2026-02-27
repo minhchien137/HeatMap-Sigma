@@ -2,6 +2,9 @@
 let currentPhaseView = 'hours'; // 'hours' hoặc 'pct' hoặc 'chart'
 let cachedPhaseData = [];
 let cachedFunctionData = null;
+let cachedCustomerData = [];
+let currentCustomerView = 'table';
+let customerChartInstance = null;
 let currentFunctionView = 'table';
 let functionChartInstance = null;
 let phaseChartInstance = null;
@@ -43,6 +46,7 @@ function initializeFilters() {
     loadDepartments();
     loadProjects();
     loadPhases();
+    loadCustomers();
 }
 
 // Load departments
@@ -103,6 +107,26 @@ async function loadPhases() {
     }
 }
 
+// Load customers
+async function loadCustomers() {
+    try {
+        const response = await fetch('/Heatmap/GetCustomerList');
+        if (response.ok) {
+            const customers = await response.json();
+            const select = document.getElementById('customerFilter');
+            if (!select) return;
+            customers.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.name;
+                option.textContent = c.name;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading customers:', error);
+    }
+}
+
 // Apply filters
 function applyFilters() {
     loadReportData();
@@ -137,9 +161,11 @@ async function loadReportData() {
 function getFilters() {
     const timeRange = document.getElementById('timeRange').value;
     const phaseEl = document.getElementById('phaseFilter');
+    const customerEl = document.getElementById('customerFilter');
     const filters = {
         timeRange: timeRange,
         year: document.getElementById('yearFilter').value,
+        customer: customerEl ? customerEl.value : '',
         department: document.getElementById('departmentFilter').value,
         project: document.getElementById('projectFilter').value,
         phase: phaseEl ? phaseEl.value : ''
@@ -210,7 +236,7 @@ function getDateRangeLabel() {
 // Update week label on both section headers
 function updateWeekLabels() {
     const result = getDateRangeLabel();
-    ['functionWeekLabel', 'phaseWeekLabel'].forEach(id => {
+    ['functionWeekLabel', 'phaseWeekLabel', 'customerWeekLabel'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = result ? `Week ${result.weekNum} (${result.dateRange})` : '';
     });
@@ -229,6 +255,12 @@ function updateDashboard(data) {
         updatePhaseChart(data.phaseData);
     } else {
         updatePhaseTable(data.phaseData, currentPhaseView);
+    }
+    cachedCustomerData = data.customerData || [];
+    if (currentCustomerView === 'chart') {
+        updateCustomerChart(cachedCustomerData);
+    } else {
+        updateCustomerTable(cachedCustomerData);
     }
     updateWeekLabels();
 }
@@ -1247,9 +1279,8 @@ function showError(message) {
 // PHASE PIVOT TABLE
 // ========================
 function formatHours(val) {
-    // Giữ nguyên số thập phân, bỏ .0 nếu là số nguyên
-    const n = Number(val);
-    return Number.isInteger(n) ? n.toString() : n.toString();
+    const n = Math.round(Number(val) * 100) / 100; // làm tròn 2 chữ số thập phân, tránh floating point
+    return Number.isInteger(n) ? n.toString() : n.toFixed(2).replace(/\.?0+$/, '');
 }
 
 // Switch phase view mode
@@ -1474,4 +1505,193 @@ function updatePhaseTable(phaseData, mode = 'hours') {
     footHtml += `<td class="td-pct">100%</td>`;
     footHtml += '</tr>';
     tfoot.innerHTML = footHtml;
+}
+// ============================================================
+// CUSTOMER TABLE & CHART
+// ============================================================
+
+function switchCustomerView(mode) {
+    currentCustomerView = mode;
+    const btnTable = document.getElementById('btnCustomerTable');
+    const btnChart = document.getElementById('btnCustomerChart');
+    const tableView = document.getElementById('customerTableView');
+    const chartView = document.getElementById('customerChartView');
+    const activeClass  = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white';
+    const inactiveClass = 'px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600';
+    
+    if (mode === 'table') {
+        btnTable.className = activeClass;
+        btnChart.className = inactiveClass;
+        tableView.classList.remove('hidden');
+        chartView.classList.add('hidden');
+        updateCustomerTable(cachedCustomerData);
+    } else {
+        btnChart.className = activeClass;
+        btnTable.className = inactiveClass;
+        tableView.classList.add('hidden');
+        chartView.classList.remove('hidden');
+        updateCustomerChart(cachedCustomerData);
+    }
+}
+
+/**
+* Pivot table:
+*  Rows    = Customer (grouped header row) + Project rows under each customer
+*  Columns = Departments (dynamic) + Total + SCM%
+*  Logic matches excel screenshot 1: Total – By Customer
+*/
+function updateCustomerTable(customerData) {
+    const thead = document.getElementById('customerTableHead');
+    const tbody = document.getElementById('customerTableBody');
+    const tfoot = document.getElementById('customerTableFoot');
+    
+    if (!customerData || customerData.length === 0) {
+        thead.innerHTML = '<tr><th colspan="10" class="phase-loading">Không có dữ liệu</th></tr>';
+        tbody.innerHTML = '';
+        tfoot.innerHTML = '';
+        return;
+    }
+    
+    // Unique departments (columns) sorted
+    const departments = [...new Set(customerData.map(d => d.department))].sort();
+    const grandTotal  = customerData.reduce((s, d) => s + Number(d.totalHours), 0);
+    
+    // ==== HEADER ====
+    let headHtml = '<tr>';
+    headHtml += `<th class="th-phase" style="min-width:110px">Customer</th>`;
+    headHtml += `<th class="th-phase" style="min-width:140px">Project</th>`;
+    departments.forEach(d => { headHtml += `<th class="th-dept">${d}</th>`; });
+    headHtml += `<th class="th-total">SVN</th>`;
+    headHtml += `<th class="th-pct">SVN %</th>`;
+    headHtml += '</tr>';
+    thead.innerHTML = headHtml;
+    
+    // Group: customer → projects
+    const customerMap = {};
+    customerData.forEach(row => {
+        const cust = row.customer || '(Không có)';
+        if (!customerMap[cust]) customerMap[cust] = {};
+        const proj = row.project;
+        if (!customerMap[cust][proj]) customerMap[cust][proj] = {};
+        customerMap[cust][proj][row.department] = (customerMap[cust][proj][row.department] || 0) + Number(row.totalHours);
+    });
+    
+    let bodyHtml = '';
+    const sortedCustomers = Object.keys(customerMap).sort();
+    
+    sortedCustomers.forEach(cust => {
+        const projects = Object.keys(customerMap[cust]).sort();
+        
+        // Project rows — Customer name cell only on first row (rowspan = số project)
+        projects.forEach((proj, idx) => {
+            const projTotal = Object.values(customerMap[cust][proj]).reduce((s, h) => s + h, 0);
+            const projPct   = grandTotal > 0 ? Math.round(projTotal / grandTotal * 100) : 0;
+            bodyHtml += `<tr>`;
+            if (idx === 0) {
+                bodyHtml += `<td class="td-customer-name" rowspan="${projects.length}">${cust}</td>`;
+            }
+            bodyHtml += `<td class="td-project-name">${proj}</td>`;
+            departments.forEach(dept => {
+                const h = customerMap[cust][proj][dept] || 0;
+                bodyHtml += `<td>${h > 0 ? formatHours(h) : ''}</td>`;
+            });
+            bodyHtml += `<td class="td-total">${formatHours(projTotal)}</td>`;
+            bodyHtml += `<td class="td-pct">${projPct}%</td>`;
+            bodyHtml += `</tr>`;
+        });
+    });
+    
+    tbody.innerHTML = bodyHtml;
+    
+    // ==== FOOTER ====
+    let footHtml = '<tr>';
+    footHtml += `<td class="td-phase" colspan="2"></td>`;
+    departments.forEach(dept => {
+        const deptTotal = customerData
+        .filter(d => d.department === dept)
+        .reduce((s, d) => s + Number(d.totalHours), 0);
+        footHtml += `<td>${deptTotal > 0 ? formatHours(deptTotal) : ''}</td>`;
+    });
+    footHtml += `<td class="td-total">${formatHours(grandTotal)}</td>`;
+    footHtml += `<td class="td-pct">100%</td>`;
+    footHtml += '</tr>';
+    tfoot.innerHTML = footHtml;
+}
+
+/** Bar chart: X = Customer, stacked bars = Departments */
+function updateCustomerChart(customerData) {
+    const container = document.getElementById('customerChartView');
+    if (customerChartInstance) {
+        customerChartInstance.destroy();
+        customerChartInstance = null;
+    }
+    if (container) {
+        container.innerHTML = '<canvas id="customerChart" style="width:100%;height:100%;"></canvas>';
+    }
+    const canvas = document.getElementById('customerChart');
+    
+    if (!customerData || customerData.length === 0) {
+        if (container) container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9ca3af;font-size:0.875rem;font-weight:500;">KHÔNG CÓ DỮ LIỆU</div>`;
+        return;
+    }
+    if (!canvas) return;
+    
+    const customers    = [...new Set(customerData.map(d => d.customer))].sort();
+    const departments  = [...new Set(customerData.map(d => d.department))].sort();
+    
+    const palette = [
+        { bg: 'rgba(220,38,38,0.85)',   border: '#dc2626' },
+        { bg: 'rgba(37,99,235,0.85)',   border: '#2563eb' },
+        { bg: 'rgba(22,163,74,0.85)',   border: '#16a34a' },
+        { bg: 'rgba(234,179,8,0.85)',   border: '#ca8a04' },
+        { bg: 'rgba(168,85,247,0.85)',  border: '#9333ea' },
+        { bg: 'rgba(6,182,212,0.85)',   border: '#0891b2' },
+        { bg: 'rgba(251,146,60,0.85)',  border: '#ea580c' },
+        { bg: 'rgba(99,102,241,0.85)',  border: '#6366f1' },
+    ];
+    
+    const datasets = departments.map((dept, i) => {
+        const color = palette[i % palette.length];
+        return {
+            label: dept,
+            data: customers.map(cust => {
+                return customerData
+                .filter(d => d.customer === cust && d.department === dept)
+                .reduce((s, d) => s + Number(d.totalHours), 0);
+            }),
+            backgroundColor: color.bg,
+            borderColor: color.border,
+            borderWidth: 1.5,
+            borderRadius: 4,
+        };
+    });
+    
+    customerChartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: { labels: customers, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 14 } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.dataset.label}: ${formatHours(ctx.parsed.y)}h`
+                    }
+                },
+                datalabels: { display: false }
+            },
+            scales: {
+                x: { stacked: true, grid: { display: false } },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: '#f3f4f6' },
+                    ticks: { callback: v => formatHours(v) + 'h' },
+                    title: { display: true, text: 'Tổng giờ làm', font: { weight: 'bold' } }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
 }

@@ -100,7 +100,8 @@ namespace HeatmapSystem.Services
                     heatmapData = CalculateHeatmapData(data),
                     detailData = CalculateDetailData(data),
                     phaseData = CalculatePhaseData(data),
-                    functionData = CalculateFunctionData(data, workingDays)
+                    functionData = CalculateFunctionData(data, workingDays),
+                    customerData = CalculateCustomerData(data)
                 };
             }
             catch (Exception ex)
@@ -242,6 +243,41 @@ namespace HeatmapSystem.Services
             }
         }
 
+        public List<CustomerListDto> GetCustomerList()
+        {
+            try
+            {
+                return _context.SVN_StaffDetail
+                    .Where(s => s.Customer != null && s.Customer != "")
+                    .Select(s => s.Customer)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .Select(c => new CustomerListDto { name = c })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting customer list");
+                throw;
+            }
+        }
+
+        public List<CustomerDataDto> GetCustomerData(ReportFilterDto filter)
+        {
+            try
+            {
+                var (fromDate, toDate) = GetDateRange(filter);
+                var query = BuildBaseQuery(filter, fromDate, toDate);
+                var data = query.ToList();
+                return CalculateCustomerData(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting customer data");
+                throw;
+            }
+        }
+
         #endregion
 
         #region Private Helper Methods
@@ -250,6 +286,11 @@ namespace HeatmapSystem.Services
         {
             var query = _context.SVN_StaffDetail
                 .Where(s => s.WorkDate >= fromDate && s.WorkDate <= toDate);
+
+            if (!string.IsNullOrEmpty(filter.Customer))
+            {
+                query = query.Where(s => s.Customer == filter.Customer);
+            }
 
             if (!string.IsNullOrEmpty(filter.Department))
             {
@@ -481,6 +522,24 @@ namespace HeatmapSystem.Services
                 })
                 .OrderBy(p => p.phase)
                 .ThenBy(p => p.department)
+                .ToList();
+        }
+
+        // Tổng hợp dữ liệu giờ làm theo Customer, Project và Department (pivot: Customer×Project = row, Dept = col)
+        private List<CustomerDataDto> CalculateCustomerData(List<SVN_StaffDetail> data)
+        {
+            return data
+                .GroupBy(s => new { s.Customer, s.Project, s.Department })
+                .Select(g => new CustomerDataDto
+                {
+                    customer = g.Key.Customer,
+                    project = g.Key.Project,
+                    department = g.Key.Department,
+                    totalHours = g.Sum(s => s.WorkHours ?? 0)
+                })
+                .OrderBy(c => c.customer)
+                .ThenBy(c => c.project)
+                .ThenBy(c => c.department)
                 .ToList();
         }
 
