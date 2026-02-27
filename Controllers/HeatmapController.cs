@@ -829,6 +829,7 @@ public class DetailDataDto
                         svnStaff = s.SVNStaff,
                         nameStaff = s.NameStaff,
                         department = s.Department,
+                        customer = s.Customer,
                         project = s.Project,
                         projectPhase = s.ProjectPhase,
                         phase = s.Phase,
@@ -993,6 +994,7 @@ public class DetailDataDto
         public async Task<IActionResult> ExportHistoryToExcel(
             string department = "",
             string project = "",
+            string customer = "",
             string year = "",
             string week = "",
             string search = "")
@@ -1017,6 +1019,11 @@ public class DetailDataDto
                 if (!string.IsNullOrEmpty(project))
                 {
                     query = query.Where(s => s.Project == project);
+                }
+
+                if (!string.IsNullOrEmpty(customer))
+                {
+                    query = query.Where(s => s.Customer == customer);
                 }
 
                 if (!string.IsNullOrEmpty(year))
@@ -1047,12 +1054,13 @@ public class DetailDataDto
                 // Code này cần cài thêm package, tạm thời return CSV
 
                 var csv = new System.Text.StringBuilder();
-                csv.AppendLine("STT,SVN Staff,Tên nhân viên,Bộ phận,Dự án,Ngày làm việc,Tuần,Năm,Giờ làm,Người tạo,Ngày tạo");
+                csv.AppendLine("STT,SVN Staff,Tên nhân viên,Bộ phận,Customer,Dự án,Project Phase,Phase,Ngày làm việc,Tuần,Năm,Giờ làm,Người tạo,Ngày tạo");
 
                 int stt = 1;
                 foreach (var item in data)
                 {
-                    csv.AppendLine($"{stt},{item.SVNStaff},{item.NameStaff},{item.Department},{item.Project}," +
+                    csv.AppendLine($"{stt},{item.SVNStaff},{item.NameStaff},{item.Department},{item.Customer},{item.Project}," +
+                        $"{item.ProjectPhase},{item.Phase}," +
                         $"{item.WorkDate:dd/MM/yyyy},{item.WeekNo},{item.Year},{item.WorkHours}," +
                         $"{item.CreateBy},{item.CreateDate:dd/MM/yyyy HH:mm}");
                     stt++;
@@ -1068,6 +1076,10 @@ public class DetailDataDto
                 if (!string.IsNullOrEmpty(project))
                 {
                     filterDescription.Add($"Dự án: {project}");
+                }
+                if (!string.IsNullOrEmpty(customer))
+                {
+                    filterDescription.Add($"Customer: {customer}");
                 }
                 if (!string.IsNullOrEmpty(year))
                 {

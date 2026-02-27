@@ -30,7 +30,7 @@
                 <h3 class="text-lg sm:text-xl md:text-2xl font-black text-gray-900">Bộ lọc & Tìm kiếm</h3>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 sm:gap-4 md:gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-3 sm:gap-4 md:gap-5">
                 <!-- Bộ phận -->
                 <div class="group">
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
@@ -39,6 +39,15 @@
                         <option value="">-- Tất cả --</option>
                     </select>
                 </div>
+
+                  <!-- Customer -->
+                <div class="group">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Customer</label>
+                    <select id="filterCustomer" class="filter-field">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+
 
                 <!-- Dự án -->
                 <div class="group">
@@ -88,7 +97,7 @@
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tìm
                         kiếm</label>
                     <div class="relative">
-                        <input type="text" id="searchInput" placeholder="Tên nhân viên, SVN..."
+                        <input type="text" id="searchInput" placeholder="Tên ..."
                             class="filter-field pr-12">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 absolute right-3 sm:right-4 top-1/2 -translate-y-1/2" fill="none"
@@ -235,6 +244,7 @@
                             <th class="table-header">SVN Code</th>
                             <th class="table-header">Nhân viên</th>
                             <th class="table-header">Bộ phận</th>
+                            <th class="table-header">Customer</th>
                             <th class="table-header">Dự án</th>
                             <th class="table-header">Project Phase</th>
                             <th class="table-header">Phase</th>
