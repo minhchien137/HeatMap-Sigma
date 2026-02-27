@@ -36,6 +36,26 @@ namespace HeatmapSystem.Services
    
         /// Xuất dữ liệu báo cáo sang CSV
         byte[] ExportReportToCsv(ReportFilterDto filter);
+
+        /// Lấy danh sách customer
+        List<CustomerListDto> GetCustomerList();
+
+        /// Lấy dữ liệu tổng giờ theo Customer
+        List<CustomerDataDto> GetCustomerData(ReportFilterDto filter);
+    }
+
+    // DTO Classes
+    public class CustomerListDto
+    {
+        public string name { get; set; }
+    }
+
+    public class CustomerDataDto
+    {
+        public string customer { get; set; }
+        public string project { get; set; }
+        public string department { get; set; }
+        public decimal totalHours { get; set; }
     }
 
     // DTO Classes
@@ -67,6 +87,7 @@ namespace HeatmapSystem.Services
     {
         public string TimeRange { get; set; }
         public string Year { get; set; }
+        public string Customer { get; set; }
         public string Department { get; set; }
         public string Project { get; set; }
         public string Phase { get; set; }
@@ -84,6 +105,7 @@ namespace HeatmapSystem.Services
         public List<DetailDataDto> detailData { get; set; }
         public List<PhaseDataDto> phaseData { get; set; }
         public FunctionUtilizationDto functionData { get; set; }
+        public List<CustomerDataDto> customerData { get; set; }
     }
 
     public class FunctionUtilizationDto
