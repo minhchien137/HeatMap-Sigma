@@ -26,6 +26,12 @@ namespace HeatmapSystem.Models
         [StringLength(150)]
         public string Department { get; set; }
 
+
+        [Required]
+        [Column("Customer")]
+        [StringLength(100)]
+        public string Customer { get; set; }
+
         [Required]
         [Column("Project")]
         [StringLength(100)]
