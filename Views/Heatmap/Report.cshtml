@@ -360,41 +360,21 @@
             </div>
         </div>
 
-        <!-- Detailed Table -->
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-black text-gray-900">Chi tiết theo Dự án</h2>
-                <button onclick="toggleTableSort()"
-                        class="px-4 py-2 text-sm font-bold text-gray-700 hover:text-red-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                    </svg>
-                    Sắp xếp
-                </button>
+        <!-- Detail Pivot Table — dạng Excel -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8">
+            <div class="flex items-center justify-between p-6 pb-4">
+                <div>
+                    <h2 class="text-xl font-black text-gray-900">Tóm tắt từng nhân viên</h2>
+                    <p class="text-sm text-gray-500 mt-1">Phân bổ giờ theo ngày — Customer × Project × Phase</p>
+                </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full" id="detailTable">
-                    <thead class="bg-gray-50 border-b-2 border-gray-200">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Dự án</th>
-                            <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Bộ phận</th>
-                            <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">Số người</th>
-                            <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">Tổng giờ</th>
-                            <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">TB giờ/người</th>
-                            <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">Trạng thái</th>
-                            <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">Hành động</th>
-                        </tr>
+                <table class="detail-pivot w-full text-sm" id="detailPivotTable">
+                    <thead id="detailPivotHead">
+                        <tr><th colspan="10" style="padding:2rem;text-align:center;color:#9ca3af;font-weight:500;background:#fff;border:none">Đang tải dữ liệu...</th></tr>
                     </thead>
-                    <tbody id="detailTableBody" class="divide-y divide-gray-100">
-                        <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <p class="font-medium">Không có dữ liệu</p>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="detailPivotBody"></tbody>
+                    <tfoot id="detailPivotFoot"></tfoot>
                 </table>
             </div>
         </div>
@@ -496,4 +476,34 @@
         border-top: 2px solid #fca5a5 !important;
     }
     .tr-customer-total td.td-phase { color: #991b1b !important; font-weight: 800; }
+
+    /* ===== DETAIL PIVOT TABLE (Excel-style) ===== */
+    .detail-pivot { border-collapse: collapse; font-size: 0.8rem; }
+    .detail-pivot th, .detail-pivot td { border: 1px solid #e5e7eb; padding: 5px 8px; white-space: nowrap; }
+    .dp-week-row th { background: #f3f4f6; color: #6b7280; font-weight: 700; text-align: center; font-size: 0.72rem; text-transform: uppercase; }
+    .dp-week-row th.dp-fixed { background: #f9fafb; }
+    .dp-week-row th.dp-week-cell { background: #e5e7eb; }
+    .dp-week-row th.dp-avail-cell { background: #fef9c3; color: #92400e; font-weight: 800; }
+    .dp-week-row th.dp-pct-cell { background: #dc2626; color: #fff; font-weight: 800; }
+    .dp-date-row th { background: #f9fafb; color: #374151; font-weight: 600; text-align: center; font-size: 0.72rem; }
+    .dp-date-row th.dp-fixed { background: #f9fafb; text-align: left; }
+    .dp-date-row th.dp-total-lbl { background: #374151; color: #fff; font-weight: 700; }
+    .dp-date-row th.dp-pct-lbl   { background: #dc2626; color: #fff; font-weight: 700; }
+    .dp-customer { background: #f9fafb; color: #111827; font-weight: 700; text-align: left; min-width: 85px; }
+    .dp-project  { background: #fff;    color: #374151; font-weight: 500; text-align: left; min-width: 130px; padding-left: 12px !important; }
+    .dp-projphase{ background: #fff;    color: #6b7280; text-align: center; min-width: 65px; }
+    .dp-phase    { background: #fff;    color: #6b7280; text-align: center; min-width: 55px; }
+    .dp-data     { background: #fffde7; color: #374151; text-align: center; }
+    .dp-data.has-val { background: #fff; color: #111827; font-weight: 600; }
+    .dp-total    { background: #f3f4f6; color: #111827; font-weight: 700; text-align: center; min-width: 85px; }
+    .dp-pct      { background: #fff;    color: #dc2626; font-weight: 700; text-align: center; min-width: 60px; }
+    .detail-pivot tfoot td { background: #1f2937; color: #fff; font-weight: 700; text-align: center; border-color: #374151; }
+    .detail-pivot tfoot td.dp-customer { background: #000; text-align: left; color: #fff; }
+    .detail-pivot tfoot td.dp-total    { background: #374151; }
+    .detail-pivot tfoot td.dp-pct      { background: #dc2626; }
+    .detail-pivot tfoot td.dp-data     { background: #1f2937; color: #d1d5db; }
+    .detail-pivot tbody tr:hover td { background: #f0f9ff !important; }
+    .detail-pivot tbody tr:hover td.dp-customer { background: #1e40af !important; color: #fff !important; }
+    .detail-pivot tbody tr:hover td.dp-total { background: #d1fae5 !important; color: #065f46 !important; }
+    .detail-pivot tbody tr:hover td.dp-pct   { background: #fee2e2 !important; color: #991b1b !important; }
 </style>

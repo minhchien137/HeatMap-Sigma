@@ -263,6 +263,7 @@ function updateDashboard(data) {
         updateCustomerTable(cachedCustomerData);
     }
     updateWeekLabels();
+    updateDetailPivotTable(data.detailPivotData);
 }
 
 // Update KPIs
@@ -640,9 +641,9 @@ function updateFunctionChart(funcData) {
 // Update detail table
 function updateDetailTable(detailData) {
     const tbody = document.getElementById('detailTableBody');
+    if (!tbody) return; // element đã bị thay bằng pivot table
     
-    if (detailData.length === 0) {
-        tbody.innerHTML = `
+    tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="px-6 py-12 text-center text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -652,41 +653,41 @@ function updateDetailTable(detailData) {
                 </td>
             </tr>
         `;
-        return;
+    return;
+}
+
+// Group by project
+const projectGroups = {};
+detailData.forEach(row => {
+    if (!projectGroups[row.project]) {
+        projectGroups[row.project] = {
+            project: row.project,
+            departments: [],
+            totalStaffCount: 0,
+            totalHours: 0
+        };
     }
-    
-    // Group by project
-    const projectGroups = {};
-    detailData.forEach(row => {
-        if (!projectGroups[row.project]) {
-            projectGroups[row.project] = {
-                project: row.project,
-                departments: [],
-                totalStaffCount: 0,
-                totalHours: 0
-            };
-        }
-        projectGroups[row.project].departments.push({
-            department: row.department,
-            staffCount: row.staffCount,
-            totalHours: row.totalHours
-        });
-        projectGroups[row.project].totalStaffCount += row.staffCount;
-        projectGroups[row.project].totalHours += row.totalHours;
+    projectGroups[row.project].departments.push({
+        department: row.department,
+        staffCount: row.staffCount,
+        totalHours: row.totalHours
     });
+    projectGroups[row.project].totalStaffCount += row.staffCount;
+    projectGroups[row.project].totalHours += row.totalHours;
+});
+
+let html = '';
+Object.values(projectGroups).forEach(group => {
+    const avgHours = group.totalHours / group.totalStaffCount;
+    const statusClass = getStatusClass(avgHours);
+    const statusText = getStatusText(avgHours);
     
-    let html = '';
-    Object.values(projectGroups).forEach(group => {
-        const avgHours = group.totalHours / group.totalStaffCount;
-        const statusClass = getStatusClass(avgHours);
-        const statusText = getStatusText(avgHours);
-        
-        // Create department badges
-        const departmentBadges = group.departments.map(d => 
-            `<span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium mr-1">${d.department}</span>`
-        ).join('');
-        
-        html += `
+    // Create department badges
+    const departmentBadges = group.departments.map(d => 
+        `<span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium mr-1">${d.department}</span>`
+    ).join('');
+    
+    html += `
             <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 font-bold text-gray-900">${group.project}</td>
                 <td class="px-6 py-4">
@@ -712,10 +713,10 @@ function updateDetailTable(detailData) {
                 </td>
             </tr>
         `;
-    });
-    
-    tbody.innerHTML = html;
-}
+});
+
+tbody.innerHTML = html;
+
 
 // Get status class
 function getStatusClass(avgHours) {
@@ -1694,4 +1695,159 @@ function updateCustomerChart(customerData) {
         },
         plugins: [ChartDataLabels]
     });
+}
+
+// ===== DETAIL PIVOT TABLE (Excel-style) =====
+function updateDetailPivotTable(pivotData) {
+    const thead = document.getElementById('detailPivotHead');
+    const tbody = document.getElementById('detailPivotBody');
+    const tfoot = document.getElementById('detailPivotFoot');
+    if (!thead || !tbody || !tfoot) return;
+    
+    if (!pivotData || !pivotData.rows || pivotData.rows.length === 0) {
+        thead.innerHTML = '<tr><th colspan="10" style="padding:2rem;text-align:center;color:#9ca3af;font-weight:500;background:#fff;border:none">Không có dữ liệu</th></tr>';
+        tbody.innerHTML = '';
+        tfoot.innerHTML = '';
+        return;
+    }
+    
+    const dates = pivotData.dates;
+    const dateLabels = pivotData.dateLabels;
+    const weekLabels = pivotData.weekLabels;
+    const rows = pivotData.rows;
+    const totalByDate = pivotData.totalByDate;
+    const grandTotal = pivotData.grandTotal;
+    const FIXED_COLS = 6;
+    
+    // Group dates by week
+    const weekGroups = [];
+    let curWeek = null, curCount = 0, curAvail = 0;
+    dates.forEach((d, i) => {
+        const wk = weekLabels[i];
+        if (wk !== curWeek) {
+            if (curWeek !== null) weekGroups.push({ week: curWeek, count: curCount, avail: curAvail });
+            curWeek = wk; curCount = 1;
+            curAvail = pivotData.availableHrsByDate ? pivotData.availableHrsByDate[i] : 0;
+        } else { curCount++; }
+    });
+    if (curWeek !== null) weekGroups.push({ week: curWeek, count: curCount, avail: curAvail });
+    
+    // Tổng available per week
+    const weekTotalAvail = {};
+    weekGroups.forEach(wg => { weekTotalAvail[wg.week] = wg.avail * wg.count; });
+    
+    // ---- ROW 1: Week group header ----
+    let h1 = '<tr class="dp-week-row">';
+    h1 += `<th class="dp-fixed" colspan="${FIXED_COLS}"></th>`;
+    weekGroups.forEach(wg => {
+        h1 += `<th class="dp-week-cell" colspan="${wg.count}">${wg.week}</th>`;
+        h1 += `<th class="dp-avail-cell">Available hrs:</th>`;
+        h1 += `<th class="dp-pct-cell">% Spent</th>`;
+    });
+    h1 += '</tr>';
+    
+    // ---- ROW 2: Available hrs per day + week totals ----
+    let h2 = '<tr class="dp-week-row">';
+    h2 += `<th class="dp-fixed" colspan="${FIXED_COLS}">Total :</th>`;
+    weekGroups.forEach(wg => {
+        const weekDates = dates.filter((_, i) => weekLabels[i] === wg.week);
+        const weekSpent = weekDates.reduce((s, d) => s + (totalByDate[d] || 0), 0);
+        const pct = weekTotalAvail[wg.week] > 0 ? Math.round(weekSpent / weekTotalAvail[wg.week] * 100) : 0;
+        weekDates.forEach(() => {
+            h2 += `<th class="dp-avail-cell" style="font-size:0.7rem">${wg.avail}</th>`;
+        });
+        h2 += `<th class="dp-avail-cell">${weekTotalAvail[wg.week] > 0 ? weekTotalAvail[wg.week] : ''}</th>`;
+        h2 += `<th class="dp-pct-cell">${pct > 0 ? pct + '%' : ''}</th>`;
+    });
+    h2 += '</tr>';
+    
+    // ---- ROW 3: Column labels ----
+    let h3 = '<tr class="dp-date-row">';
+    h3 += `<th class="dp-fixed">Customer</th>`;
+    h3 += `<th class="dp-fixed">Product/Project</th>`;
+    h3 += `<th class="dp-fixed" style="text-align:center">Project Phase</th>`;
+    h3 += `<th class="dp-fixed" style="text-align:center">Phase</th>`;
+    h3 += `<th class="dp-fixed" style="text-align:center">Staff</th>`;
+    h3 += `<th class="dp-fixed" style="text-align:center">Dept</th>`;
+    weekGroups.forEach(wg => {
+        dates.filter((_, i) => weekLabels[i] === wg.week).forEach(d => {
+            h3 += `<th>${dateLabels[dates.indexOf(d)]}</th>`;
+        });
+        h3 += `<th class="dp-total-lbl">Time Spent (hrs)</th>`;
+        h3 += `<th class="dp-pct-lbl">% Spent</th>`;
+    });
+    h3 += '</tr>';
+    
+    thead.innerHTML = h1 + h2 + h3;
+    
+    // Group by customer for merging display
+    const customerMap = {};
+    rows.forEach(r => {
+        if (!customerMap[r.customer]) customerMap[r.customer] = [];
+        customerMap[r.customer].push(r);
+    });
+    
+    let bodyHtml = '';
+    Object.entries(customerMap).forEach(([customer, cRows]) => {
+        // Group by project within customer
+        const projectMap = {};
+        cRows.forEach(r => {
+            const pKey = `${r.project}||${r.projectPhase}||${r.phase}`;
+            if (!projectMap[pKey]) projectMap[pKey] = [];
+            projectMap[pKey].push(r);
+        });
+        
+        let customerFirstRow = true;
+        Object.entries(projectMap).forEach(([pKey, pRows]) => {
+            pRows.forEach((row, ri) => {
+                bodyHtml += '<tr>';
+                // Customer cell - merge across all rows of this customer
+                if (customerFirstRow) {
+                    bodyHtml += `<td class="dp-customer" rowspan="${cRows.length}">${customer}</td>`;
+                    customerFirstRow = false;
+                }
+                // Project/Phase cells - merge across staff rows of same project+phase
+                if (ri === 0) {
+                    bodyHtml += `<td class="dp-project" rowspan="${pRows.length}">${row.project}</td>`;
+                    bodyHtml += `<td class="dp-projphase" rowspan="${pRows.length}">${row.projectPhase}</td>`;
+                    bodyHtml += `<td class="dp-phase" rowspan="${pRows.length}">${row.phase}</td>`;
+                }
+                // Staff and Department - always show per row
+                bodyHtml += `<td class="dp-projphase">${row.staffName || ''}</td>`;
+                bodyHtml += `<td class="dp-phase">${row.department || ''}</td>`;
+                weekGroups.forEach(wg => {
+                    const weekDates = dates.filter((_, i) => weekLabels[i] === wg.week);
+                    let weekRowTotal = 0;
+                    weekDates.forEach(d => {
+                        const val = row.dailyHours[d] || 0;
+                        weekRowTotal += val;
+                        bodyHtml += `<td class="dp-data${val > 0 ? ' has-val' : ''}">${val > 0 ? val : ''}</td>`;
+                    });
+                    const pct = weekTotalAvail[wg.week] > 0 ? Math.round(weekRowTotal / weekTotalAvail[wg.week] * 100) : 0;
+                    bodyHtml += `<td class="dp-total">${weekRowTotal > 0 ? weekRowTotal : ''}</td>`;
+                    bodyHtml += `<td class="dp-pct">${weekRowTotal > 0 ? pct + '%' : ''}</td>`;
+                });
+                bodyHtml += '</tr>';
+            });
+        });
+    });
+    tbody.innerHTML = bodyHtml;
+    
+    // ---- FOOTER ----
+    let footHtml = '<tr>';
+    footHtml += `<td class="dp-customer" colspan="${FIXED_COLS}"></td>`;
+    weekGroups.forEach(wg => {
+        const weekDates = dates.filter((_, i) => weekLabels[i] === wg.week);
+        let wkTotal = 0;
+        weekDates.forEach(d => {
+            const v = totalByDate[d] || 0;
+            wkTotal += v;
+            footHtml += `<td class="dp-data">${v > 0 ? v : ''}</td>`;
+        });
+        const pct = weekTotalAvail[wg.week] > 0 ? Math.round(wkTotal / weekTotalAvail[wg.week] * 100) : 0;
+        footHtml += `<td class="dp-total">${wkTotal > 0 ? wkTotal : ''}</td>`;
+        footHtml += `<td class="dp-pct">${pct > 0 ? pct + '%' : ''}</td>`;
+    });
+    footHtml += '</tr>';
+    tfoot.innerHTML = footHtml;
 }

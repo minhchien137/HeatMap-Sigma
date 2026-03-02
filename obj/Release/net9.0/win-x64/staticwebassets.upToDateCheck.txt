@@ -7,9 +7,9 @@ wwwroot\images\logo.png
 wwwroot\images\vn.png
 wwwroot\js\staff.js
 wwwroot\js\import.js
-wwwroot\js\report.js
-wwwroot\js\site.js
 wwwroot\js\history.js
+wwwroot\js\site.js
+wwwroot\js\report.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -74,8 +74,8 @@ C:\HeatMap-Sigma\wwwroot\css\import.css
 C:\HeatMap-Sigma\wwwroot\css\site.css
 C:\HeatMap-Sigma\wwwroot\favicon.ico
 C:\HeatMap-Sigma\wwwroot\js\staff.js
-C:\HeatMap-Sigma\wwwroot\js\import.js
 C:\HeatMap-Sigma\wwwroot\js\report.js
+C:\HeatMap-Sigma\wwwroot\js\import.js
 C:\HeatMap-Sigma\wwwroot\js\site.js
 C:\HeatMap-Sigma\wwwroot\js\history.js
 C:\HeatMap-Sigma\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
