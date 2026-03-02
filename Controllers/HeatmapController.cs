@@ -1285,8 +1285,10 @@ public class DetailDataDto
         public IActionResult ExportReport(
             string timeRange = "current_week",
             string year = "",
+            string customer = "",
             string department = "",
             string project = "",
+            string phase = "",
             string startDate = "",
             string endDate = "")
         {
@@ -1299,16 +1301,19 @@ public class DetailDataDto
 
                 var filter = new ReportFilterDto
                 {
-                    TimeRange = timeRange,
-                    Year = year,
+                    TimeRange  = timeRange,
+                    Year       = year,
+                    Customer   = customer,
                     Department = department,
-                    Project = project,
-                    StartDate = startDate,
-                    EndDate = endDate
+                    Project    = project,
+                    Phase      = phase,
+                    StartDate  = startDate,
+                    EndDate    = endDate
                 };
 
                 var bytes = _reportService.ExportReportToCsv(filter);
-                return File(bytes, "text/csv", $"Bao_cao_nang_suat_{DateTime.Now:yyyyMMddHHmmss}.csv");
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"Bao_cao_nang_suat_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
             }
             catch (Exception ex)
             {

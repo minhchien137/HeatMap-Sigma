@@ -333,6 +333,9 @@ C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\aspnetcorev2_inprocess.dl
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Azure.Core.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Azure.Identity.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\BCrypt.Net-Next.dll
+C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\EPPlus.dll
+C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\EPPlus.Interfaces.dll
+C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\EPPlus.System.Drawing.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.Bcl.AsyncInterfaces.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.Data.SqlClient.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.EntityFrameworkCore.dll
@@ -347,6 +350,7 @@ C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.IdentityModel.L
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.IdentityModel.Protocols.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.IdentityModel.Tokens.dll
+C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.IO.RecyclableMemoryStream.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.SqlServer.Server.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\Microsoft.Win32.SystemEvents.dll
 C:\HeatMap-Sigma\obj\Release\net9.0\win-x64\PubTmp\Out\System.ClientModel.dll

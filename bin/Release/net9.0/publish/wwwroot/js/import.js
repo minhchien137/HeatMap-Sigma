@@ -53,11 +53,11 @@ function generateWeeks() {
         
         const currentYear = new Date().getFullYear();
         const currentWeek = getWeekNumber(new Date());
-
+        
         while (weekSelect.options.length > 1) {
             weekSelect.remove(1);
         }
-
+        
         for (let week = 1; week <= 52; week++) {
             const jan1 = new Date(currentYear, 0, 1);
             const daysOffset = (week - 1) * 7;
@@ -65,15 +65,15 @@ function generateWeeks() {
             const monday = getMonday(weekDate);
             const sunday = new Date(monday);
             sunday.setDate(monday.getDate() + 6);
-
+            
             const weekText = `Tuần ${week} (${formatDate(monday)} - ${formatDate(sunday)})`;
             const weekValue = `${week}|${formatDate(monday)}|${formatDate(sunday)}`;
-
+            
             const option = document.createElement('option');
             option.value = weekValue;
             option.textContent = weekText;
             if (week === currentWeek) option.selected = true;
-
+            
             weekSelect.appendChild(option);
         }
     });
@@ -103,7 +103,7 @@ function generateHoursAndMinutes() {
                 minuteSelect.appendChild(option);
             }
         }
-
+        
         // Add change listeners for decimal calculation
         if (hourSelect && minuteSelect) {
             const calculateDecimal = () => {
@@ -127,17 +127,29 @@ function setupDepartmentChangeListeners() {
     document.getElementById('department1')?.addEventListener('change', function() {
         loadEmployees(this.value, 'employee1');
     });
-
+    
     // Mode 2
     document.getElementById('department2')?.addEventListener('change', function() {
         loadEmployees(this.value, 'employee2');
     });
-
+    
     // Mode 3
     document.getElementById('department3')?.addEventListener('change', function() {
         loadEmployeesAsCheckboxes(this.value);
     });
-
+    
+    // Customer change → filter project dropdown
+    document.getElementById('customer1')?.addEventListener('change', function() {
+        filterProjectsByCustomer(this.value, 'project1');
+    });
+    
+    document.getElementById('customer2')?.addEventListener('change', function() {
+        // Filter commonProject dropdown
+        filterProjectsByCustomer(this.value, 'commonProject');
+        // Re-render day hours list để cập nhật dropdown dự án riêng từng ngày
+        updateDayHoursList();
+    });
+    
     // Week change listeners for Mode 2 and 3
     const week2Select = document.getElementById('week2');
     if (week2Select) {
@@ -149,7 +161,7 @@ function setupDepartmentChangeListeners() {
             week2Select.dispatchEvent(new Event('change'));
         }
     }
-
+    
     const week3Select = document.getElementById('week3');
     if (week3Select) {
         week3Select.addEventListener('change', function() {
@@ -162,58 +174,84 @@ function setupDepartmentChangeListeners() {
     }
 }
 
-// Load employees for dropdown
+// Filter project dropdown theo customer đã chọn
+function filterProjectsByCustomer(customerName, projectSelectId) {
+    const select = document.getElementById(projectSelectId);
+    if (!select) return;
+    
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">-- Chọn dự án --</option>';
+    
+    const filtered = customerName
+    ? window.projectsData.filter(p => p.NameCustomer === customerName)
+    : window.projectsData;
+    
+    filtered.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.IdProject;
+        option.textContent = p.NameProject;
+        if (p.IdProject == currentVal) option.selected = true;
+        select.appendChild(option);
+    });
+}
+
+// Lấy tên customer từ select id
+function getCustomerName(selectId) {
+    const sel = document.getElementById(selectId);
+    if (!sel || !sel.value) return '';
+    return sel.selectedOptions[0]?.text || '';
+}
 function loadEmployees(departmentId, targetSelectId) {
     const employeeSelect = document.getElementById(targetSelectId);
     employeeSelect.innerHTML = '<option value="">Đang tải...</option>';
-
+    
     if (!departmentId) {
         employeeSelect.innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
         return;
     }
-
+    
     fetch(`/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`)
-        .then(response => response.json())
-        .then(employees => {
-            employeeSelect.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
-            employees.forEach(emp => {
-                const fullName = `${emp.first_name} ${emp.last_name}`.trim() || emp.nickname || emp.emp_code;
-                const option = document.createElement('option');
-                option.value = emp.id;
-                option.textContent = fullName;
-                employeeSelect.appendChild(option);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading employees:', error);
-            employeeSelect.innerHTML = '<option value="">Lỗi khi tải danh sách</option>';
+    .then(response => response.json())
+    .then(employees => {
+        employeeSelect.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+        employees.forEach(emp => {
+            const fullName = `${emp.first_name} ${emp.last_name}`.trim() || emp.nickname || emp.emp_code;
+            const option = document.createElement('option');
+            option.value = emp.id;
+            option.textContent = fullName;
+            employeeSelect.appendChild(option);
         });
+    })
+    .catch(error => {
+        console.error('Error loading employees:', error);
+        employeeSelect.innerHTML = '<option value="">Lỗi khi tải danh sách</option>';
+    });
 }
 
 // Load employees as checkboxes (Mode 3)
 function loadEmployeesAsCheckboxes(departmentId) {
     const container = document.getElementById('employeeCheckboxes3');
     container.innerHTML = '<p class="text-gray-400 text-center py-4">Đang tải...</p>';
-
+    
     if (!departmentId) {
         container.innerHTML = '<p class="text-gray-400 text-center py-4">Vui lòng chọn bộ phận</p>';
         return;
     }
-
+    
     fetch(`/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`)
-        .then(response => response.json())
-        .then(employees => {
-            container.innerHTML = '';
-            if (employees.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center py-4">Không có nhân viên</p>';
-                return;
-            }
-
-            employees.forEach(emp => {
-                const fullName = `${emp.first_name} ${emp.last_name}`.trim() || emp.nickname || emp.emp_code;
-                const div = document.createElement('div');
-                div.className = 'employee-checkbox';
-                div.innerHTML = `
+    .then(response => response.json())
+    .then(employees => {
+        container.innerHTML = '';
+        if (employees.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-center py-4">Không có nhân viên</p>';
+            return;
+        }
+        
+        employees.forEach(emp => {
+            const fullName = `${emp.first_name} ${emp.last_name}`.trim() || emp.nickname || emp.emp_code;
+            const div = document.createElement('div');
+            div.className = 'employee-checkbox';
+            div.innerHTML = `
                     <input type="checkbox" 
                            id="emp${emp.id}" 
                            value="${emp.id}" 
@@ -221,13 +259,13 @@ function loadEmployeesAsCheckboxes(departmentId) {
                            onchange="handleEmployeeCheckboxChange(this)">
                     <label for="emp${emp.id}" class="cursor-pointer select-none">${fullName}</label>
                 `;
-                container.appendChild(div);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading employees:', error);
-            container.innerHTML = '<p class="text-red-400 text-center py-4">Lỗi khi tải danh sách</p>';
+            container.appendChild(div);
         });
+    })
+    .catch(error => {
+        console.error('Error loading employees:', error);
+        container.innerHTML = '<p class="text-red-400 text-center py-4">Lỗi khi tải danh sách</p>';
+    });
 }
 
 // Handle employee checkbox change (Mode 3)
@@ -259,7 +297,7 @@ function generateDayCheckboxes(weekValue, containerId) {
         container.innerHTML = '<p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>';
         return;
     }
-
+    
     const [weekNum, startDateStr, endDateStr] = weekValue.split('|');
     const startDate = new Date(startDateStr.split('/').reverse().join('-'));
     const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
@@ -330,13 +368,19 @@ function updateDayHoursList() {
         
         let projectDropdown = '';
         if (projectMode === 2) {
-            // Mode 2: Individual project per day
+            // Mode 2: Individual project per day - filter by customer2
+            const customerName = getCustomerName('customer2');
+            const projectOptions = (customerName
+                ? window.projectsData.filter(p => p.NameCustomer === customerName)
+                : window.projectsData
+            ).map(p =>
+                `<option value="${p.IdProject}" ${p.IdProject == existingData.project ? 'selected' : ''}>${p.NameProject}</option>`
+            ).join('');
+            
             projectDropdown = `
                 <select class="day-project input-field flex-1" data-date="${dateStr}" onchange="saveDayData('${dateStr}', this.value, null, null)">
                     <option value="">-- Chọn dự án --</option>
-                    ${window.projectsData.map(p => 
-                        `<option value="${p.IdProject}" ${p.IdProject == existingData.project ? 'selected' : ''}>${p.NameProject}</option>`
-                    ).join('')}
+                    ${projectOptions}
                 </select>
             `;
         }
@@ -351,28 +395,28 @@ function updateDayHoursList() {
                 <select class="day-hour input-field" style="width: 80px;" data-date="${dateStr}" onchange="updateDayDecimal('${dateStr}')">
                     <option value="">Giờ</option>
                     ${Array.from({length: 24}, (_, h) => 
-                        `<option value="${h}" ${h == existingData.hours ? 'selected' : ''}>${String(h).padStart(2, '0')}</option>`
-                    ).join('')}
+        `<option value="${h}" ${h == existingData.hours ? 'selected' : ''}>${String(h).padStart(2, '0')}</option>`
+    ).join('')}
                 </select>
                 <select class="day-minute input-field" style="width: 80px;" data-date="${dateStr}" onchange="updateDayDecimal('${dateStr}')">
                     <option value="">Phút</option>
                     ${Array.from({length: 60}, (_, m) => 
-                        `<option value="${m}" ${m == existingData.minutes ? 'selected' : ''}>${String(m).padStart(2, '0')}</option>`
-                    ).join('')}
+`<option value="${m}" ${m == existingData.minutes ? 'selected' : ''}>${String(m).padStart(2, '0')}</option>`
+).join('')}
                 </select>
             </div>
             <div class="day-decimal text-sm text-gray-500 font-bold" data-value="${existingData.decimal || ''}">
                 ${existingData.decimal ? existingData.decimal + ' giờ' : ''}
             </div>
         `;
-        
-        container.appendChild(dayRow);
-        
-        // Restore decimal if exists
-        if (existingData.decimal) {
-            updateDayDecimal(dateStr);
-        }
-    });
+
+container.appendChild(dayRow);
+
+// Restore decimal if exists
+if (existingData.decimal) {
+    updateDayDecimal(dateStr);
+}
+});
 }
 
 // Update decimal for a specific day
@@ -454,8 +498,8 @@ function showBulkInputPopup() {
                 <select class="bulk-project input-field" data-emp="${empId}">
                     <option value="">-- Chọn dự án --</option>
                     ${window.projectsData.map(p => 
-                        `<option value="${p.IdProject}">${p.NameProject}</option>`
-                    ).join('')}
+        `<option value="${p.IdProject}">${p.NameProject}</option>`
+    ).join('')}
                 </select>
             </td>
             <td class="px-6 py-4 border-b border-gray-100">
@@ -463,14 +507,14 @@ function showBulkInputPopup() {
                     <select class="bulk-hour input-field" style="width: 80px;" data-emp="${empId}" onchange="updateBulkDecimal('${empId}')">
                         <option value="">Giờ</option>
                         ${Array.from({length: 24}, (_, h) => 
-                            `<option value="${h}">${String(h).padStart(2, '0')}</option>`
-                        ).join('')}
+    `<option value="${h}">${String(h).padStart(2, '0')}</option>`
+).join('')}
                     </select>
                     <select class="bulk-minute input-field" style="width: 80px;" data-emp="${empId}" onchange="updateBulkDecimal('${empId}')">
                         <option value="">Phút</option>
                         ${Array.from({length: 60}, (_, m) => 
-                            `<option value="${m}">${String(m).padStart(2, '0')}</option>`
-                        ).join('')}
+`<option value="${m}">${String(m).padStart(2, '0')}</option>`
+).join('')}
                     </select>
                 </div>
             </td>
@@ -478,10 +522,10 @@ function showBulkInputPopup() {
                 <div class="bulk-decimal text-sm text-gray-500 font-bold" data-value=""></div>
             </td>
         `;
-        tbody.appendChild(row);
-    });
-    
-    document.getElementById('bulkInputPopup').style.display = 'flex';
+tbody.appendChild(row);
+});
+
+document.getElementById('bulkInputPopup').style.display = 'flex';
 }
 
 // Update bulk decimal for Mode 3
@@ -544,50 +588,65 @@ function handleSubmitMode1() {
     const department = document.getElementById('department1').value;
     const employee = document.getElementById('employee1').value;
     const project = document.getElementById('project1').value;
+    const projectPhase = document.getElementById('projectPhase1').value;
+    const phase = document.getElementById('phase1').value;
     const day = document.getElementById('day1').value;
     const hourDecimal = document.getElementById('hourDecimal1').value;
-
+    
     if (!department) {
         showErrorModal('Vui lòng chọn bộ phận');
         return;
     }
-
+    
     if (!employee) {
         showErrorModal('Vui lòng chọn nhân viên');
         return;
     }
-
+    
     if (!project) {
         showErrorModal('Vui lòng chọn dự án');
         return;
     }
-
+    
+    if (!projectPhase) {
+        showErrorModal('Vui lòng chọn Project Phase');
+        return;
+    }
+    
+    if (!phase) {
+        showErrorModal('Vui lòng chọn Phase');
+        return;
+    }
+    
     if (!day) {
         showErrorModal('Vui lòng chọn ngày');
         return;
     }
-
+    
     if (!hourDecimal || parseFloat(hourDecimal) <= 0) {
         showErrorModal('Vui lòng nhập giờ làm việc hợp lệ');
         return;
     }
-
+    
     // Get selected text for confirmation
     const employeeName = document.getElementById('employee1').selectedOptions[0].text;
     const projectName = document.getElementById('project1').selectedOptions[0].text;
     const formattedDate = new Date(day).toLocaleDateString('vi-VN');
-
-    const message = `Xác nhận lưu dữ liệu?\n\nNhân viên: ${employeeName}\nDự án: ${projectName}\nNgày: ${formattedDate}\nGiờ: ${hourDecimal} giờ`;
+    
+    const message = `Xác nhận lưu dữ liệu?\n\nNhân viên: ${employeeName}\nDự án: ${projectName}\nProject Phase: ${projectPhase}\nPhase: ${phase}\nNgày: ${formattedDate}\nGiờ: ${hourDecimal} giờ`;
     
     showConfirmModal(message, function() {
         // Prepare data
         const data = {
             EmployeeId: parseInt(employee),
             ProjectId: parseInt(project),
+            Customer: getCustomerName('customer1'),
+            ProjectPhase: projectPhase,
+            Phase: phase,
             WorkDate: day,
             WorkHours: parseFloat(hourDecimal)
         };
-
+        
         // Send to server
         fetch('/Heatmap/SaveStaffDetail', {
             method: 'POST',
@@ -599,7 +658,6 @@ function handleSubmitMode1() {
         .then(response => response.json())
         .then(result => {
             if (result.success) {
-                // Thông báo đơn giản hơn, không có "localhost:5029 cho biết"
                 showSuccessModal(
                     '✓ Lưu dữ liệu thành công!\n\n' +
                     `Nhân viên: ${result.data.employee}\n` +
@@ -613,6 +671,8 @@ function handleSubmitMode1() {
                 document.getElementById('department1').selectedIndex = 0;
                 document.getElementById('employee1').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
                 document.getElementById('project1').selectedIndex = 0;
+                document.getElementById('projectPhase1').selectedIndex = 0;
+                document.getElementById('phase1').selectedIndex = 0;
                 document.getElementById('day1').value = '';
                 document.getElementById('hour1').selectedIndex = 0;
                 document.getElementById('minute1').selectedIndex = 0;
@@ -631,10 +691,22 @@ function handleSubmitMode1() {
 
 function handleSubmitMode2() {
     const employee = document.getElementById('employee2').value;
+    const projectPhase = document.getElementById('projectPhase2').value;
+    const phase = document.getElementById('phase2').value;
     const selectedDays = Array.from(document.querySelectorAll('#dayCheckboxes2 input[type="checkbox"]:checked'));
     
     if (!employee) {
         showErrorModal('Vui lòng chọn nhân viên');
+        return;
+    }
+    
+    if (!projectPhase) {
+        showErrorModal('Vui lòng chọn Project Phase');
+        return;
+    }
+    
+    if (!phase) {
+        showErrorModal('Vui lòng chọn Phase');
         return;
     }
     
@@ -645,23 +717,17 @@ function handleSubmitMode2() {
     
     // Kiểm tra project theo mode
     if (projectMode === 1) {
-        // Mode 1: Kiểm tra common project
         const commonProject = document.getElementById('commonProject').value;
         if (!commonProject) {
             showErrorModal('Vui lòng chọn dự án');
             return;
         }
     } else {
-        // Mode 2: Kiểm tra từng ngày có project chưa
         const dayProjects = Array.from(document.querySelectorAll('#dayHoursList2 .day-project'));
         let hasInvalidProject = false;
-        
         dayProjects.forEach(projectSelect => {
-            if (!projectSelect.value) {
-                hasInvalidProject = true;
-            }
+            if (!projectSelect.value) hasInvalidProject = true;
         });
-        
         if (hasInvalidProject) {
             showErrorModal('Vui lòng chọn dự án cho tất cả các ngày');
             return;
@@ -671,13 +737,9 @@ function handleSubmitMode2() {
     // Kiểm tra tất cả các ngày đã nhập giờ chưa
     const dayHours = Array.from(document.querySelectorAll('#dayHoursList2 .day-decimal'));
     let hasInvalidHours = false;
-    
     dayHours.forEach(decimalDisplay => {
-        if (!decimalDisplay.dataset.value) {
-            hasInvalidHours = true;
-        }
+        if (!decimalDisplay.dataset.value) hasInvalidHours = true;
     });
-    
     if (hasInvalidHours) {
         showErrorModal('Vui lòng nhập giờ cho tất cả các ngày đã chọn');
         return;
@@ -687,32 +749,27 @@ function handleSubmitMode2() {
     showConfirmModal(message, function() {
         // Chuẩn bị dữ liệu để gửi
         const days = [];
-        
         selectedDays.forEach(dayCheckbox => {
             const dateStr = dayCheckbox.value;
             const dayState = dayDataState[dateStr];
+            if (!dayState || !dayState.decimal) return;
             
-            if (!dayState || !dayState.decimal) {
-                return; // Skip if no data
-            }
-            
-            // Chuyển đổi ngày sang định dạng yyyy-MM-dd
             const dateParts = dateStr.split('/');
             const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-            
-            const dayData = {
+            days.push({
                 Date: formattedDate,
                 WorkHours: parseFloat(dayState.decimal),
                 ProjectId: projectMode === 2 ? parseInt(dayState.project) : null
-            };
-            
-            days.push(dayData);
+            });
         });
         
         const requestData = {
             EmployeeId: parseInt(employee),
             ProjectMode: projectMode,
             CommonProjectId: projectMode === 1 ? parseInt(document.getElementById('commonProject').value) : null,
+            Customer: getCustomerName('customer2'),
+            ProjectPhase: projectPhase,
+            Phase: phase,
             Days: days
         };
         
@@ -727,29 +784,42 @@ function handleSubmitMode2() {
         .then(response => response.json())
         .then(result => {
             if (result.success) {
-                const projectText = projectMode === 1 
-                    ? document.getElementById('commonProject').selectedOptions[0].text + ' (chung)'
-                    : 'Riêng từng ngày';
+                const projectText = projectMode === 1
+                ? document.getElementById('commonProject').selectedOptions[0].text + ' (chung)'
+                : 'Riêng từng ngày';
                 
                 showSuccessModal(
                     '✓ Lưu dữ liệu thành công!\n\n' +
                     `Nhân viên: ${document.getElementById('employee2').selectedOptions[0].text}\n` +
                     `Bộ phận: ${result.data.department}\n` +
                     `Dự án: ${projectText}\n` +
+                    `Project Phase: ${projectPhase}\n` +
+                    `Phase: ${phase}\n` +
                     `Tổng số ngày: ${result.data.totalDays}\n` +
                     `   - Mới tạo: ${result.data.savedCount}\n` +
                     `   - Cập nhật: ${result.data.updatedCount}\n\n` +
                     `Các ngày: ${result.data.dates.join(', ')}`
                 );
                 
-                // Reset form
-                document.getElementById('department2').selectedIndex = 0;
-                document.getElementById('employee2').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
+                // Reset form - giữ lại: bộ phận, project phase, phase, tuần
+                // Reload lại danh sách nhân viên theo bộ phận đang chọn
+                const dept2 = document.getElementById('department2').value;
+                if (dept2) {
+                    loadEmployees(dept2, 'employee2');
+                } else {
+                    document.getElementById('employee2').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
+                }
                 if (projectMode === 1) {
                     document.getElementById('commonProject').selectedIndex = 0;
                 }
-                document.getElementById('week2').selectedIndex = 0;
-                document.getElementById('dayCheckboxes2').innerHTML = '<p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>';
+                // Reset customer và re-filter project list
+                document.getElementById('customer2').selectedIndex = 0;
+                filterProjectsByCustomer('', 'commonProject');
+                // Giữ tuần và reload danh sách ngày (bỏ tick)
+                const week2Select = document.getElementById('week2');
+                if (week2Select && week2Select.value) {
+                    week2Select.dispatchEvent(new Event('change'));
+                }
                 document.getElementById('dayHoursSection2').style.display = 'none';
                 dayDataState = {};
             } else {
@@ -767,24 +837,24 @@ function handleSubmitMode3() {
     const rows = document.querySelectorAll('#bulkInputTableBody tr');
     let valid = true;
     let totalRecords = 0;
-
+    
     rows.forEach(row => {
         const project = row.querySelector('.bulk-project').value;
         const decimal = row.querySelector('.bulk-decimal').dataset.value;
-
+        
         if (!project || !decimal) {
             valid = false;
         }
     });
-
+    
     if (!valid) {
         showErrorModal('Vui lòng nhập đầy đủ thông tin cho tất cả nhân viên');
         return;
     }
-
+    
     const selectedDays = Array.from(document.querySelectorAll('#dayCheckboxes3 input[type="checkbox"]:checked'));
     totalRecords = rows.length * selectedDays.length;
-
+    
     const message = `Bạn sắp tạo ${totalRecords} bản ghi (${rows.length} người × ${selectedDays.length} ngày). Xác nhận?`;
     showConfirmModal(message, function() {
         alert('Chức năng đang phát triển - Mode 3');
@@ -833,38 +903,38 @@ function copyFirstDayDataToAll() {
         showErrorModal('Không có ngày nào được chọn');
         return;
     }
-
+    
     const firstDate = firstRow.dataset.date;
     const firstState = dayDataState[firstDate];
-
+    
     // Validate first day data
     if (
         !firstState ||
-        !firstState.hours ||
-        !firstState.minutes ||
+        firstState.hours === undefined || firstState.hours === null || firstState.hours === '' ||
+        firstState.minutes === undefined || firstState.minutes === null || firstState.minutes === '' ||
         (projectMode === 2 && !firstState.project)
     ) {
         showErrorModal('Vui lòng nhập đầy đủ thông tin cho ngày đầu tiên');
         return;
     }
-
+    
     // Get all selected days
     const selectedDays = Array.from(
         document.querySelectorAll('#dayCheckboxes2 input[type="checkbox"]:checked')
     ).map(cb => cb.value);
-
+    
     if (selectedDays.length <= 1) {
         showErrorModal('Cần chọn ít nhất 2 ngày để copy');
         return;
     }
-
+    
     // Copy state to all days
     selectedDays.forEach(date => {
         if (date !== firstDate) {
             dayDataState[date] = { ...firstState };
         }
     });
-
+    
     // Refresh UI
     updateDayHoursList();
     

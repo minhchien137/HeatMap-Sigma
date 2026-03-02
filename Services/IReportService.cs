@@ -106,6 +106,7 @@ namespace HeatmapSystem.Services
         public List<PhaseDataDto> phaseData { get; set; }
         public FunctionUtilizationDto functionData { get; set; }
         public List<CustomerDataDto> customerData { get; set; }
+        public DetailPivotDto detailPivotData { get; set; }
     }
 
     public class FunctionUtilizationDto
@@ -167,6 +168,35 @@ namespace HeatmapSystem.Services
         public string department { get; set; }
         public int staffCount { get; set; }
         public decimal totalHours { get; set; }
+    }
+
+    // Pivot detail: mỗi row = Customer × Project × ProjectPhase × Phase, mỗi ô = giờ theo ngày
+    public class DetailPivotRowDto
+    {
+        public string customer { get; set; }
+        public string project { get; set; }
+        public string projectPhase { get; set; }
+        public string phase { get; set; }
+        public string staffName { get; set; }
+        public string svnStaff { get; set; }
+        public string department { get; set; }
+        // key = "yyyy-MM-dd", value = total hours
+        public Dictionary<string, decimal> dailyHours { get; set; }
+        public decimal totalHours { get; set; }
+    }
+
+    public class DetailPivotDto
+    {
+        // Danh sách ngày làm việc trong khoảng lọc (sorted)
+        public List<string> dates { get; set; }           // ["2026-05-19", ...]
+        public List<string> dateLabels { get; set; }      // ["5/19", ...]
+        public List<string> weekLabels { get; set; }      // ["wk21", "wk21", ...]  per date
+        public List<decimal> availableHrsByDate { get; set; } // available hrs per week
+        // Rows
+        public List<DetailPivotRowDto> rows { get; set; }
+        // Totals per date
+        public Dictionary<string, decimal> totalByDate { get; set; }
+        public decimal grandTotal { get; set; }
     }
 
     public class StaffDetailDto
