@@ -35,19 +35,19 @@ namespace HeatmapSystem.Models
 
         // IP address của thiết bị tạo token
         [StringLength(50)]
-        public string IpAddress { get; set; }
+        public string? IpAddress { get; set; }
 
 
         // User-Agent của trình duyệt
         [StringLength(500)]
-        public string UserAgent { get; set; }
+        public string? UserAgent { get; set; }
 
         // Đã bị thu hồi chưa
         public bool IsRevoked { get; set; }
 
         // Lý do thu hồi
         [StringLength(200)]
-        public string RevokeReason { get; set; }
+        public string? RevokeReason { get; set; }
 
         // Thời gian thu hồi
         public DateTime? RevokedAt { get; set; }

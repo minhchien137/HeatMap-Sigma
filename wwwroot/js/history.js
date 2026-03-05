@@ -314,11 +314,12 @@ function displayTableView(pageData, start) {
                         ${formatDateTime(createDate)}
                     </td>
                     <td class="table-cell text-center">
+                        ${window.currentUserIsAdmin ? `
                         <button onclick="openDeleteModal(${item.staffDetailId})" class="action-icon bg-red-50 text-red-600 hover:bg-red-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                        </button>
+                        </button>` : '<span class="text-gray-300">—</span>'}
                     </td>
                 </tr>
             `;
@@ -354,11 +355,12 @@ function displayMobileView(pageData, start) {
                             <span class="badge badge-blue mb-2">${item.svnStaff}</span>
                             <h4 class="font-bold text-gray-900 text-sm sm:text-base">${item.nameStaff}</h4>
                         </div>
+                        ${window.currentUserIsAdmin ? `
                         <button onclick="openDeleteModal(${item.staffDetailId})" class="action-icon bg-red-50 text-red-600 hover:bg-red-100 flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                        </button>
+                        </button>` : ''}
                     </div>
                     
                     <div class="space-y-2">
@@ -610,14 +612,17 @@ async function confirmDelete() {
     
     try {
         const response = await fetch(`/Heatmap/DeleteStaffDetail/${deleteRecordId}`, {
-            method: 'DELETE'
+            method: 'POST'
         });
         
-        if (!response.ok) {
-            throw new Error('Delete failed');
+        const result = await response.json();
+        
+        if (response.status === 403) {
+            closeDeleteModal();
+            showError(result.message || 'Bạn không có quyền xóa bản ghi!');
+            return;
         }
         
-        const result = await response.json();
         if (result.success) {
             closeDeleteModal();
             showSuccess('Đã xóa bản ghi thành công');

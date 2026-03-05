@@ -627,4 +627,8 @@
     }
 </style>
 
+<script>
+    // Truyền quyền admin từ server session xuống JS
+    window.currentUserIsAdmin = @(Context.Session.GetString("IsAdmin") == "true" ? "true" : "false");
+</script>
 <script src="~/js/history.js"></script>

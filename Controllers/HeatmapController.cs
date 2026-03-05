@@ -851,8 +851,7 @@ public class DetailDataDto
             }
         }
 
-        [RequireUpdate]
-        [HttpDelete("DeleteStaffDetail/{id}")]
+        [HttpPost("DeleteStaffDetail/{id}")]
         public async Task<IActionResult> DeleteStaffDetail(int id)
         {
             try
@@ -860,6 +859,14 @@ public class DetailDataDto
                 if (!IsAuthenticated())
                 {
                     return Json(new { success = false, message = "Unauthorized" });
+                }
+
+                // Chỉ Admin mới được xóa
+                var isAdmin = HttpContext.Session.GetString("IsAdmin");
+                if (isAdmin != "true")
+                {
+                    Response.StatusCode = 403;
+                    return Json(new { success = false, message = "Bạn không có quyền xóa bản ghi!" });
                 }
 
                 // Tìm bản ghi cần xóa

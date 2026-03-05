@@ -132,8 +132,9 @@ namespace HeatmapSystem.Controllers
             string Password, 
             string CaptchaInput, 
             string CaptchaCode, 
-            bool RememberMe = false)
+            string RememberMe = null)
         {
+            bool isRememberMe = RememberMe == "on" || RememberMe == "true";
             try
             {
                 var ipAddress = GetClientIpAddress();
@@ -242,7 +243,7 @@ namespace HeatmapSystem.Controllers
                 HttpContext.Session.SetString("Permission", user.Permission ?? "None"); // LƯU PERMISSION VÀO SESSION
 
                 // Tạo Refresh Token nếu chọn "Remember Me"
-                if (RememberMe)
+                if (isRememberMe)
                 {
                     var refreshToken = await _authService.GenerateRefreshToken(
                         user.SVNCode, 
@@ -265,7 +266,7 @@ namespace HeatmapSystem.Controllers
                     SVNCode = TaiKhoan,
                     TimeAccess = DateTime.Now,
                     ActionType = "Login",
-                    Description = $"Đăng nhập thành công{(RememberMe ? " (Remember Me)" : "")} (IP: {ipAddress})"
+                    Description = $"Đăng nhập thành công{(isRememberMe ? " (Remember Me)" : "")} (IP: {ipAddress})"
                 };
                 _context.SVN_Logs.Add(successLog);
                 await _context.SaveChangesAsync();
