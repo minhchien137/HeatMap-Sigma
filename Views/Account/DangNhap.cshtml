@@ -363,11 +363,7 @@
             const captchaInput = document.getElementById('txtCaptcha').value.trim();
 
             if (!tk || !p) { showErrorModal("Vui lòng điền đầy đủ thông tin!"); return; }
-
             if (!captchaInput) { showErrorModal("Vui lòng nhập mã xác nhận!"); return; }
-
-            const err = validatePassword(p);
-            if (err) { showErrorModal(err); return; }
 
             const modal = document.getElementById('confirmModal');
             modal.style.display = 'flex';
