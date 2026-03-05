@@ -34,7 +34,7 @@ namespace HeatmapSystem.Models
 
         [Column("Permission")]
         [StringLength(20)]
-        public string Permission { get; set; } = "None";
+        public string Permission { get; set; } = "Update";
 
 
         /* Helper properties*/
