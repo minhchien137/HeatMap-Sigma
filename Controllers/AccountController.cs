@@ -245,6 +245,10 @@ namespace HeatmapSystem.Controllers
                 // Tạo Refresh Token nếu chọn "Remember Me"
                 if (isRememberMe)
                 {
+                    // ✅ FIX: Revoke tất cả token cũ trước khi tạo mới
+                    // Tránh tình trạng tích lũy hàng đống bản ghi AuthTokens
+                    await _authService.RevokeAllUserTokens(user.SVNCode, "Đăng nhập mới - thay thế token cũ");
+
                     var refreshToken = await _authService.GenerateRefreshToken(
                         user.SVNCode, 
                         ipAddress, 
