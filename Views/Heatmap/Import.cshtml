@@ -18,17 +18,17 @@
 
         <!-- Mode Selector (3 Tabs) -->
         <div class="mb-10">
-            <div class="flex gap-4 justify-center">
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <button id="modeBtn1" onclick="switchMode(1)"
-                        class="mode-btn active px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
+                        class="mode-btn active px-5 py-3 rounded-2xl font-bold text-sm transition-all border-2 w-full sm:w-auto">
                     Nhập đơn (1 người - 1 ngày)
                 </button>
                 <button id="modeBtn2" onclick="switchMode(2)"
-                        class="mode-btn px-8 py-4 rounded-2xl font-bold text-base transition-all border-2">
+                        class="mode-btn px-5 py-3 rounded-2xl font-bold text-sm transition-all border-2 w-full sm:w-auto">
                     Một người - Nhiều ngày
                 </button>
                 <button id="modeBtn3" onclick="switchMode(3)"
-                        class="mode-btn px-8 py-4 rounded-2xl font-bold text-base transition-all border-2 hidden">
+                        class="mode-btn px-5 py-3 rounded-2xl font-bold text-sm transition-all border-2 w-full sm:w-auto">
                     Nhiều người - Nhiều ngày
                 </button>
             </div>
@@ -56,58 +56,42 @@
                         <div class="group">
                             <label
                             class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
-                            <select id="employee1" class="input-field">
+                            <!-- Hidden select - giữ nguyên để submit code không đổi -->
+                            <select id="employee1" class="hidden" aria-hidden="true">
                                 <option value="">-- Chọn bộ phận trước --</option>
                             </select>
+                            <!-- Custom searchable dropdown -->
+                            <div class="searchable-select" id="employee1-sd" data-target="employee1">
+                                <div class="searchable-select-trigger input-field" onclick="toggleSearchableSelect('employee1-sd')">
+                                    <span class="searchable-select-display">-- Chọn bộ phận trước --</span>
+                                    <svg class="searchable-select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                                <div class="searchable-select-dropdown">
+                                    <div class="searchable-select-search-wrap">
+                                        <input class="searchable-select-search" placeholder="Tìm nhân viên..." oninput="filterSearchableSelect('employee1-sd', this.value)" />
+                                    </div>
+                                    <div class="searchable-select-options">
+                                        <div class="searchable-select-placeholder">-- Chọn bộ phận trước --</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Customer -->
+                        <!-- Dự án (multi) -->
                         <div class="group">
-                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Customer</label>
-                               <select id="customer1" class="input-field">
-                                <option value="">-- Chọn customer --</option>
-                                @foreach (var customer in ViewBag.Customers)
-                                {
-                                    <option value="@customer.IdCustomer">@customer.NameCustomer</option>
-                                }
-                            </select>
+                            <div class="flex items-center justify-between mb-2 ml-2">
+                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400">Dự án & Giờ làm</label>
+                            </div>
+                            <!-- Column labels -->
+                            <div class="bulk-row-label" style="border-radius:0.75rem 0.75rem 0 0; border:2px solid #e5e7eb; border-bottom:1px solid #f3f4f6;">
+                                <span>Customer</span><span>Project</span><span>Proj.Phase</span><span>Phase</span><span>Số giờ</span><span></span>
+                            </div>
+                            <!-- Rows container -->
+                            <div id="projectRows1" style="border:2px solid #e5e7eb; border-top:none; border-bottom:none;"></div>
+                            <!-- Add button -->
+                            <button type="button" class="bulk-add-btn" style="border-radius:0 0 0.75rem 0.75rem; border:2px solid #e5e7eb; border-top:1px dashed #e5e7eb;"
+                                    onclick="addMode1ProjectRow()">+ Thêm dự án</button>
                         </div>
-
-                        <!-- Project -->
-                        <div class="group">
-                            <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project</label>
-                            <select id="project1" class="input-field">
-                                <option value="">-- Chọn dự án --</option>
-                                @foreach (var project in ViewBag.Projects)
-                                {
-                                    <option value="@project.IdProject">@project.NameProject</option>
-                                }
-                            </select>
-                        </div>
-
-                    
-                        <div class="group">
-                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project Phase</label>
-                            <select id="projectPhase1" class="input-field">
-                                <option value="">-- Chọn Project phase --</option>
-                                @foreach (var pp in ViewBag.ProjectPhases)
-                                {
-                                    <option value="@pp.ProjectPhase">@pp.ProjectPhase</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="group">
-                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Phase</label> 
-                            <select id="phase1" class="input-field">
-                                <option value="">-- Chọn Phase --</option>
-                                @foreach (var p in  ViewBag.ProjectPhases)
-                                {
-                                    <option value="@p.ProjectPhase">@p.ProjectPhase</option>
-                                }   
-                            </select>
-                        </div>                                                                        
 
                         <!-- Tuần -->
                         <div class="group">
@@ -124,26 +108,10 @@
                             class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Ngày</label>
                             <input type="date" id="day1" class="input-field" />
                         </div>
-
-                        <!-- Giờ -->
-                        <div class="group">
-                            <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Giờ</label>
-                            <div class="flex gap-3">
-                                <select id="hour1" class="input-field flex-1">
-                                    <option value="">Giờ</option>
-                                </select>
-                                <select id="minute1" class="input-field flex-1">
-                                    <option value="">Phút</option>
-                                </select>
-                            </div>
-                            <input type="hidden" id="hourDecimal1" />
-                            <div class="mt-2 text-sm text-gray-500 ml-2" id="hourDisplay1"></div>
-                        </div>
                     </div>
 
                     <!-- Right Column - Image -->
-                    <div class="flex-1 flex flex-col items-center justify-start">
+                    <div class="flex-1 hidden lg:flex flex-col items-center justify-start">
                         <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Image
                             User</label>
                             <div class="upload-box">
@@ -161,7 +129,7 @@
 
                     <!-- Submit Button -->
                     <div class="mt-12 text-center">
-                        <button onclick="handleSubmitMode1()" class="submit-btn">
+                        <button onclick="handleSubmitMode1()" class="submit-btn w-full sm:w-auto">
                             Lưu dữ liệu
                         </button>
                     </div>
@@ -187,217 +155,163 @@
                             <div class="group">
                                 <label
                                 class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
-                                <select id="employee2" class="input-field">
+                                <!-- Hidden select - giữ nguyên để submit code không đổi -->
+                                <select id="employee2" class="hidden" aria-hidden="true">
                                     <option value="">-- Chọn bộ phận trước --</option>
                                 </select>
+                                <!-- Custom searchable dropdown -->
+                                <div class="searchable-select" id="employee2-sd" data-target="employee2">
+                                    <div class="searchable-select-trigger input-field" onclick="toggleSearchableSelect('employee2-sd')">
+                                        <span class="searchable-select-display">-- Chọn bộ phận trước --</span>
+                                        <svg class="searchable-select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                    </div>
+                                    <div class="searchable-select-dropdown">
+                                        <div class="searchable-select-search-wrap">
+                                            <input class="searchable-select-search" placeholder="Tìm nhân viên..." oninput="filterSearchableSelect('employee2-sd', this.value)" />
+                                        </div>
+                                        <div class="searchable-select-options">
+                                            <div class="searchable-select-placeholder">-- Chọn bộ phận trước --</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Customer (Mode 2) -->
+                            <!-- Tuần -->
                             <div class="group">
-                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Customer</label>
-                                <select id="customer2" class="input-field">
-                                    <option value="">-- Chọn Customer --</option>
-                                    @foreach (var customer in ViewBag.Customers)
-                                    {
-                                        <option value="@customer.IdCustomer">@customer.NameCustomer</option>
-                                    }
+                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                                <select id="week2" class="input-field">
+                                    <option value="">-- Chọn tuần --</option>
                                 </select>
                             </div>
 
-                            <!-- Toggle: Chọn cách nhập dự án -->
+                            <!-- Chọn các ngày trong tuần -->
                             <div class="group">
-                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn dự
-                                    án</label>
-                                    <div class="flex gap-4">
-                                        <button type="button" id="projectModeBtn1" onclick="switchProjectMode(1)"
-                                                class="project-mode-btn active flex-1 px-6 py-4 rounded-2xl font-bold text-sm transition-all border-2">
-                                            Một dự án cho tất cả
-                                        </button>
-                                        <button type="button" id="projectModeBtn2" onclick="switchProjectMode(2)"
-                                                class="project-mode-btn flex-1 px-6 py-4 rounded-2xl font-bold text-sm transition-all border-2">
-                                            Dự án riêng từng ngày
-                                        </button>
-                                    </div>
+                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn ngày</label>
+                                <div id="dayCheckboxes2" class="grid grid-cols-1 gap-3">
+                                    <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
                                 </div>
+                            </div>
 
-                                <!-- Project chung (khi chọn mode 1) -->
-                                <div class="group" id="commonProjectSection">
-                                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project
-                                        (áp
-                                        dụng cho tất cả các ngày)</label>
-                                        <select id="commonProject" class="input-field">
-                                            <option value="">-- Chọn dự án --</option>
-                                            @foreach (var project in ViewBag.Projects)
-                                            {
-                                                <option value="@project.IdProject">@project.NameProject
-                                                    @(!string.IsNullOrEmpty(project.NameCustomer) ? $"({project.NameCustomer})" : "")</option>
-                                                }
-                                            </select>
-                                        </div>
+                            <!-- List nhập dự án & giờ cho từng ngày -->
+                            <div class="group" id="dayHoursSection2" style="display: none;">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Nhập dự án & giờ làm việc</label>
+                                    <button type="button" onclick="copyFirstDayDataToAll()" id="copyFirstDayBtn"
+                                            class="copy-btn text-xs px-4 py-2 rounded-lg transition-all font-semibold self-start sm:self-auto">
+                                        📋 Copy ngày đầu cho tất cả
+                                    </button>
+                                </div>
+                                <div id="dayHoursList2" class="space-y-3">
+                                    <p class="text-gray-400 text-center py-4">Chưa chọn ngày nào</p>
+                                </div>
+                            </div>
 
-                                        <!-- Project Phase -->
-                                        <div class="group">
-                                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Project Phase</label>
-                                            <select id="projectPhase2" class="input-field">
-                                                <option value="">-- Chọn Project Phase --</option>
-                                                @foreach (var pp in ViewBag.ProjectPhases)
-                                                {
-                                                    <option value="@pp.ProjectPhase">@pp.ProjectPhase</option>
-                                                }
-                                            </select>
-                                        </div>
+                            <!-- Submit Button -->
+                            <div class="text-center mt-10">
+                                <button onclick="handleSubmitMode2()" class="submit-btn w-full sm:w-auto">
+                                    Lưu dữ liệu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                                        <!-- Phase -->
-                                        <div class="group">
-                                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Phase</label>
-                                            <select id="phase2" class="input-field">
-                                                <option value="">-- Chọn Phase --</option>
-                                                @foreach (var pp in ViewBag.ProjectPhases)
-                                                {
-                                                    <option value="@pp.ProjectPhase">@pp.ProjectPhase</option>
-                                                }
-                                            </select>
-                                        </div>
+                <!-- MODE 3: Nhiều người - Nhiều ngày -->
+                <div id="mode3" class="mode-content hidden">
+                    <div class="space-y-6 max-w-3xl mx-auto">
+                        <!-- Bộ phận -->
+                        <div class="group">
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ phận</label>
+                            <select id="department3" class="input-field">
+                                <option value="">-- Chọn bộ phận --</option>
+                                @foreach (var dept in ViewBag.Departments)
+                                {
+                                    <option value="@dept.id">@dept.dept_name</option>
+                                }
+                            </select>
+                        </div>
 
-                                        <!-- Tuần -->
-                                        <div class="group">
-                                            <label
-                                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
-                                            <select id="week2" class="input-field">
-                                                <option value="">-- Chọn tuần --</option>
-                                            </select>
-                                        </div>
+                        <!-- Chọn nhân viên (checkboxes) -->
+                        <div class="group">
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn nhân viên</label>
+                            <div id="employeeCheckboxes3" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                                <p class="text-gray-400 text-center py-4">Vui lòng chọn bộ phận</p>
+                            </div>
+                        </div>
 
-                                        <!-- Chọn các ngày trong tuần -->
-                                        <div class="group">
-                                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn
-                                                ngày</label>
-                                                <div id="dayCheckboxes2" class="grid grid-cols-1 gap-3">
-                                                    <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
-                                                </div>
-                                            </div>
+                        <!-- Tuần -->
+                        <div class="group">
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                            <select id="week3" class="input-field">
+                                <option value="">-- Chọn tuần --</option>
+                            </select>
+                        </div>
 
-                                            <!-- List nhập giờ cho từng ngày -->
-                                            <div class="group" id="dayHoursSection2" style="display: none;">
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Nhập giờ
-                                                        làm việc</label>
-                                                        <button type="button" onclick="copyFirstDayDataToAll()" id="copyFirstDayBtn"
-                                                                class="copy-btn text-xs px-4 py-2 rounded-lg transition-all font-semibold">
-                                                            📋 Copy ngày đầu cho tất cả
-                                                        </button>
-                                                    </div>
-                                                    <div id="dayHoursList2" class="space-y-3">
-                                                        <p class="text-gray-400 text-center py-4">Chưa chọn ngày nào</p>
-                                                    </div>
-                                                </div>
+                        <!-- Chọn các ngày trong tuần -->
+                        <div class="group">
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn ngày</label>
+                            <div id="dayCheckboxes3" class="grid grid-cols-1 gap-3">
+                                <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
+                            </div>
+                        </div>
 
-                                                <!-- Submit Button -->
-                                                <div class="text-center mt-10">
-                                                    <button onclick="handleSubmitMode2()" class="submit-btn">
-                                                        Lưu dữ liệu
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <!-- Button nhập dữ liệu hàng loạt -->
+                        <div class="text-center mt-10">
+                            <button onclick="showBulkInputPopup()" class="submit-btn w-full sm:w-auto">
+                                Nhập dữ liệu hàng loạt
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                                        <!-- MODE 3: Nhiều người - Nhiều ngày -->
-                                        <div id="mode3" class="mode-content hidden">
-                                            <div class="space-y-6 max-w-3xl mx-auto">
-                                                <!-- Bộ phận -->
-                                                <div class="group">
-                                                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
-                                                        phận</label>
-                                                        <select id="department3" class="input-field">
-                                                            <option value="">-- Chọn bộ phận --</option>
-                                                            @foreach (var dept in ViewBag.Departments)
-                                                            {
-                                                                <option value="@dept.id">@dept.dept_name</option>
-                                                            }
-                                                        </select>
-                                                    </div>
-
-                                                    <!-- Chọn nhân viên (checkboxes) -->
-                                                    <div class="group">
-                                                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn nhân
-                                                            viên</label>
-                                                            <div id="employeeCheckboxes3"
-                                                                 class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                                                                <p class="text-gray-400 text-center py-4">Vui lòng chọn bộ phận</p>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Tuần -->
-                                                        <div class="group">
-                                                            <label
-                                                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
-                                                            <select id="week3" class="input-field">
-                                                                <option value="">-- Chọn tuần --</option>
-                                                            </select>
-                                                        </div>
-
-                                                        <!-- Chọn các ngày trong tuần -->
-                                                        <div class="group">
-                                                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn
-                                                                ngày</label>
-                                                                <div id="dayCheckboxes3" class="grid grid-cols-1 gap-3">
-                                                                    <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Button nhập dữ liệu hàng loạt -->
-                                                            <div class="text-center mt-10">
-                                                                <button onclick="showBulkInputPopup()" class="submit-btn">
-                                                                    Nhập dữ liệu hàng loạt
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Back to Home Button - Nằm ngoài container trắng -->
-                                                <div class="text-center mt-10">
-                                                    <a href="/Heatmap/Home"
-                                                           class="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                                             stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                                        </svg>
-                                                        Về trang chủ
-                                                    </a>
-                                                </div>
+                <!-- Back to Home Button -->
+                <div class="text-center mt-10">
+                    <a href="/Heatmap/Home"
+                           class="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Về trang chủ
+                    </a>
+                </div>
                                             </div>
 
                                             <!-- Bulk Input Popup (Mode 3) -->
                                             <div id="bulkInputPopup"
-                                                 class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
-                                                <div
-                                                    class="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden border border-gray-100">
-                                                    <div class="p-8 border-b border-gray-100">
-                                                        <h3 class="text-2xl font-black text-gray-900">Nhập dữ liệu hàng loạt</h3>
+                                                 class="fixed inset-0 z-[100] hidden items-center justify-center px-2 sm:px-4 bg-black/70 backdrop-blur-md">
+                                                <div class="bg-white rounded-none sm:rounded-[2.5rem] shadow-2xl w-full sm:max-w-3xl h-full sm:h-auto sm:max-h-[90vh] overflow-hidden border border-gray-100 flex flex-col">
+                                                    <!-- Header -->
+                                                    <div class="px-4 sm:px-8 py-4 sm:py-6 border-b border-gray-100 flex-shrink-0">
+                                                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                                                            <div>
+                                                                <h3 class="text-xl sm:text-2xl font-black text-gray-900">Nhập dữ liệu hàng loạt</h3>
+                                                                <p class="text-sm text-gray-400 mt-1">Mỗi nhân viên có thể làm nhiều dự án trong một ngày</p>
+                                                            </div>
+                                                            <div class="flex items-center gap-3 flex-shrink-0">
+                                                                <button type="button" onclick="copyFirstDayToAllMode3()"
+                                                                        class="copy-btn text-xs px-3 py-2 rounded-lg transition-all font-semibold whitespace-nowrap">
+                                                                    📋 Copy ngày đầu
+                                                                </button>
+                                                                <div id="bulkSummary" class="text-xs text-gray-400 font-semibold text-right"></div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Employee switcher -->
+                                                        <div class="flex gap-2 flex-wrap overflow-x-auto pb-1" id="bulkEmpTabs">
+                                                            <!-- Tab buttons generated by JS -->
+                                                        </div>
                                                     </div>
-                                                    <div class="p-8 overflow-y-auto max-h-[60vh]">
-                                                        <table class="w-full">
-                                                            <thead>
-                                                                <tr class="bg-gray-50">
-                                                                    <th class="px-6 py-4 text-left text-xs font-black uppercase text-gray-400">Nhân viên</th>
-                                                                    <th class="px-6 py-4 text-left text-xs font-black uppercase text-gray-400">Dự án</th>
-                                                                    <th class="px-6 py-4 text-left text-xs font-black uppercase text-gray-400">Giờ làm việc</th>
-                                                                    <th class="px-6 py-4 text-left text-xs font-black uppercase text-gray-400">Thập phân</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="bulkInputTableBody">
-                                                                <!-- Rows will be generated by JavaScript -->
-                                                            </tbody>
-                                                        </table>
+                                                    <!-- Blocks container -->
+                                                    <div class="overflow-y-auto flex-1 p-3 sm:p-6">
+                                                        <div id="bulkInputBlocks" class="space-y-4">
+                                                        </div>
                                                     </div>
-                                                    <div class="p-8 border-t border-gray-100 flex justify-end gap-4">
+                                                    <!-- Footer -->
+                                                    <div class="px-4 sm:px-8 py-4 sm:py-5 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
                                                         <button onclick="closeBulkInputPopup()"
-                                                                class="px-6 py-3 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">
+                                                                class="flex-1 sm:flex-none px-5 py-3 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">
                                                             Hủy
                                                         </button>
                                                         <button onclick="handleSubmitMode3()"
-                                                                class="px-6 py-3 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
+                                                                class="flex-1 sm:flex-none px-5 py-3 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
                                                             Xác nhận lưu
                                                         </button>
                                                     </div>
@@ -407,7 +321,7 @@
                                             <!-- Confirm Modal -->
                                             <div id="confirmModal"
                                                  class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
-                                                <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100">
+                                                <div class="bg-white p-8 sm:p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100">
                                                     <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
                                                              stroke="currentColor">
@@ -432,7 +346,7 @@
 
                                             <!-- Error Modal -->
                                             <div id="errorModal" class="fixed inset-0 z-[110] hidden items-center justify-center px-4 bg-black/70 backdrop-blur-md">
-                                                <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100">
+                                                <div class="bg-white p-8 sm:p-12 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-gray-100">
                                                     <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-8 mx-auto">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24"
                                                              stroke="currentColor">
@@ -449,6 +363,138 @@
                                                 </div>
                                             </div>
 
+                                            <style>
+                                                /* ===== SEARCHABLE SELECT ===== */
+                                                .searchable-select {
+                                                    position: relative;
+                                                    width: 100%;
+                                                }
+
+                                                .searchable-select-trigger {
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: space-between;
+                                                    cursor: pointer;
+                                                    user-select: none;
+                                                }
+
+                                                .searchable-select-trigger:hover {
+                                                    border-color: #dc2626;
+                                                }
+
+                                                .searchable-select-trigger.open {
+                                                    border-color: #dc2626;
+                                                    border-bottom-left-radius: 0;
+                                                    border-bottom-right-radius: 0;
+                                                }
+
+                                                .searchable-select-arrow {
+                                                    color: #9ca3af;
+                                                    flex-shrink: 0;
+                                                    transition: transform 0.2s ease;
+                                                }
+
+                                                .searchable-select-trigger.open .searchable-select-arrow {
+                                                    transform: rotate(180deg);
+                                                    color: #dc2626;
+                                                }
+
+                                                .searchable-select-display {
+                                                    color: #6b7280;
+                                                    overflow: hidden;
+                                                    text-overflow: ellipsis;
+                                                    white-space: nowrap;
+                                                    flex: 1;
+                                                }
+
+                                                .searchable-select-display.selected {
+                                                    color: #1f2937;
+                                                }
+
+                                                .searchable-select-dropdown {
+                                                    display: none;
+                                                    position: absolute;
+                                                    top: 100%;
+                                                    left: 0;
+                                                    right: 0;
+                                                    background: white;
+                                                    border: 2px solid #dc2626;
+                                                    border-top: none;
+                                                    border-bottom-left-radius: 1rem;
+                                                    border-bottom-right-radius: 1rem;
+                                                    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+                                                    z-index: 999;
+                                                    overflow: hidden;
+                                                }
+
+                                                .searchable-select-dropdown.open {
+                                                    display: block;
+                                                }
+
+                                                .searchable-select-search-wrap {
+                                                    padding: 10px 12px;
+                                                    border-bottom: 1px solid #f3f4f6;
+                                                    background: #fafafa;
+                                                }
+
+                                                .searchable-select-search {
+                                                    width: 100%;
+                                                    padding: 8px 12px;
+                                                    border: 1.5px solid #e5e7eb;
+                                                    border-radius: 0.5rem;
+                                                    font-size: 0.9rem;
+                                                    outline: none;
+                                                    background: white;
+                                                    transition: border-color 0.2s;
+                                                }
+
+                                                .searchable-select-search:focus {
+                                                    border-color: #dc2626;
+                                                }
+
+                                                .searchable-select-options {
+                                                    max-height: 220px;
+                                                    overflow-y: auto;
+                                                    padding: 6px 0;
+                                                }
+
+                                                .searchable-select-item {
+                                                    padding: 10px 16px;
+                                                    cursor: pointer;
+                                                    font-size: 0.95rem;
+                                                    color: #374151;
+                                                    transition: background 0.15s;
+                                                }
+
+                                                .searchable-select-item:hover {
+                                                    background: #fef2f2;
+                                                    color: #dc2626;
+                                                }
+
+                                                .searchable-select-item.active {
+                                                    background: #fef2f2;
+                                                    color: #dc2626;
+                                                    font-weight: 700;
+                                                }
+
+                                                .searchable-select-item.hidden-item {
+                                                    display: none;
+                                                }
+
+                                                .searchable-select-placeholder {
+                                                    padding: 12px 16px;
+                                                    color: #9ca3af;
+                                                    font-size: 0.9rem;
+                                                    text-align: center;
+                                                }
+
+                                                .searchable-select-empty {
+                                                    padding: 12px 16px;
+                                                    color: #9ca3af;
+                                                    font-size: 0.9rem;
+                                                    text-align: center;
+                                                }
+                                            </style>
                                             <style>
                                                 .input-field {
                                                     width: 100%;
@@ -620,15 +666,265 @@
                                                 .copy-btn:active {
                                                     transform: scale(0.98);
                                                 }
+
+                                                /* Disabled select - chờ chọn customer */
+                                                .select-disabled {
+                                                    opacity: 0.5;
+                                                    cursor: not-allowed;
+                                                    background-color: #f9fafb;
+                                                    color: #9ca3af;
+                                                }
+
+                                                /* ===== BULK BLOCK (Mode 3) ===== */
+                                                .bulk-block {
+                                                    border: 2px solid #e5e7eb;
+                                                    border-radius: 1.25rem;
+                                                    overflow: hidden;
+                                                    background: white;
+                                                }
+
+                                                .bulk-block-header {
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: space-between;
+                                                    padding: 12px 18px;
+                                                    background: #f9fafb;
+                                                    border-bottom: 2px solid #e5e7eb;
+                                                }
+
+                                                .bulk-block-emp {
+                                                    font-weight: 800;
+                                                    font-size: 0.95rem;
+                                                    color: #111827;
+                                                }
+
+                                                .bulk-block-day {
+                                                    font-size: 0.85rem;
+                                                    color: #6b7280;
+                                                    font-weight: 600;
+                                                }
+
+                                                .bulk-project-row {
+                                                    display: grid;
+                                                    grid-template-columns: 1fr 1fr 100px 100px 80px 36px;
+                                                    gap: 10px;
+                                                    align-items: center;
+                                                    padding: 10px 14px;
+                                                    border-bottom: 1px solid #f3f4f6;
+                                                }
+
+                                                .bulk-project-row:last-child {
+                                                    border-bottom: none;
+                                                }
+
+                                                .bulk-row-label {
+                                                    display: grid;
+                                                    grid-template-columns: 1fr 1fr 100px 100px 80px 36px;
+                                                    gap: 10px;
+                                                    padding: 6px 14px;
+                                                    background: #fafafa;
+                                                    border-bottom: 1px solid #f3f4f6;
+                                                }
+
+                                                /* Mobile: stack project rows vertically */
+                                                @@media (max-width: 640px) {
+                                                    .bulk-row-label {
+                                                        display: none;
+                                                    }
+
+                                                    .bulk-project-row {
+                                                        grid-template-columns: 1fr 1fr;
+                                                        grid-template-rows: auto auto auto;
+                                                        gap: 8px;
+                                                        padding: 12px 14px;
+                                                        position: relative;
+                                                    }
+
+                                                    /* Customer chiếm full width */
+                                                    .bulk-project-row .bulk-customer {
+                                                        grid-column: 1 / -1;
+                                                    }
+
+                                                    /* Project chiếm full width */
+                                                    .bulk-project-row .bulk-project {
+                                                        grid-column: 1 / -1;
+                                                    }
+
+                                                    /* ProjectPhase + Phase nằm cạnh nhau */
+                                                    .bulk-project-row .bulk-pp,
+                                                    .bulk-project-row .bulk-phase {
+                                                        grid-column: span 1;
+                                                    }
+
+                                                    /* Hours + delete nằm cạnh nhau */
+                                                    .bulk-project-row .bulk-hours-input {
+                                                        grid-column: span 1;
+                                                    }
+
+                                                    .bulk-project-row .bulk-delete-btn {
+                                                        grid-column: span 1;
+                                                        justify-self: end;
+                                                        align-self: center;
+                                                    }
+                                                }
+
+                                                .bulk-row-label span {
+                                                    font-size: 0.7rem;
+                                                    font-weight: 800;
+                                                    text-transform: uppercase;
+                                                    letter-spacing: 0.05em;
+                                                    color: #9ca3af;
+                                                }
+
+                                                .bulk-hours-input {
+                                                    width: 100%;
+                                                    padding: 0.6rem 0.75rem;
+                                                    border: 2px solid #e5e7eb;
+                                                    border-radius: 0.6rem;
+                                                    font-size: 0.95rem;
+                                                    outline: none;
+                                                    transition: border-color 0.2s;
+                                                    color: #1f2937;
+                                                }
+
+                                                .bulk-hours-input:focus {
+                                                    border-color: #dc2626;
+                                                }
+
+                                                .bulk-select {
+                                                    width: 100%;
+                                                    padding: 0.6rem 0.75rem;
+                                                    border: 2px solid #e5e7eb;
+                                                    border-radius: 0.6rem;
+                                                    font-size: 0.9rem;
+                                                    outline: none;
+                                                    transition: border-color 0.2s;
+                                                    color: #1f2937;
+                                                    background: white;
+                                                }
+
+                                                .bulk-select:focus {
+                                                    border-color: #dc2626;
+                                                }
+
+                                                .bulk-select.select-disabled {
+                                                    opacity: 0.45;
+                                                    cursor: not-allowed;
+                                                    background: #f9fafb;
+                                                }
+
+                                                .bulk-delete-btn {
+                                                    width: 34px;
+                                                    height: 34px;
+                                                    border-radius: 0.5rem;
+                                                    border: 2px solid #fee2e2;
+                                                    background: white;
+                                                    color: #ef4444;
+                                                    font-size: 1rem;
+                                                    cursor: pointer;
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: center;
+                                                    transition: all 0.15s;
+                                                    flex-shrink: 0;
+                                                }
+
+                                                .bulk-delete-btn:hover {
+                                                    background: #fef2f2;
+                                                    border-color: #ef4444;
+                                                }
+
+                                                .bulk-add-btn {
+                                                    width: 100%;
+                                                    padding: 9px 14px;
+                                                    background: #f9fafb;
+                                                    border: none;
+                                                    border-top: 1px dashed #e5e7eb;
+                                                    color: #dc2626;
+                                                    font-size: 0.85rem;
+                                                    font-weight: 700;
+                                                    cursor: pointer;
+                                                    text-align: left;
+                                                    transition: background 0.15s;
+                                                }
+
+                                                .bulk-add-btn:hover {
+                                                    background: #fef2f2;
+                                                }
+
+                                                /* Employee tab switcher */
+                                                .bulk-emp-tab {
+                                                    padding: 7px 16px;
+                                                    border-radius: 999px;
+                                                    border: 2px solid #e5e7eb;
+                                                    font-size: 0.85rem;
+                                                    font-weight: 700;
+                                                    color: #6b7280;
+                                                    background: white;
+                                                    cursor: pointer;
+                                                    transition: all 0.15s;
+                                                    white-space: nowrap;
+                                                }
+
+                                                .bulk-emp-tab:hover {
+                                                    border-color: #dc2626;
+                                                    color: #dc2626;
+                                                }
+
+                                                .bulk-emp-tab.active {
+                                                    background: #dc2626;
+                                                    border-color: #dc2626;
+                                                    color: white;
+                                                    box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+                                                }
+
+                                                /* ===== GLOBAL MOBILE RESPONSIVE ===== */
+                                                @@media (max-width: 640px) {
+                                                    /* Card padding nhỏ hơn */
+                                                    .bg-white.rounded-\[3rem\] {
+                                                        padding: 1.5rem !important;
+                                                        border-radius: 1.5rem !important;
+                                                    }
+
+                                                    /* Title nhỏ hơn */
+                                                    .text-5xl { font-size: 2.25rem !important; }
+                                                    .text-6xl { font-size: 2.5rem  !important; }
+
+                                                    /* Submit btn full width */
+                                                    .submit-btn {
+                                                        width: 100%;
+                                                        padding: 0.9rem 1.5rem;
+                                                        letter-spacing: 0.1em;
+                                                        font-size: 0.9rem;
+                                                    }
+
+                                                    /* Input font size 16px tránh zoom iOS */
+                                                    .input-field,
+                                                    .bulk-select,
+                                                    .bulk-hours-input {
+                                                        font-size: 16px !important;
+                                                    }
+
+                                                    /* Outer container no horizontal padding */
+                                                    .w-full.max-w-6xl {
+                                                        padding-left: 0.5rem;
+                                                        padding-right: 0.5rem;
+                                                    }
+                                                }
                                             </style>
 
 
                                             <script>
-                                                // Tạo biến global chứa projects data để file import.js sử dụng
                                                 window.projectsData = [
                                                     @foreach (var project in ViewBag.Projects)
                                                     {
                                                         <text>{IdProject: @project.IdProject, NameProject: "@project.NameProject", NameCustomer: "@(project.NameCustomer ?? "")" },</text>
+                                                    }
+                                                ];
+                                                window.projectPhasesData = [
+                                                    @foreach (var pp in ViewBag.ProjectPhases)
+                                                    {
+                                                        <text>"@pp.ProjectPhase",</text>
                                                     }
                                                 ];
                                             </script>

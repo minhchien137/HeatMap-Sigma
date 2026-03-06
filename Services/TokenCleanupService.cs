@@ -9,13 +9,7 @@ using System.Threading.Tasks;
 namespace HeatmapSystem.Services
 {
  
-    /* 
-       1. Background service chạy định kỳ để dọn dẹp token hết hạn
-       2. Chạy mỗi ngày lúc 2:00 AM
-    */
-
-    
-
+   
     public class TokenCleanupService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
@@ -56,10 +50,15 @@ namespace HeatmapSystem.Services
                     // Chạy cleanup
                     await CleanupTokens();
                 }
+                catch (OperationCanceledException)
+                {
+                    // Đây là hành vi bình thường khi app shutdown, không phải lỗi
+                    break;
+                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Lỗi trong Token Cleanup Service");
-                    // Nếu có lỗi, đợi 1 giờ rồi thử lại
+                    // Nếu có lỗi thật, đợi 1 giờ rồi thử lại
                     await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
                 }
             }

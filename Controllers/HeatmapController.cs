@@ -1369,6 +1369,506 @@ public class DetailDataDto
         }
         
 
+        // ============================================================
+        // MODE 1 MỚI: 1 người - 1 ngày - NHIỀU dự án
+        // ============================================================
+
+        public class ProjectRowRequest
+        {
+            public int ProjectId { get; set; }
+            public string Customer { get; set; }
+            public string ProjectPhase { get; set; }
+            public string Phase { get; set; }
+            public decimal WorkHours { get; set; }
+        }
+
+        public class SaveStaffDetailMultiRequest
+        {
+            public int EmployeeId { get; set; }
+            public string WorkDate { get; set; }
+            public List<ProjectRowRequest> Projects { get; set; }
+        }
+
+        [RequireUpdate]
+        [HttpPost("SaveStaffDetailMulti")]
+        public IActionResult SaveStaffDetailMulti([FromBody] SaveStaffDetailMultiRequest request)
+        {
+            try
+            {
+                if (!IsAuthenticated())
+                    return Json(new { success = false, message = "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại." });
+
+                if (request.Projects == null || request.Projects.Count == 0)
+                    return Json(new { success = false, message = "Vui lòng nhập ít nhất 1 dự án" });
+
+                // 1. Lấy thông tin nhân viên & bộ phận
+                EmployeeDto employee = null;
+                DepartmentDto department = null;
+
+                using (var connection = _zkContext.Database.GetDbConnection())
+                {
+                    if (connection.State != System.Data.ConnectionState.Open)
+                        connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = @"SELECT id, emp_code, first_name, last_name, nickname, department_id, status
+                                            FROM personnel_employee WHERE id = @empId";
+                        var p = cmd.CreateParameter(); p.ParameterName = "@empId"; p.Value = request.EmployeeId;
+                        cmd.Parameters.Add(p);
+                        using (var r = cmd.ExecuteReader())
+                        {
+                            if (r.Read())
+                                employee = new EmployeeDto
+                                {
+                                    id             = Convert.ToInt32(r["id"]),
+                                    emp_code       = r.IsDBNull(r.GetOrdinal("emp_code"))   ? "" : r.GetString(r.GetOrdinal("emp_code")),
+                                    first_name     = r.IsDBNull(r.GetOrdinal("first_name")) ? "" : r.GetString(r.GetOrdinal("first_name")),
+                                    last_name      = r.IsDBNull(r.GetOrdinal("last_name"))  ? "" : r.GetString(r.GetOrdinal("last_name")),
+                                    nickname       = r.IsDBNull(r.GetOrdinal("nickname"))   ? "" : r.GetString(r.GetOrdinal("nickname")),
+                                    department_id  = Convert.ToInt32(r["department_id"]),
+                                    status         = Convert.ToInt16(r["status"])
+                                };
+                        }
+                    }
+                    if (employee == null)
+                        return Json(new { success = false, message = "Không tìm thấy nhân viên" });
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = @"SELECT id, dept_code, dept_name, is_default, parent_dept_id, dept_manager_id, company_id
+                                            FROM personnel_department WHERE id = @deptId";
+                        var p = cmd.CreateParameter(); p.ParameterName = "@deptId"; p.Value = employee.department_id;
+                        cmd.Parameters.Add(p);
+                        using (var r = cmd.ExecuteReader())
+                        {
+                            if (r.Read())
+                                department = new DepartmentDto
+                                {
+                                    id             = Convert.ToInt32(r["id"]),
+                                    dept_code      = r.IsDBNull(r.GetOrdinal("dept_code"))  ? "" : r.GetString(r.GetOrdinal("dept_code")),
+                                    dept_name      = r.IsDBNull(r.GetOrdinal("dept_name"))  ? "" : r.GetString(r.GetOrdinal("dept_name")),
+                                    is_default     = Convert.ToBoolean(r["is_default"]),
+                                    parent_dept_id = r.IsDBNull(r.GetOrdinal("parent_dept_id")) ? (int?)null : Convert.ToInt32(r["parent_dept_id"]),
+                                    dept_manager_id= r.IsDBNull(r.GetOrdinal("dept_manager_id"))? (int?)null : Convert.ToInt32(r["dept_manager_id"]),
+                                    company_id     = Convert.ToInt32(r["company_id"])
+                                };
+                        }
+                    }
+                }
+
+                // 2. Parse ngày
+                if (!DateTime.TryParse(request.WorkDate, out DateTime workDate))
+                    return Json(new { success = false, message = "Ngày làm việc không hợp lệ" });
+
+                string currentUser = GetCurrentSVNCode();
+                string fullName    = $"{employee.first_name} {employee.last_name}".Trim();
+                if (string.IsNullOrEmpty(fullName)) fullName = employee.nickname ?? employee.emp_code;
+
+                var culture = System.Globalization.CultureInfo.CurrentCulture;
+                int weekNo  = culture.Calendar.GetWeekOfYear(workDate, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                int year    = workDate.Year;
+
+                int savedCount = 0, updatedCount = 0;
+
+                // 3. Loop từng dự án → lưu 1 bản ghi
+                foreach (var row in request.Projects)
+                {
+                    var project = _context.SVN_Projects.Find(row.ProjectId);
+                    if (project == null) continue;
+
+                    // Check trùng theo (emp_code + ngày + project + projectPhase + phase)
+                    var existing = _context.SVN_StaffDetail.FirstOrDefault(s =>
+                        s.SVNStaff        == employee.emp_code &&
+                        s.WorkDate.Date   == workDate.Date     &&
+                        s.Project         == project.NameProject &&
+                        s.ProjectPhase    == (row.ProjectPhase ?? "") &&
+                        s.Phase           == (row.Phase ?? ""));
+
+                    if (existing != null)
+                    {
+                        existing.WorkHours   = row.WorkHours;
+                        existing.Customer    = row.Customer ?? project.NameCustomer ?? "";
+                        existing.CreateDate  = DateTime.Now;
+                        existing.CreateBy    = currentUser;
+                        updatedCount++;
+                    }
+                    else
+                    {
+                        _context.SVN_StaffDetail.Add(new SVN_StaffDetail
+                        {
+                            SVNStaff     = employee.emp_code,
+                            NameStaff    = fullName,
+                            Department   = department?.dept_name ?? "N/A",
+                            Customer     = row.Customer ?? project.NameCustomer ?? "",
+                            Project      = project.NameProject,
+                            ProjectPhase = row.ProjectPhase ?? "",
+                            Phase        = row.Phase ?? "",
+                            WorkDate     = workDate,
+                            WeekNo       = weekNo,
+                            Year         = year,
+                            WorkHours    = row.WorkHours,
+                            CreateBy     = currentUser,
+                            CreateDate   = DateTime.Now
+                        });
+                        savedCount++;
+                    }
+                }
+
+                _context.SaveChanges();
+
+                return Json(new
+                {
+                    success      = true,
+                    message      = "Lưu dữ liệu thành công",
+                    savedCount   = savedCount,
+                    updatedCount = updatedCount,
+                    total        = savedCount + updatedCount
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in SaveStaffDetailMulti");
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        // ============================================================
+        // MODE 2 MỚI: 1 người - NHIỀU ngày - NHIỀU dự án/ngày
+        // ============================================================
+
+        public class MultiProjectDayRequest
+        {
+            public string Date { get; set; }
+            public List<ProjectRowRequest> Projects { get; set; }
+        }
+
+        public class SaveMultipleDaysMultiRequest
+        {
+            public int EmployeeId { get; set; }
+            public List<MultiProjectDayRequest> Days { get; set; }
+        }
+
+        [RequireUpdate]
+        [HttpPost("SaveMultipleDaysMulti")]
+        public IActionResult SaveMultipleDaysMulti([FromBody] SaveMultipleDaysMultiRequest request)
+        {
+            try
+            {
+                if (!IsAuthenticated())
+                    return Json(new { success = false, message = "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại." });
+
+                if (request.Days == null || request.Days.Count == 0)
+                    return Json(new { success = false, message = "Không có ngày nào được gửi lên" });
+
+                // 1. Lấy nhân viên & bộ phận
+                EmployeeDto employee = null;
+                DepartmentDto department = null;
+
+                using (var connection = _zkContext.Database.GetDbConnection())
+                {
+                    if (connection.State != System.Data.ConnectionState.Open)
+                        connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = @"SELECT id, emp_code, first_name, last_name, nickname, department_id, status
+                                            FROM personnel_employee WHERE id = @empId";
+                        var p = cmd.CreateParameter(); p.ParameterName = "@empId"; p.Value = request.EmployeeId;
+                        cmd.Parameters.Add(p);
+                        using (var r = cmd.ExecuteReader())
+                        {
+                            if (r.Read())
+                                employee = new EmployeeDto
+                                {
+                                    id            = Convert.ToInt32(r["id"]),
+                                    emp_code      = r.IsDBNull(r.GetOrdinal("emp_code"))   ? "" : r.GetString(r.GetOrdinal("emp_code")),
+                                    first_name    = r.IsDBNull(r.GetOrdinal("first_name")) ? "" : r.GetString(r.GetOrdinal("first_name")),
+                                    last_name     = r.IsDBNull(r.GetOrdinal("last_name"))  ? "" : r.GetString(r.GetOrdinal("last_name")),
+                                    nickname      = r.IsDBNull(r.GetOrdinal("nickname"))   ? "" : r.GetString(r.GetOrdinal("nickname")),
+                                    department_id = Convert.ToInt32(r["department_id"]),
+                                    status        = Convert.ToInt16(r["status"])
+                                };
+                        }
+                    }
+                    if (employee == null)
+                        return Json(new { success = false, message = "Không tìm thấy nhân viên" });
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = @"SELECT id, dept_code, dept_name, is_default, parent_dept_id, dept_manager_id, company_id
+                                            FROM personnel_department WHERE id = @deptId";
+                        var p = cmd.CreateParameter(); p.ParameterName = "@deptId"; p.Value = employee.department_id;
+                        cmd.Parameters.Add(p);
+                        using (var r = cmd.ExecuteReader())
+                        {
+                            if (r.Read())
+                                department = new DepartmentDto
+                                {
+                                    id              = Convert.ToInt32(r["id"]),
+                                    dept_code       = r.IsDBNull(r.GetOrdinal("dept_code"))  ? "" : r.GetString(r.GetOrdinal("dept_code")),
+                                    dept_name       = r.IsDBNull(r.GetOrdinal("dept_name"))  ? "" : r.GetString(r.GetOrdinal("dept_name")),
+                                    is_default      = Convert.ToBoolean(r["is_default"]),
+                                    parent_dept_id  = r.IsDBNull(r.GetOrdinal("parent_dept_id"))  ? (int?)null : Convert.ToInt32(r["parent_dept_id"]),
+                                    dept_manager_id = r.IsDBNull(r.GetOrdinal("dept_manager_id")) ? (int?)null : Convert.ToInt32(r["dept_manager_id"]),
+                                    company_id      = Convert.ToInt32(r["company_id"])
+                                };
+                        }
+                    }
+                }
+
+                string currentUser = GetCurrentSVNCode();
+                string fullName    = $"{employee.first_name} {employee.last_name}".Trim();
+                if (string.IsNullOrEmpty(fullName)) fullName = employee.nickname ?? employee.emp_code;
+
+                var culture      = System.Globalization.CultureInfo.CurrentCulture;
+                int savedCount   = 0;
+                int updatedCount = 0;
+
+                // 2. Loop ngày → loop dự án → lưu từng bản ghi
+                foreach (var dayData in request.Days)
+                {
+                    if (!DateTime.TryParse(dayData.Date, out DateTime workDate)) continue;
+                    if (dayData.Projects == null || dayData.Projects.Count == 0) continue;
+
+                    int weekNo = culture.Calendar.GetWeekOfYear(workDate, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                    int year   = workDate.Year;
+
+                    foreach (var row in dayData.Projects)
+                    {
+                        var project = _context.SVN_Projects.Find(row.ProjectId);
+                        if (project == null) continue;
+
+                        var existing = _context.SVN_StaffDetail.FirstOrDefault(s =>
+                            s.SVNStaff      == employee.emp_code      &&
+                            s.WorkDate.Date == workDate.Date           &&
+                            s.Project       == project.NameProject     &&
+                            s.ProjectPhase  == (row.ProjectPhase ?? "") &&
+                            s.Phase         == (row.Phase ?? ""));
+
+                        if (existing != null)
+                        {
+                            existing.WorkHours  = row.WorkHours;
+                            existing.Customer   = row.Customer ?? project.NameCustomer ?? "";
+                            existing.CreateDate = DateTime.Now;
+                            existing.CreateBy   = currentUser;
+                            updatedCount++;
+                        }
+                        else
+                        {
+                            _context.SVN_StaffDetail.Add(new SVN_StaffDetail
+                            {
+                                SVNStaff     = employee.emp_code,
+                                NameStaff    = fullName,
+                                Department   = department?.dept_name ?? "N/A",
+                                Customer     = row.Customer ?? project.NameCustomer ?? "",
+                                Project      = project.NameProject,
+                                ProjectPhase = row.ProjectPhase ?? "",
+                                Phase        = row.Phase ?? "",
+                                WorkDate     = workDate,
+                                WeekNo       = weekNo,
+                                Year         = year,
+                                WorkHours    = row.WorkHours,
+                                CreateBy     = currentUser,
+                                CreateDate   = DateTime.Now
+                            });
+                            savedCount++;
+                        }
+                    }
+                }
+
+                _context.SaveChanges();
+
+                return Json(new
+                {
+                    success      = true,
+                    message      = "Lưu dữ liệu thành công",
+                    savedCount   = savedCount,
+                    updatedCount = updatedCount,
+                    total        = savedCount + updatedCount
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in SaveMultipleDaysMulti");
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        // ============================================================
+        // MODE 3 MỚI: NHIỀU người - NHIỀU ngày - NHIỀU dự án
+        // ============================================================
+
+        public class BulkImportRowRequest
+        {
+            public int EmpId { get; set; }
+            public string Date { get; set; }
+            public string Customer { get; set; }
+            public int ProjectId { get; set; }
+            public string ProjectPhase { get; set; }
+            public string Phase { get; set; }
+            public decimal Hours { get; set; }
+        }
+
+        [RequireUpdate]
+        [HttpPost("BulkImportMultiProject")]
+        public IActionResult BulkImportMultiProject([FromBody] List<BulkImportRowRequest> records)
+        {
+            try
+            {
+                if (!IsAuthenticated())
+                    return Json(new { success = false, message = "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại." });
+
+                if (records == null || records.Count == 0)
+                    return Json(new { success = false, message = "Không có dữ liệu để lưu" });
+
+                string currentUser = GetCurrentSVNCode();
+                var culture        = System.Globalization.CultureInfo.CurrentCulture;
+
+                // Cache để tránh query lặp cho cùng 1 nhân viên
+                var employeeCache   = new Dictionary<int, EmployeeDto>();
+                var departmentCache = new Dictionary<int, DepartmentDto>();
+
+                // Mở 1 connection duy nhất cho toàn bộ batch
+                using (var connection = _zkContext.Database.GetDbConnection())
+                {
+                    if (connection.State != System.Data.ConnectionState.Open)
+                        connection.Open();
+
+                    // Load tất cả empId cần dùng
+                    var empIds = records.Select(r => r.EmpId).Distinct().ToList();
+
+                    foreach (var empId in empIds)
+                    {
+                        using (var cmd = connection.CreateCommand())
+                        {
+                            cmd.CommandText = @"SELECT id, emp_code, first_name, last_name, nickname, department_id, status
+                                                FROM personnel_employee WHERE id = @empId";
+                            var p = cmd.CreateParameter(); p.ParameterName = "@empId"; p.Value = empId;
+                            cmd.Parameters.Add(p);
+                            using (var r = cmd.ExecuteReader())
+                            {
+                                if (r.Read())
+                                {
+                                    var emp = new EmployeeDto
+                                    {
+                                        id            = Convert.ToInt32(r["id"]),
+                                        emp_code      = r.IsDBNull(r.GetOrdinal("emp_code"))   ? "" : r.GetString(r.GetOrdinal("emp_code")),
+                                        first_name    = r.IsDBNull(r.GetOrdinal("first_name")) ? "" : r.GetString(r.GetOrdinal("first_name")),
+                                        last_name     = r.IsDBNull(r.GetOrdinal("last_name"))  ? "" : r.GetString(r.GetOrdinal("last_name")),
+                                        nickname      = r.IsDBNull(r.GetOrdinal("nickname"))   ? "" : r.GetString(r.GetOrdinal("nickname")),
+                                        department_id = Convert.ToInt32(r["department_id"]),
+                                        status        = Convert.ToInt16(r["status"])
+                                    };
+                                    employeeCache[empId] = emp;
+                                }
+                            }
+                        }
+                    }
+
+                    // Load tất cả department cần dùng
+                    var deptIds = employeeCache.Values.Select(e => e.department_id).Distinct().ToList();
+
+                    foreach (var deptId in deptIds)
+                    {
+                        using (var cmd = connection.CreateCommand())
+                        {
+                            cmd.CommandText = @"SELECT id, dept_code, dept_name, is_default, parent_dept_id, dept_manager_id, company_id
+                                                FROM personnel_department WHERE id = @deptId";
+                            var p = cmd.CreateParameter(); p.ParameterName = "@deptId"; p.Value = deptId;
+                            cmd.Parameters.Add(p);
+                            using (var r = cmd.ExecuteReader())
+                            {
+                                if (r.Read())
+                                    departmentCache[deptId] = new DepartmentDto
+                                    {
+                                        id              = Convert.ToInt32(r["id"]),
+                                        dept_code       = r.IsDBNull(r.GetOrdinal("dept_code"))  ? "" : r.GetString(r.GetOrdinal("dept_code")),
+                                        dept_name       = r.IsDBNull(r.GetOrdinal("dept_name"))  ? "" : r.GetString(r.GetOrdinal("dept_name")),
+                                        is_default      = Convert.ToBoolean(r["is_default"]),
+                                        parent_dept_id  = r.IsDBNull(r.GetOrdinal("parent_dept_id"))  ? (int?)null : Convert.ToInt32(r["parent_dept_id"]),
+                                        dept_manager_id = r.IsDBNull(r.GetOrdinal("dept_manager_id")) ? (int?)null : Convert.ToInt32(r["dept_manager_id"]),
+                                        company_id      = Convert.ToInt32(r["company_id"])
+                                    };
+                            }
+                        }
+                    }
+                }
+
+                int savedCount = 0, updatedCount = 0, skippedCount = 0;
+
+                foreach (var record in records)
+                {
+                    if (!employeeCache.TryGetValue(record.EmpId, out var employee)) { skippedCount++; continue; }
+                    if (!DateTime.TryParse(record.Date, out DateTime workDate))     { skippedCount++; continue; }
+
+                    var project = _context.SVN_Projects.Find(record.ProjectId);
+                    if (project == null) { skippedCount++; continue; }
+
+                    departmentCache.TryGetValue(employee.department_id, out var department);
+
+                    string fullName = $"{employee.first_name} {employee.last_name}".Trim();
+                    if (string.IsNullOrEmpty(fullName)) fullName = employee.nickname ?? employee.emp_code;
+
+                    int weekNo = culture.Calendar.GetWeekOfYear(workDate, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                    int year   = workDate.Year;
+
+                    var existing = _context.SVN_StaffDetail.FirstOrDefault(s =>
+                        s.SVNStaff      == employee.emp_code       &&
+                        s.WorkDate.Date == workDate.Date            &&
+                        s.Project       == project.NameProject      &&
+                        s.ProjectPhase  == (record.ProjectPhase ?? "") &&
+                        s.Phase         == (record.Phase ?? ""));
+
+                    if (existing != null)
+                    {
+                        existing.WorkHours  = record.Hours;
+                        existing.Customer   = record.Customer ?? project.NameCustomer ?? "";
+                        existing.CreateDate = DateTime.Now;
+                        existing.CreateBy   = currentUser;
+                        updatedCount++;
+                    }
+                    else
+                    {
+                        _context.SVN_StaffDetail.Add(new SVN_StaffDetail
+                        {
+                            SVNStaff     = employee.emp_code,
+                            NameStaff    = fullName,
+                            Department   = department?.dept_name ?? "N/A",
+                            Customer     = record.Customer ?? project.NameCustomer ?? "",
+                            Project      = project.NameProject,
+                            ProjectPhase = record.ProjectPhase ?? "",
+                            Phase        = record.Phase ?? "",
+                            WorkDate     = workDate,
+                            WeekNo       = weekNo,
+                            Year         = year,
+                            WorkHours    = record.Hours,
+                            CreateBy     = currentUser,
+                            CreateDate   = DateTime.Now
+                        });
+                        savedCount++;
+                    }
+                }
+
+                _context.SaveChanges();
+
+                return Json(new
+                {
+                    success      = true,
+                    message      = $"Đã xử lý {records.Count} bản ghi",
+                    savedCount   = savedCount,
+                    updatedCount = updatedCount,
+                    skippedCount = skippedCount,
+                    total        = savedCount + updatedCount
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in BulkImportMultiProject");
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
         #endregion
     }
 }

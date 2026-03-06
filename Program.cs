@@ -79,6 +79,77 @@ app.UseRouting();
 
 app.UseSession();
 
+// ✅ FIX: Middleware tự động restore session từ RefreshToken
+// Giải quyết tình trạng F5 bị out do session in-memory bị reset
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.ToLower() ?? "";
+
+    // Bỏ qua: trang account, static files, api calls
+    bool isAccountPage  = path.StartsWith("/account/") || path == "/account";
+    bool isStaticFile   = System.IO.Path.HasExtension(path);
+
+    if (!isAccountPage && !isStaticFile)
+    {
+        var svnCode = context.Session.GetString("SVNCode");
+
+        // Session hết nhưng còn RefreshToken cookie → tự restore
+        if (string.IsNullOrEmpty(svnCode) && context.Request.Cookies.ContainsKey("RefreshToken"))
+        {
+            try
+            {
+                var authService = context.RequestServices.GetRequiredService<IAuthService>();
+                var db          = context.RequestServices.GetRequiredService<ApplicationDbContext>();
+
+                var refreshToken = context.Request.Cookies["RefreshToken"];
+                var ip           = context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+                // Kiểm tra X-Forwarded-For nếu có proxy
+                if (context.Request.Headers.ContainsKey("X-Forwarded-For"))
+                    ip = context.Request.Headers["X-Forwarded-For"].ToString().Split(',')[0].Trim();
+
+                var ua      = context.Request.Headers["User-Agent"].ToString();
+                var isValid = await authService.ValidateRefreshToken(refreshToken, ip, ua);
+
+                if (isValid)
+                {
+                    var authToken = await db.AuthTokens
+                        .FirstOrDefaultAsync(t => t.RefreshToken == refreshToken
+                                               && !t.IsRevoked
+                                               && !t.IsUsed
+                                               && t.ExpiresAt > DateTime.Now);
+
+                    if (authToken != null)
+                    {
+                        var user = await db.SVN_User
+                            .FirstOrDefaultAsync(u => u.SVNCode == authToken.SVNCode);
+
+                        if (user != null)
+                        {
+                            // ✅ Restore session - user không bị văng ra ngoài
+                            context.Session.SetString("SVNCode",    user.SVNCode);
+                            context.Session.SetString("IsAdmin",    user.IsAdmin.ToString().ToLower());
+                            context.Session.SetString("Permission", user.Permission ?? "None");
+                        }
+                    }
+                }
+                else
+                {
+                    // Token không hợp lệ → xóa cookie tránh loop
+                    context.Response.Cookies.Delete("RefreshToken");
+                }
+            }
+            catch
+            {
+                // Không throw exception, cứ để next() chạy, user sẽ bị redirect login bình thường
+                context.Response.Cookies.Delete("RefreshToken");
+            }
+        }
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapStaticAssets();

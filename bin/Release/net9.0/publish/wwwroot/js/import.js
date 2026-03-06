@@ -4,6 +4,144 @@ let confirmCallback = null;
 let projectMode = 1; // 1 = một dự án cho tất cả, 2 = dự án riêng từng ngày
 let dayDataState = {};
 
+// ============================================================
+// SEARCHABLE SELECT COMPONENT
+// ============================================================
+
+// Mở/đóng dropdown
+function toggleSearchableSelect(sdId) {
+    const sd = document.getElementById(sdId);
+    const trigger = sd.querySelector('.searchable-select-trigger');
+    const dropdown = sd.querySelector('.searchable-select-dropdown');
+    const searchInput = sd.querySelector('.searchable-select-search');
+    const isOpen = dropdown.classList.contains('open');
+    
+    // Đóng tất cả dropdown khác trước
+    document.querySelectorAll('.searchable-select-dropdown.open').forEach(d => {
+        d.classList.remove('open');
+        d.closest('.searchable-select').querySelector('.searchable-select-trigger').classList.remove('open');
+    });
+    
+    if (!isOpen) {
+        dropdown.classList.add('open');
+        trigger.classList.add('open');
+        // Focus vào ô search
+        setTimeout(() => searchInput && searchInput.focus(), 50);
+    }
+}
+
+// Lọc options theo từ khóa tìm kiếm
+function filterSearchableSelect(sdId, keyword) {
+    const sd = document.getElementById(sdId);
+    const items = sd.querySelectorAll('.searchable-select-item');
+    const emptyMsg = sd.querySelector('.searchable-select-empty');
+    const kw = keyword.toLowerCase().trim();
+    let visibleCount = 0;
+    
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (kw === '' || text.includes(kw)) {
+            item.classList.remove('hidden-item');
+            visibleCount++;
+        } else {
+            item.classList.add('hidden-item');
+        }
+    });
+    
+    if (emptyMsg) emptyMsg.remove();
+    if (visibleCount === 0 && kw !== '') {
+        const empty = document.createElement('div');
+        empty.className = 'searchable-select-empty';
+        empty.textContent = 'Không tìm thấy nhân viên';
+        sd.querySelector('.searchable-select-options').appendChild(empty);
+    }
+}
+
+// Chọn một item
+function selectSearchableItem(sdId, value, label) {
+    const sd = document.getElementById(sdId);
+    const targetSelectId = sd.getAttribute('data-target');
+    const display = sd.querySelector('.searchable-select-display');
+    const dropdown = sd.querySelector('.searchable-select-dropdown');
+    const trigger = sd.querySelector('.searchable-select-trigger');
+    const searchInput = sd.querySelector('.searchable-select-search');
+    
+    // Cập nhật hiển thị
+    display.textContent = label;
+    display.classList.add('selected');
+    
+    // Sync với hidden <select>
+    const hiddenSelect = document.getElementById(targetSelectId);
+    hiddenSelect.value = value;
+    // Cập nhật selectedOptions text (cho code dùng .selectedOptions[0].text)
+    for (let opt of hiddenSelect.options) {
+        if (opt.value === String(value)) {
+            opt.selected = true;
+            break;
+        }
+    }
+    
+    // Highlight item đang chọn
+    sd.querySelectorAll('.searchable-select-item').forEach(i => i.classList.remove('active'));
+    sd.querySelectorAll('.searchable-select-item').forEach(i => {
+        if (i.getAttribute('data-value') === String(value)) i.classList.add('active');
+    });
+    
+    // Đóng dropdown
+    dropdown.classList.remove('open');
+    trigger.classList.remove('open');
+    if (searchInput) searchInput.value = '';
+    filterSearchableSelect(sdId, '');
+}
+
+// Reset searchable select về trạng thái ban đầu
+function resetSearchableSelect(sdId, placeholder) {
+    const sd = document.getElementById(sdId);
+    if (!sd) return;
+    const display = sd.querySelector('.searchable-select-display');
+    const optionsContainer = sd.querySelector('.searchable-select-options');
+    const searchInput = sd.querySelector('.searchable-select-search');
+    
+    display.textContent = placeholder;
+    display.classList.remove('selected');
+    optionsContainer.innerHTML = `<div class="searchable-select-placeholder">${placeholder}</div>`;
+    if (searchInput) searchInput.value = '';
+}
+
+// Populate options vào searchable select
+function populateSearchableSelect(sdId, employees, placeholder) {
+    const sd = document.getElementById(sdId);
+    if (!sd) return;
+    const optionsContainer = sd.querySelector('.searchable-select-options');
+    const display = sd.querySelector('.searchable-select-display');
+    
+    display.textContent = placeholder;
+    display.classList.remove('selected');
+    optionsContainer.innerHTML = '';
+    
+    employees.forEach(emp => {
+        const fullName = `${emp.first_name} ${emp.last_name}`.trim() || emp.nickname || emp.emp_code;
+        const item = document.createElement('div');
+        item.className = 'searchable-select-item';
+        item.setAttribute('data-value', emp.id);
+        item.textContent = fullName;
+        item.onclick = () => selectSearchableItem(sdId, emp.id, fullName);
+        optionsContainer.appendChild(item);
+    });
+}
+
+// Đóng dropdown khi click ra ngoài
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.searchable-select')) {
+        document.querySelectorAll('.searchable-select-dropdown.open').forEach(d => {
+            d.classList.remove('open');
+            d.closest('.searchable-select').querySelector('.searchable-select-trigger').classList.remove('open');
+        });
+    }
+});
+
+// ============================================================
+
 // Switch between modes
 function switchMode(mode) {
     currentMode = mode;
@@ -203,16 +341,31 @@ function getCustomerName(selectId) {
 }
 function loadEmployees(departmentId, targetSelectId) {
     const employeeSelect = document.getElementById(targetSelectId);
+    // sdId = searchable dropdown wrapper id (employee1-sd, employee2-sd)
+    const sdId = targetSelectId + '-sd';
+    const sd = document.getElementById(sdId);
+    
+    // Reset hidden select
     employeeSelect.innerHTML = '<option value="">Đang tải...</option>';
+    
+    // Reset custom dropdown hiển thị "Đang tải..."
+    if (sd) {
+        const display = sd.querySelector('.searchable-select-display');
+        const optionsContainer = sd.querySelector('.searchable-select-options');
+        if (display) { display.textContent = 'Đang tải...'; display.classList.remove('selected'); }
+        if (optionsContainer) optionsContainer.innerHTML = '<div class="searchable-select-placeholder">Đang tải...</div>';
+    }
     
     if (!departmentId) {
         employeeSelect.innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
+        if (sd) resetSearchableSelect(sdId, '-- Chọn bộ phận trước --');
         return;
     }
     
     fetch(`/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`)
     .then(response => response.json())
     .then(employees => {
+        // Populate hidden select (giữ cho code submit hoạt động)
         employeeSelect.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
         employees.forEach(emp => {
             const fullName = `${emp.first_name} ${emp.last_name}`.trim() || emp.nickname || emp.emp_code;
@@ -221,10 +374,14 @@ function loadEmployees(departmentId, targetSelectId) {
             option.textContent = fullName;
             employeeSelect.appendChild(option);
         });
+        
+        // Populate custom searchable dropdown
+        if (sd) populateSearchableSelect(sdId, employees, '-- Chọn nhân viên --');
     })
     .catch(error => {
         console.error('Error loading employees:', error);
         employeeSelect.innerHTML = '<option value="">Lỗi khi tải danh sách</option>';
+        if (sd) resetSearchableSelect(sdId, 'Lỗi khi tải danh sách');
     });
 }
 
@@ -670,6 +827,7 @@ function handleSubmitMode1() {
                 // Reset form
                 document.getElementById('department1').selectedIndex = 0;
                 document.getElementById('employee1').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
+                resetSearchableSelect('employee1-sd', '-- Chọn bộ phận trước --');
                 document.getElementById('project1').selectedIndex = 0;
                 document.getElementById('projectPhase1').selectedIndex = 0;
                 document.getElementById('phase1').selectedIndex = 0;
@@ -808,6 +966,7 @@ function handleSubmitMode2() {
                     loadEmployees(dept2, 'employee2');
                 } else {
                     document.getElementById('employee2').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
+                    resetSearchableSelect('employee2-sd', '-- Chọn bộ phận trước --');
                 }
                 if (projectMode === 1) {
                     document.getElementById('commonProject').selectedIndex = 0;
