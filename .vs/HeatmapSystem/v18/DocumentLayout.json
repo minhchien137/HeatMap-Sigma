@@ -1,7 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\HeatMap-Sigma\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A3E55F54-312D-FB46-F93A-6FEF478432A7}|HeatmapSystem.csproj|c:\\heatmap-sigma\\views\\heatmap\\import.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A3E55F54-312D-FB46-F93A-6FEF478432A7}|HeatmapSystem.csproj|solutionrelative:views\\heatmap\\import.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +14,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -18,6 +23,19 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Import.cshtml",
+              "DocumentMoniker": "C:\\HeatMap-Sigma\\Views\\Heatmap\\Import.cshtml",
+              "RelativeDocumentMoniker": "Views\\Heatmap\\Import.cshtml",
+              "ToolTip": "C:\\HeatMap-Sigma\\Views\\Heatmap\\Import.cshtml",
+              "RelativeToolTip": "Views\\Heatmap\\Import.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-06T08:53:41.581Z",
+              "EditorCaption": ""
             }
           ]
         }

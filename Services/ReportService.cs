@@ -54,25 +54,6 @@ namespace HeatmapSystem.Services
             }
         }
 
-        public List<PhaseListDto> GetPhaseList()
-        {
-            try
-            {
-                return _context.SVN_StaffDetail
-                    .Where(s => s.Phase != null && s.Phase != "")
-                    .Select(s => s.Phase)
-                    .Distinct()
-                    .OrderBy(p => p)
-                    .Select(p => new PhaseListDto { name = p })
-                    .ToList();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting phase list");
-                throw;
-            }
-        }
-
         public ReportDataDto GetReportData(ReportFilterDto filter)
         {
             try
@@ -635,7 +616,7 @@ namespace HeatmapSystem.Services
                     var weekLabels = pivotData.weekLabels;
                     var pivotRows  = pivotData.rows;
                     var totalByDate = pivotData.totalByDate;
-                    int fixedCols  = 6;
+                    int fixedCols  = 5;
 
                     // Build week groups (ordered as they appear)
                     var weekGroups = new List<(string week, List<int> idxs)>();
@@ -711,7 +692,7 @@ namespace HeatmapSystem.Services
                     }
 
                     // ── Row 5: Column labels ───────────────────────────────
-                    string[] fixedLabels = { "Customer", "Product/Project", "Project Phase", "Phase", "Staff", "Dept" };
+                    string[] fixedLabels = { "Customer", "Product/Project", "Project Phase", "Staff", "Dept" };
                     for (int i = 0; i < fixedLabels.Length; i++) { SetHeader(ws7.Cells[5, i + 1]); ws7.Cells[5, i + 1].Value = fixedLabels[i]; }
                     col = fixedCols + 1;
                     foreach (var (wk, idxs) in weekGroups)
@@ -735,17 +716,16 @@ namespace HeatmapSystem.Services
                     foreach (var custGrp in pivotRows.GroupBy(r => r.customer))
                     {
                         int custStart = dataRow;
-                        foreach (var projGrp in custGrp.GroupBy(r => new { r.project, r.projectPhase, r.phase }))
+                        foreach (var projGrp in custGrp.GroupBy(r => new { r.project, r.projectPhase }))
                         {
                             int projStart = dataRow;
                             foreach (var row in projGrp)
                             {
                                 ws7.Cells[dataRow, 2].Value = row.project;
                                 ws7.Cells[dataRow, 3].Value = row.projectPhase;
-                                ws7.Cells[dataRow, 4].Value = row.phase;
-                                ws7.Cells[dataRow, 5].Value = row.staffName;
-                                ws7.Cells[dataRow, 6].Value = row.department;
-                                for (int i = 1; i <= 6; i++) ws7.Cells[dataRow, i].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
+                                ws7.Cells[dataRow, 4].Value = row.staffName;
+                                ws7.Cells[dataRow, 5].Value = row.department;
+                                for (int i = 1; i <= 5; i++) ws7.Cells[dataRow, i].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
 
                                 col = fixedCols + 1;
                                 foreach (var (wk, idxs) in weekGroups)
@@ -779,7 +759,7 @@ namespace HeatmapSystem.Services
                             // Merge project/phase cols if multiple staff
                             if (projGrp.Count() > 1)
                             {
-                                for (int mc = 2; mc <= 4; mc++)
+                                for (int mc = 2; mc <= 3; mc++)
                                 {
                                     ws7.Cells[projStart, mc, dataRow - 1, mc].Merge = true;
                                     ws7.Cells[projStart, mc].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
@@ -905,7 +885,7 @@ namespace HeatmapSystem.Services
 
             if (!string.IsNullOrEmpty(filter.Phase))
             {
-                query = query.Where(s => s.Phase == filter.Phase);
+                query = query.Where(s => s.ProjectPhase == filter.Phase);
             }
 
             return query;
@@ -1109,14 +1089,14 @@ namespace HeatmapSystem.Services
         }
 
 
-        // Tổng hợp dữ liệu giờ làm theo Phase và Department
+        // Tổng hợp dữ liệu giờ làm theo ProjectPhase và Department
         private List<PhaseDataDto> CalculatePhaseData(List<SVN_StaffDetail> data)
         {
             return data
-                .GroupBy(s => new { s.Phase, s.Department })
+                .GroupBy(s => new { s.ProjectPhase, s.Department })
                 .Select(g => new PhaseDataDto
                 {
-                    phase = g.Key.Phase,
+                    phase = g.Key.ProjectPhase,
                     department = g.Key.Department,
                     totalHours = g.Sum(s => s.WorkHours ?? 0),
                     staffCount = g.Select(s => s.SVNStaff).Distinct().Count()
@@ -1232,15 +1212,14 @@ namespace HeatmapSystem.Services
                 return (decimal)(staff * 8.5);
             }).ToList();
 
-            // Group data: Customer × Project × ProjectPhase × Phase × SVNStaff × WorkDate
-            // Pivot rows: Customer × Project × ProjectPhase × Phase (unique)
+            // Group data: Customer × Project × ProjectPhase × SVNStaff × WorkDate
+            // Pivot rows: Customer × Project × ProjectPhase (unique)
             var rowKeys = data
-                .Select(s => new { s.Customer, s.Project, s.ProjectPhase, s.Phase, s.SVNStaff, s.NameStaff, s.Department })
+                .Select(s => new { s.Customer, s.Project, s.ProjectPhase, s.SVNStaff, s.NameStaff, s.Department })
                 .Distinct()
                 .OrderBy(k => k.Customer)
                 .ThenBy(k => k.Project)
                 .ThenBy(k => k.ProjectPhase)
-                .ThenBy(k => k.Phase)
                 .ThenBy(k => k.SVNStaff)
                 .ToList();
 
@@ -1250,7 +1229,6 @@ namespace HeatmapSystem.Services
                     s.Customer == key.Customer &&
                     s.Project == key.Project &&
                     s.ProjectPhase == key.ProjectPhase &&
-                    s.Phase == key.Phase &&
                     s.SVNStaff == key.SVNStaff).ToList();
 
                 var dailyHours = rowData
@@ -1265,7 +1243,6 @@ namespace HeatmapSystem.Services
                     customer = key.Customer,
                     project = key.Project,
                     projectPhase = key.ProjectPhase,
-                    phase = key.Phase,
                     staffName = key.NameStaff,
                     svnStaff = key.SVNStaff,
                     department = key.Department,
