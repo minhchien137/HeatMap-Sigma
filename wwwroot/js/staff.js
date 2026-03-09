@@ -45,7 +45,7 @@ async function loadData() {
         displayData();
     } catch (error) {
         console.error('Error loading data:', error);
-        showError('Không thể tải dữ liệu. Vui lòng thử lại.');
+        showError(typeof t === 'function' ? t('common.loading') + '...' : 'Không thể tải dữ liệu. Vui lòng thử lại.');
     }
 }
 
@@ -146,8 +146,8 @@ function displayData() {
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                     </svg>
-                    <p class="text-gray-400 text-base sm:text-lg font-bold">Không có dữ liệu</p>
-                    <p class="text-gray-400 text-xs sm:text-sm mt-2">Thử điều chỉnh bộ lọc hoặc tìm kiếm</p>
+                    <p class="text-gray-400 text-base sm:text-lg font-bold">${typeof t==="function"?t("staff.nodata"):"Không có dữ liệu"}</p>
+                    <p class="text-gray-400 text-xs sm:text-sm mt-2">${typeof t==="function"?t("history.nodata.sub"):"Thử điều chỉnh bộ lọc hoặc tìm kiếm"}</p>
                 </div>
             </div>
         `;
@@ -184,17 +184,19 @@ function displayData() {
     
     // Update showing records text
     document.getElementById('showingRecords').textContent = 
-    `${startIndex + 1}-${endIndex} trong tổng số ${sortedData.length}`;
+    typeof t === "function"
+    ? `${startIndex + 1}-${endIndex} / ${sortedData.length}`
+    : `${startIndex + 1}-${endIndex} trong tổng số ${sortedData.length}`;
     
     // Render desktop table rows
     pageData.forEach((item) => {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50 transition-colors';
         
-        const genderText = item.gender === 'M' ? 'Nam' : item.gender === 'F' ? 'Nữ' : '';
+        const genderText = item.gender === 'M' ? (typeof t==="function"?t('staff.male'):'Nam') : item.gender === 'F' ? (typeof t==="function"?t('staff.female'):'Nữ') : '';
         const statusBadge = item.status === 0 
-        ? '<span class="badge badge-green">Đang làm việc</span>'
-        : '<span class="badge badge-gray">Đã nghỉ việc</span>';
+        ? `<span class="badge badge-green">${typeof t==="function"?t('staff.active'):'Đang làm việc'}</span>`
+        : `<span class="badge badge-gray">${typeof t==="function"?t('staff.inactive'):'Đã nghỉ việc'}</span>`;
         
         row.innerHTML = `
             <td class="table-cell">
@@ -221,10 +223,10 @@ function displayData() {
     // Render mobile cards
     if (mobileContainer) {
         pageData.forEach((item) => {
-            const genderText = item.gender === 'M' ? 'Nam' : item.gender === 'F' ? 'Nữ' : '';
+            const genderText = item.gender === 'M' ? (typeof t==="function"?t('staff.male'):'Nam') : item.gender === 'F' ? (typeof t==="function"?t('staff.female'):'Nữ') : '';
             const statusBadge = item.status === 0 
-            ? '<span class="badge badge-green">Đang làm việc</span>'
-            : '<span class="badge badge-gray">Đã nghỉ việc</span>';
+            ? `<span class="badge badge-green">${typeof t==="function"?t('staff.active'):'Đang làm việc'}</span>`
+            : `<span class="badge badge-gray">${typeof t==="function"?t('staff.inactive'):'Đã nghỉ việc'}</span>`;
             
             const card = document.createElement('div');
             card.className = 'p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors';
@@ -240,19 +242,19 @@ function displayData() {
                 <h4 class="font-bold text-gray-900 text-base mb-3">${item.full_name || 'N/A'}</h4>
                 <div class="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                        <p class="text-xs text-gray-400 font-bold mb-0.5">GIỚI TÍNH</p>
+                        <p class="text-xs text-gray-400 font-bold mb-0.5">${(typeof t==="function"?t('staff.col.gender'):'Giới tính').toUpperCase()}</p>
                         <p class="text-gray-700">${genderText || 'N/A'}</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 font-bold mb-0.5">NGÀY SINH</p>
+                        <p class="text-xs text-gray-400 font-bold mb-0.5">${(typeof t==="function"?t('staff.col.dob'):'Ngày sinh').toUpperCase()}</p>
                         <p class="text-gray-700">${formatDate(item.birthday)}</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 font-bold mb-0.5">BỘ PHẬN</p>
+                        <p class="text-xs text-gray-400 font-bold mb-0.5">${(typeof t==="function"?t('common.dept'):'Bộ phận').toUpperCase()}</p>
                         <p class="text-gray-700">${item.department || 'N/A'}</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 font-bold mb-0.5">THÀNH PHỐ</p>
+                        <p class="text-xs text-gray-400 font-bold mb-0.5">${(typeof t==="function"?t('staff.col.city'):'Thành phố').toUpperCase()}</p>
                         <p class="text-gray-700">${item.city || 'N/A'}</p>
                     </div>
                 </div>
@@ -407,5 +409,10 @@ function showError(message) {
 
 // Export to Excel
 function exportToExcel() {
-    alert('Chức năng xuất Excel đang được phát triển');
+    alert(typeof t === 'function' ? t('common.coming_soon') : 'Chức năng xuất Excel đang được phát triển');
 }
+
+// Re-apply i18n when language changes (triggered by i18n.js)
+document.addEventListener('i18n:applied', function() {
+    displayData();
+});
