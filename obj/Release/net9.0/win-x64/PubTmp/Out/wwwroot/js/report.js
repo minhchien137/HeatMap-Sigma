@@ -1421,7 +1421,7 @@ function updatePhaseChart(phaseData) {
                     max: 100,
                     ticks: { callback: v => v + '%' },
                     grid: { color: '#f3f4f6' },
-                    title: { display: true, text: 'Phân bổ theo Phase (%)', font: { weight: 'bold' } }
+                    title: { display: true, text: 'Phân bổ theo Project Phase (%)', font: { weight: 'bold' } }
                 }
             }
         },
@@ -1447,7 +1447,7 @@ function updatePhaseTable(phaseData, mode = 'hours') {
     
     // ==== HEADER ====
     let headHtml = '<tr>';
-    headHtml += `<th class="th-phase">By Phase</th>`;
+    headHtml += `<th class="th-phase">By Proj. Phase</th>`;
     departments.forEach(dept => { headHtml += `<th class="th-dept">${dept}</th>`; });
     headHtml += `<th class="th-total">SVN</th>`;
     headHtml += `<th class="th-pct">SVN %</th>`;
@@ -1717,7 +1717,7 @@ function updateDetailPivotTable(pivotData) {
     const rows = pivotData.rows;
     const totalByDate = pivotData.totalByDate;
     const grandTotal = pivotData.grandTotal;
-    const FIXED_COLS = 6;
+    const FIXED_COLS = 5;
     
     // Group dates by week
     const weekGroups = [];
@@ -1766,7 +1766,6 @@ function updateDetailPivotTable(pivotData) {
     h3 += `<th class="dp-fixed">Customer</th>`;
     h3 += `<th class="dp-fixed">Product/Project</th>`;
     h3 += `<th class="dp-fixed" style="text-align:center">Project Phase</th>`;
-    h3 += `<th class="dp-fixed" style="text-align:center">Phase</th>`;
     h3 += `<th class="dp-fixed" style="text-align:center">Staff</th>`;
     h3 += `<th class="dp-fixed" style="text-align:center">Dept</th>`;
     weekGroups.forEach(wg => {
@@ -1792,7 +1791,7 @@ function updateDetailPivotTable(pivotData) {
         // Group by project within customer
         const projectMap = {};
         cRows.forEach(r => {
-            const pKey = `${r.project}||${r.projectPhase}||${r.phase}`;
+            const pKey = `${r.project}||${r.projectPhase}`;
             if (!projectMap[pKey]) projectMap[pKey] = [];
             projectMap[pKey].push(r);
         });
@@ -1810,7 +1809,6 @@ function updateDetailPivotTable(pivotData) {
                 if (ri === 0) {
                     bodyHtml += `<td class="dp-project" rowspan="${pRows.length}">${row.project}</td>`;
                     bodyHtml += `<td class="dp-projphase" rowspan="${pRows.length}">${row.projectPhase}</td>`;
-                    bodyHtml += `<td class="dp-phase" rowspan="${pRows.length}">${row.phase}</td>`;
                 }
                 // Staff and Department - always show per row
                 bodyHtml += `<td class="dp-projphase">${row.staffName || ''}</td>`;

@@ -161,6 +161,14 @@ document.addEventListener('DOMContentLoaded', function() {
     generateHoursAndMinutes();
     setupDepartmentChangeListeners();
     initMode1ProjectRows(); // khởi tạo 1 row mặc định cho Mode 1
+    
+    // Nếu user thường (có userDepartmentId) -> auto-load nhân viên cho cả 3 mode
+    if (window.userDepartmentId) {
+        const deptId = String(window.userDepartmentId);
+        loadEmployees(deptId, 'employee1');
+        loadEmployees(deptId, 'employee2');
+        loadEmployeesAsCheckboxes(deptId);
+    }
 });
 
 // Generate weeks for all modes
@@ -374,6 +382,10 @@ function loadEmployeesAsCheckboxes(departmentId) {
         return;
     }
     
+    // Reset ô search khi load lại
+    const searchBox = document.getElementById('searchEmployee3');
+    if (searchBox) searchBox.value = '';
+    
     fetch(`/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`)
     .then(response => response.json())
     .then(employees => {
@@ -413,6 +425,26 @@ function handleEmployeeCheckboxChange(checkbox) {
         parent.classList.remove('selected');
     }
     updateSelectedEmployeesDisplay();
+}
+
+// Filter employee checkboxes by search text (Mode 3)
+function filterEmployeeCheckboxes(searchText) {
+    const keyword = searchText.toLowerCase().trim();
+    const boxes = document.querySelectorAll('#employeeCheckboxes3 .employee-checkbox');
+    boxes.forEach(box => {
+        const name = box.querySelector('label')?.textContent.toLowerCase() ?? '';
+        box.style.display = (!keyword || name.includes(keyword)) ? '' : 'none';
+    });
+}
+
+// Filter employee checkboxes by search text (Mode 3)
+function filterEmployeeCheckboxes(searchText) {
+    const keyword = searchText.toLowerCase().trim();
+    const boxes = document.querySelectorAll('#employeeCheckboxes3 .employee-checkbox');
+    boxes.forEach(box => {
+        const name = box.querySelector('label')?.textContent.toLowerCase() ?? '';
+        box.style.display = (!keyword || name.includes(keyword)) ? '' : 'none';
+    });
 }
 
 // Update selected employees display (Mode 3)
@@ -508,7 +540,6 @@ function saveAllDayBlocks() {
                 customer:     row.querySelector('.bulk-customer')?.value || '',
                 project:      row.querySelector('.bulk-project')?.value || '',
                 projectPhase: row.querySelector('.bulk-pp')?.value || '',
-                phase:        row.querySelector('.bulk-phase')?.value || '',
                 hours:        row.querySelector('.bulk-hours-input')?.value || ''
             });
         });
@@ -556,7 +587,7 @@ function renderDayHoursList() {
         // Column labels
         const labels = document.createElement('div');
         labels.className = 'bulk-row-label';
-        labels.innerHTML = `<span>Customer</span><span>Project</span><span>Proj. Phase</span><span>Phase</span><span>Số giờ</span><span></span>`;
+        labels.innerHTML = `<span>Customer</span><span>Project</span><span>Proj. Phase</span><span>Số giờ</span><span></span>`;
         block.appendChild(labels);
         
         // Rows container
@@ -679,7 +710,7 @@ function showBulkInputPopup() {
     
     bulkActiveEmpId = selectedEmployees[0].value;
     renderBulkBlocks(bulkActiveEmpId);
-    document.getElementById('bulkInputPopup').style.display = 'flex';
+    document.getElementById('bulkInputPopup').classList.remove('hidden'); document.getElementById('bulkInputPopup').classList.add('flex');
 }
 
 // Lưu data DOM hiện tại vào bulkAllData trước khi switch tab
@@ -693,7 +724,6 @@ function saveBulkCurrentData() {
                 customer:     row.querySelector('.bulk-customer').value,
                 project:      row.querySelector('.bulk-project').value,
                 projectPhase: row.querySelector('.bulk-pp')?.value || '',
-                phase:        row.querySelector('.bulk-phase')?.value || '',
                 hours:        row.querySelector('.bulk-hours-input').value
             });
         });
@@ -738,7 +768,7 @@ function createBulkBlock(empId, empName, date, dateLabel, savedRows) {
     
     const labels = document.createElement('div');
     labels.className = 'bulk-row-label';
-    labels.innerHTML = `<span>Customer</span><span>Project</span><span>Proj.Phase</span><span>Phase</span><span>Số giờ</span><span></span>`;
+    labels.innerHTML = `<span>Customer</span><span>Project</span><span>Proj.Phase</span><span>Số giờ</span><span></span>`;
     block.appendChild(labels);
     
     const rowsContainer = document.createElement('div');
@@ -789,13 +819,6 @@ function addProjectRow(rowsContainer, savedData) {
     ppSelect.className = 'bulk-select bulk-pp';
     ppSelect.innerHTML = `<option value="">-- Proj. Phase --</option>${ppOpts}`;
     
-    // Phase
-    const phaseOpts = (window.projectPhasesData || [])
-    .map(p => `<option value="${p}"${savedData?.phase === p ? ' selected' : ''}>${p}</option>`).join('');
-    const phaseSelect = document.createElement('select');
-    phaseSelect.className = 'bulk-select bulk-phase';
-    phaseSelect.innerHTML = `<option value="">-- Phase --</option>${phaseOpts}`;
-    
     // Hours
     const hoursInput = document.createElement('input');
     hoursInput.type = 'number';
@@ -819,7 +842,6 @@ function addProjectRow(rowsContainer, savedData) {
     row.appendChild(customerSelect);
     row.appendChild(projectSelect);
     row.appendChild(ppSelect);
-    row.appendChild(phaseSelect);
     row.appendChild(hoursInput);
     row.appendChild(deleteBtn);
     rowsContainer.appendChild(row);
@@ -848,7 +870,7 @@ function onBulkCustomerChange(customerSelect) {
 // Close bulk input popup
 function closeBulkInputPopup() {
     saveBulkCurrentData(); // Lưu data đang nhập dở trước khi đóng
-    document.getElementById('bulkInputPopup').style.display = 'none';
+    document.getElementById('bulkInputPopup').classList.add('hidden'); document.getElementById('bulkInputPopup').classList.remove('flex');
 }
 
 // Helper functions
@@ -893,16 +915,14 @@ function handleSubmitMode1() {
         const customer     = row.querySelector('.bulk-customer').value;
         const project      = row.querySelector('.bulk-project').value;
         const projectPhase = row.querySelector('.bulk-pp').value;
-        const phase        = row.querySelector('.bulk-phase').value;
         const hours        = parseFloat(row.querySelector('.bulk-hours-input').value);
-        if (!customer || !project || !projectPhase || !phase || !hours || hours <= 0) {
+        if (!customer || !project || !projectPhase || !hours || hours <= 0) {
             rowError = `Vui lòng nhập đầy đủ tất cả thông tin (dòng ${idx + 1})`;
         }
         projectRows.push({
             Customer:     customer,
             ProjectId:    parseInt(project),
             ProjectPhase: projectPhase,
-            Phase:        phase,
             WorkHours:    hours
         });
     });
@@ -931,9 +951,14 @@ function handleSubmitMode1() {
             .then(result => {
                 if (result.success) {
                     showSuccessModal(`✓ Đã lưu ${projectRows.length} dự án thành công!`);
-                    document.getElementById('department1').selectedIndex = 0;
+                    if (!window.userDepartmentId) {
+                        document.getElementById('department1').selectedIndex = 0;
+                    }
                     document.getElementById('employee1').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
                     resetSearchableSelect('employee1-sd', '-- Chọn bộ phận trước --');
+                    if (window.userDepartmentId) {
+                        loadEmployees(String(window.userDepartmentId), 'employee1');
+                    }
                     document.getElementById('day1').value = '';
                     initMode1ProjectRows();
                 } else {
@@ -963,16 +988,14 @@ function handleSubmitMode2() {
             const customer     = row.querySelector('.bulk-customer').value;
             const project      = row.querySelector('.bulk-project').value;
             const projectPhase = row.querySelector('.bulk-pp').value;
-            const phase        = row.querySelector('.bulk-phase').value;
             const hours        = parseFloat(row.querySelector('.bulk-hours-input').value);
-            if (!customer || !project || !projectPhase || !phase || !hours || hours <= 0) {
+            if (!customer || !project || !projectPhase || !hours || hours <= 0) {
                 rowError = `Vui lòng nhập đầy đủ tất cả thông tin (${dateStr} - dòng ${idx + 1})`;
             }
             rows.push({
                 Customer:     customer,
                 ProjectId:    parseInt(project),
                 ProjectPhase: projectPhase,
-                Phase:        phase,
                 WorkHours:    hours
             });
         });
@@ -1002,7 +1025,7 @@ function handleSubmitMode2() {
                 if (result.success) {
                     showSuccessModal(`✓ Lưu thành công ${selectedDays.length} ngày!`);
                     // Reset: giữ bộ phận/tuần, xóa ngày tick và dayDataState
-                    const dept2 = document.getElementById('department2').value;
+                    const dept2 = window.userDepartmentId ? String(window.userDepartmentId) : document.getElementById('department2').value;
                     if (dept2) loadEmployees(dept2, 'employee2');
                     else {
                         document.getElementById('employee2').innerHTML = '<option value="">-- Chọn bộ phận trước --</option>';
@@ -1032,14 +1055,13 @@ function handleSubmitMode3() {
     Object.entries(bulkAllData).forEach(([empId, empData]) => {
         Object.entries(empData.days).forEach(([date, dayData]) => {
             dayData.rows.forEach((r, idx) => {
-                if (!r.customer || !r.project || !r.projectPhase || !r.phase || !r.hours || parseFloat(r.hours) <= 0) {
+                if (!r.customer || !r.project || !r.projectPhase || !r.hours || parseFloat(r.hours) <= 0) {
                     if (!hasError) {  // chỉ giữ lỗi đầu tiên gặp
                         hasError = true;
                         const missing = [];
                         if (!r.customer)     missing.push('Customer');
                         if (!r.project)      missing.push('Project');
                         if (!r.projectPhase) missing.push('Proj. Phase');
-                        if (!r.phase)        missing.push('Phase');
                         if (!r.hours || parseFloat(r.hours) <= 0) missing.push('Số giờ');
                         errorMsg = `Thiếu: ${missing.join(', ')}\n(${empData.name} - ${dayData.label} - dòng ${idx + 1})`;
                     }
@@ -1056,7 +1078,6 @@ function handleSubmitMode3() {
                     Customer:     r.customer,
                     ProjectId:    parseInt(r.project),
                     ProjectPhase: r.projectPhase,
-                    Phase:        r.phase,
                     Hours:        parseFloat(r.hours)
                 });
             });
@@ -1108,28 +1129,28 @@ function handleSubmitMode3() {
 // Modal functions
 function showErrorModal(message) {
     document.getElementById('errorModalMessage').textContent = message;
-    document.getElementById('errorModal').style.display = 'flex';
+    document.getElementById('errorModal').classList.remove('hidden'); document.getElementById('errorModal').classList.add('flex');
 }
 
 function closeErrorModal() {
-    document.getElementById('errorModal').style.display = 'none';
+    document.getElementById('errorModal').classList.add('hidden'); document.getElementById('errorModal').classList.remove('flex');
 }
 
 // Thêm hàm mới để hiển thị thông báo thành công
 function showSuccessModal(message) {
     // Sử dụng modal error nhưng với nội dung thành công
     document.getElementById('errorModalMessage').textContent = message;
-    document.getElementById('errorModal').style.display = 'flex';
+    document.getElementById('errorModal').classList.remove('hidden'); document.getElementById('errorModal').classList.add('flex');
 }
 
 function showConfirmModal(message, callback) {
     confirmCallback = callback;
     document.getElementById('confirmMessage').textContent = message;
-    document.getElementById('confirmModal').style.display = 'flex';
+    document.getElementById('confirmModal').classList.remove('hidden'); document.getElementById('confirmModal').classList.add('flex');
 }
 
 function closeConfirmModal() {
-    document.getElementById('confirmModal').style.display = 'none';
+    document.getElementById('confirmModal').classList.add('hidden'); document.getElementById('confirmModal').classList.remove('flex');
     confirmCallback = null;
 }
 
@@ -1182,7 +1203,6 @@ function copyFirstDayDataToAll() {
             customer:     row.querySelector('.bulk-customer').value,
             project:      row.querySelector('.bulk-project').value,
             projectPhase: row.querySelector('.bulk-pp').value,
-            phase:        row.querySelector('.bulk-phase').value,
             hours:        row.querySelector('.bulk-hours-input').value
         });
     });

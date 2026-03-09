@@ -43,11 +43,18 @@
                     <div class="group">
                         <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
                             phận</label>
-                            <select id="department1" class="input-field">
+                            <select id="department1" class="input-field" disabled="@(ViewBag.UserDepartmentId != null ? "disabled" : null)">
                                 <option value="">-- Chọn bộ phận --</option>
                                 @foreach (var dept in ViewBag.Departments)
                                 {
-                                    <option value="@dept.id">@dept.dept_name</option>
+                                    @if (ViewBag.UserDepartmentId != null && dept.id == (int)ViewBag.UserDepartmentId)
+                                    {
+                                        <option value="@dept.id" selected>@dept.dept_name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@dept.id">@dept.dept_name</option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -142,11 +149,18 @@
                         <div class="group">
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
                                 phận</label>
-                                <select id="department2" class="input-field">
+                                <select id="department2" class="input-field" disabled="@(ViewBag.UserDepartmentId != null ? "disabled" : null)">
                                     <option value="">-- Chọn bộ phận --</option>
                                     @foreach (var dept in ViewBag.Departments)
                                     {
+                                        @if (ViewBag.UserDepartmentId != null && dept.id == (int)ViewBag.UserDepartmentId)
+                                    {
+                                        <option value="@dept.id" selected>@dept.dept_name</option>
+                                    }
+                                    else
+                                    {
                                         <option value="@dept.id">@dept.dept_name</option>
+                                    }
                                     }
                                 </select>
                             </div>
@@ -221,11 +235,18 @@
                         <!-- Bộ phận -->
                         <div class="group">
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ phận</label>
-                            <select id="department3" class="input-field">
+                            <select id="department3" class="input-field" disabled="@(ViewBag.UserDepartmentId != null ? "disabled" : null)">
                                 <option value="">-- Chọn bộ phận --</option>
                                 @foreach (var dept in ViewBag.Departments)
                                 {
-                                    <option value="@dept.id">@dept.dept_name</option>
+                                    @if (ViewBag.UserDepartmentId != null && dept.id == (int)ViewBag.UserDepartmentId)
+                                    {
+                                        <option value="@dept.id" selected>@dept.dept_name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@dept.id">@dept.dept_name</option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -233,6 +254,16 @@
                         <!-- Chọn nhân viên (checkboxes) -->
                         <div class="group">
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn nhân viên</label>
+                            <!-- Search box -->
+                            <div class="relative mb-3">
+                                <input type="text" id="searchEmployee3" 
+                                       placeholder="Tìm nhân viên..." 
+                                       oninput="filterEmployeeCheckboxes(this.value)"
+                                       class="input-field pr-10 w-full" />
+                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+                                </svg>
+                            </div>
                             <div id="employeeCheckboxes3" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
                                 <p class="text-gray-400 text-center py-4">Vui lòng chọn bộ phận</p>
                             </div>
@@ -706,7 +737,7 @@
 
                                                 .bulk-project-row {
                                                     display: grid;
-                                                    grid-template-columns: 1fr 1fr 120px 80px 36px;
+                                                    grid-template-columns: 1fr 1fr 100px 80px 36px;
                                                     gap: 10px;
                                                     align-items: center;
                                                     padding: 10px 14px;
@@ -719,7 +750,7 @@
 
                                                 .bulk-row-label {
                                                     display: grid;
-                                                    grid-template-columns: 1fr 1fr 120px 80px 36px;
+                                                    grid-template-columns: 1fr 1fr 100px 80px 36px;
                                                     gap: 10px;
                                                     padding: 6px 14px;
                                                     background: #fafafa;
@@ -750,7 +781,7 @@
                                                         grid-column: 1 / -1;
                                                     }
 
-                                                    /* ProjectPhase + Hours nằm cạnh nhau */
+                                                    /* ProjectPhase chiếm 1 cột */
                                                     .bulk-project-row .bulk-pp {
                                                         grid-column: span 1;
                                                     }
@@ -914,6 +945,7 @@
 
 
                                             <script>
+                                                window.userDepartmentId = @(ViewBag.UserDepartmentId?.ToString() ?? "null");
                                                 window.projectsData = [
                                                     @foreach (var project in ViewBag.Projects)
                                                     {
