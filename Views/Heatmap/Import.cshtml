@@ -21,7 +21,7 @@
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <button id="modeBtn1" onclick="switchMode(1)"
                         class="mode-btn active px-5 py-3 rounded-2xl font-bold text-sm transition-all border-2 w-full sm:w-auto">
-                    Nhập đơn (1 người - 1 ngày)
+                    Một người - Một ngày
                 </button>
                 <button id="modeBtn2" onclick="switchMode(2)"
                         class="mode-btn px-5 py-3 rounded-2xl font-bold text-sm transition-all border-2 w-full sm:w-auto">
@@ -84,7 +84,7 @@
                             </div>
                             <!-- Column labels -->
                             <div class="bulk-row-label" style="border-radius:0.75rem 0.75rem 0 0; border:2px solid #e5e7eb; border-bottom:1px solid #f3f4f6;">
-                                <span>Customer</span><span>Project</span><span>Proj.Phase</span><span>Phase</span><span>Số giờ</span><span></span>
+                                <span>Customer</span><span>Project</span><span>Proj.Phase</span><span>Số giờ</span><span></span>
                             </div>
                             <!-- Rows container -->
                             <div id="projectRows1" style="border:2px solid #e5e7eb; border-top:none; border-bottom:none;"></div>
@@ -706,7 +706,7 @@
 
                                                 .bulk-project-row {
                                                     display: grid;
-                                                    grid-template-columns: 1fr 1fr 100px 100px 80px 36px;
+                                                    grid-template-columns: 1fr 1fr 120px 80px 36px;
                                                     gap: 10px;
                                                     align-items: center;
                                                     padding: 10px 14px;
@@ -719,7 +719,7 @@
 
                                                 .bulk-row-label {
                                                     display: grid;
-                                                    grid-template-columns: 1fr 1fr 100px 100px 80px 36px;
+                                                    grid-template-columns: 1fr 1fr 120px 80px 36px;
                                                     gap: 10px;
                                                     padding: 6px 14px;
                                                     background: #fafafa;
@@ -750,9 +750,8 @@
                                                         grid-column: 1 / -1;
                                                     }
 
-                                                    /* ProjectPhase + Phase nằm cạnh nhau */
-                                                    .bulk-project-row .bulk-pp,
-                                                    .bulk-project-row .bulk-phase {
+                                                    /* ProjectPhase + Hours nằm cạnh nhau */
+                                                    .bulk-project-row .bulk-pp {
                                                         grid-column: span 1;
                                                     }
 

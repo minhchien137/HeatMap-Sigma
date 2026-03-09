@@ -297,7 +297,6 @@ public class DetailDataDto
             public string WorkDate { get; set; }
             public decimal WorkHours { get; set; }
             public string ProjectPhase { get; set; }
-            public string Phase { get; set; }
         }
 
         [RequireUpdate]
@@ -449,7 +448,6 @@ public class DetailDataDto
                     existing.WorkHours = request.WorkHours;
                     existing.Customer = request.Customer ?? project.NameCustomer ?? "";
                     existing.ProjectPhase = request.ProjectPhase ?? "";
-                    existing.Phase = request.Phase ?? "";
                     existing.CreateDate = DateTime.Now;
                     existing.CreateBy = currentUser;
                 }
@@ -464,7 +462,6 @@ public class DetailDataDto
                         Customer = request.Customer ?? project.NameCustomer ?? "",
                         Project = project.NameProject,
                         ProjectPhase = request.ProjectPhase ?? "",
-                        Phase = request.Phase ?? "",
                         WorkDate = workDate,
                         WeekNo = weekNo,
                         Year = year,
@@ -514,7 +511,6 @@ public class DetailDataDto
             public int? CommonProjectId { get; set; }  // Dùng khi ProjectMode = 1
             public string Customer { get; set; }
             public string ProjectPhase { get; set; }
-            public string Phase { get; set; }
             public List<DayDataRequest> Days { get; set; }
         }
 
@@ -692,7 +688,6 @@ public class DetailDataDto
                         existing.WorkHours = dayData.WorkHours;
                         existing.Customer = request.Customer ?? project.NameCustomer ?? "";
                         existing.ProjectPhase = request.ProjectPhase ?? "";
-                        existing.Phase = request.Phase ?? "";
                         existing.CreateDate = DateTime.Now;
                         existing.CreateBy = currentUser;
                         updatedCount++;
@@ -708,7 +703,6 @@ public class DetailDataDto
                             Customer = request.Customer ?? project.NameCustomer ?? "",
                             Project = project.NameProject,
                             ProjectPhase = request.ProjectPhase ?? "",
-                            Phase = request.Phase ?? "",
                             WorkDate = workDate,
                             WeekNo = weekNo,
                             Year = year,
@@ -832,7 +826,6 @@ public class DetailDataDto
                         customer = s.Customer,
                         project = s.Project,
                         projectPhase = s.ProjectPhase,
-                        phase = s.Phase,
                         workDate = s.WorkDate,
                         weekNo = s.WeekNo,
                         year = s.Year,
@@ -1061,13 +1054,13 @@ public class DetailDataDto
                 // Code này cần cài thêm package, tạm thời return CSV
 
                 var csv = new System.Text.StringBuilder();
-                csv.AppendLine("STT,SVN Staff,Tên nhân viên,Bộ phận,Customer,Dự án,Project Phase,Phase,Ngày làm việc,Tuần,Năm,Giờ làm,Người tạo,Ngày tạo");
+                csv.AppendLine("STT,SVN Staff,Tên nhân viên,Bộ phận,Customer,Dự án,Project Phase,Ngày làm việc,Tuần,Năm,Giờ làm,Người tạo,Ngày tạo");
 
                 int stt = 1;
                 foreach (var item in data)
                 {
                     csv.AppendLine($"{stt},{item.SVNStaff},{item.NameStaff},{item.Department},{item.Customer},{item.Project}," +
-                        $"{item.ProjectPhase},{item.Phase}," +
+                        $"{item.ProjectPhase}," +
                         $"{item.WorkDate:dd/MM/yyyy},{item.WeekNo},{item.Year},{item.WorkHours}," +
                         $"{item.CreateBy},{item.CreateDate:dd/MM/yyyy HH:mm}");
                     stt++;
@@ -1172,21 +1165,6 @@ public class DetailDataDto
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading project list");
-                return Json(new { error = ex.Message });
-            }
-        }
-
-        [HttpGet("GetPhaseList")]
-        public IActionResult GetPhaseList()
-        {
-            try
-            {
-                var phases = _reportService.GetPhaseList();
-                return Json(phases);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading phase list");
                 return Json(new { error = ex.Message });
             }
         }
@@ -1378,7 +1356,6 @@ public class DetailDataDto
             public int ProjectId { get; set; }
             public string Customer { get; set; }
             public string ProjectPhase { get; set; }
-            public string Phase { get; set; }
             public decimal WorkHours { get; set; }
         }
 
@@ -1477,13 +1454,12 @@ public class DetailDataDto
                     var project = _context.SVN_Projects.Find(row.ProjectId);
                     if (project == null) continue;
 
-                    // Check trùng theo (emp_code + ngày + project + projectPhase + phase)
+                    // Check trùng theo (emp_code + ngày + project + projectPhase)
                     var existing = _context.SVN_StaffDetail.FirstOrDefault(s =>
                         s.SVNStaff        == employee.emp_code &&
                         s.WorkDate.Date   == workDate.Date     &&
                         s.Project         == project.NameProject &&
-                        s.ProjectPhase    == (row.ProjectPhase ?? "") &&
-                        s.Phase           == (row.Phase ?? ""));
+                        s.ProjectPhase    == (row.ProjectPhase ?? ""));
 
                     if (existing != null)
                     {
@@ -1503,7 +1479,6 @@ public class DetailDataDto
                             Customer     = row.Customer ?? project.NameCustomer ?? "",
                             Project      = project.NameProject,
                             ProjectPhase = row.ProjectPhase ?? "",
-                            Phase        = row.Phase ?? "",
                             WorkDate     = workDate,
                             WeekNo       = weekNo,
                             Year         = year,
@@ -1643,8 +1618,7 @@ public class DetailDataDto
                             s.SVNStaff      == employee.emp_code      &&
                             s.WorkDate.Date == workDate.Date           &&
                             s.Project       == project.NameProject     &&
-                            s.ProjectPhase  == (row.ProjectPhase ?? "") &&
-                            s.Phase         == (row.Phase ?? ""));
+                            s.ProjectPhase  == (row.ProjectPhase ?? ""));
 
                         if (existing != null)
                         {
@@ -1664,7 +1638,6 @@ public class DetailDataDto
                                 Customer     = row.Customer ?? project.NameCustomer ?? "",
                                 Project      = project.NameProject,
                                 ProjectPhase = row.ProjectPhase ?? "",
-                                Phase        = row.Phase ?? "",
                                 WorkDate     = workDate,
                                 WeekNo       = weekNo,
                                 Year         = year,
@@ -1706,7 +1679,6 @@ public class DetailDataDto
             public string Customer { get; set; }
             public int ProjectId { get; set; }
             public string ProjectPhase { get; set; }
-            public string Phase { get; set; }
             public decimal Hours { get; set; }
         }
 
@@ -1817,8 +1789,7 @@ public class DetailDataDto
                         s.SVNStaff      == employee.emp_code       &&
                         s.WorkDate.Date == workDate.Date            &&
                         s.Project       == project.NameProject      &&
-                        s.ProjectPhase  == (record.ProjectPhase ?? "") &&
-                        s.Phase         == (record.Phase ?? ""));
+                        s.ProjectPhase  == (record.ProjectPhase ?? ""));
 
                     if (existing != null)
                     {
@@ -1838,7 +1809,6 @@ public class DetailDataDto
                             Customer     = record.Customer ?? project.NameCustomer ?? "",
                             Project      = project.NameProject,
                             ProjectPhase = record.ProjectPhase ?? "",
-                            Phase        = record.Phase ?? "",
                             WorkDate     = workDate,
                             WeekNo       = weekNo,
                             Year         = year,

@@ -130,8 +130,6 @@ namespace HeatmapSystem.Controllers
         public async Task<IActionResult> DangNhap(
             string TaiKhoan, 
             string Password, 
-            string CaptchaInput, 
-            string CaptchaCode, 
             string RememberMe = null)
         {
             bool isRememberMe = RememberMe == "on" || RememberMe == "true";
@@ -166,22 +164,6 @@ namespace HeatmapSystem.Controllers
                     _context.SVN_Logs.Add(lockLog);
                     await _context.SaveChangesAsync();
                     
-                    return View();
-                }
-
-                // Kiểm tra CAPTCHA
-                if (string.IsNullOrWhiteSpace(CaptchaInput) || string.IsNullOrWhiteSpace(CaptchaCode))
-                {
-                    TempData["Error"] = "Vui lòng nhập mã xác nhận!";
-                    ViewBag.TaiKhoan = TaiKhoan;
-                    return View();
-                }
-
-                if (CaptchaInput.ToUpper() != CaptchaCode.ToUpper())
-                {
-                    TempData["Error"] = "Mã xác nhận không đúng!";
-                    ViewBag.TaiKhoan = TaiKhoan;
-                    await _authService.RecordLoginAttempt(TaiKhoan, ipAddress, false, "Sai CAPTCHA");
                     return View();
                 }
 
