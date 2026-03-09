@@ -112,6 +112,11 @@ public class DetailDataDto
 
 
     // DTO class cho Customer (distinct từ SVN_Projects)
+    public class DepartmentNameDto
+    {
+        public string deptName { get; set; }
+    }
+
     public class CustomerDto
     {
         public string IdCustomer { get; set; }
@@ -184,6 +189,26 @@ public class DetailDataDto
                     FROM personnel_department")
                 .ToList();
             ViewBag.Departments = departments;
+
+            // Tìm bộ phận của user đang đăng nhập (nếu không phải admin)
+            var isAdminImport = HttpContext.Session.GetString("IsAdmin")?.ToLower() == "true";
+            var svnCodeImport = GetCurrentSVNCode();
+            int? userDeptId = null;
+            if (!isAdminImport && !string.IsNullOrEmpty(svnCodeImport))
+            {
+                using var conn = _zkContext.Database.GetDbConnection();
+                conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT TOP 1 department_id FROM personnel_employee WHERE emp_code = @code";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@code";
+                param.Value = svnCodeImport;
+                cmd.Parameters.Add(param);
+                var result = cmd.ExecuteScalar();
+                if (result != null && result != DBNull.Value)
+                    userDeptId = Convert.ToInt32(result);
+            }
+            ViewBag.UserDepartmentId = userDeptId;
 
             // Dự án từ Database
             var projects = _context.SVN_Projects.ToList();
@@ -760,6 +785,9 @@ public class DetailDataDto
         {
             try
             {
+                var isAdmin = HttpContext.Session.GetString("IsAdmin")?.ToLower() == "true";
+                var svnCode = GetCurrentSVNCode();
+
                 var staffData = _zkContext.Database
                     .SqlQueryRaw<StaffDto>(@"
                 SELECT 
@@ -779,12 +807,27 @@ public class DetailDataDto
                 ORDER BY e.emp_code")
                     .ToList();
 
-                return Json(staffData);
+                // Neu khong phai admin -> chi tra ve nhan vien cung bo phan voi user dang nhap
+                string userDepartment = null;
+                if (!isAdmin && !string.IsNullOrEmpty(svnCode))
+                {
+                    var currentUser = staffData.FirstOrDefault(e =>
+                        e.emp_code.Equals(svnCode, StringComparison.OrdinalIgnoreCase));
+                    if (currentUser != null && !string.IsNullOrEmpty(currentUser.department))
+                    {
+                        userDepartment = currentUser.department;
+                        staffData = staffData
+                            .Where(e => e.department == userDepartment)
+                            .ToList();
+                    }
+                }
+
+                return Json(new { data = staffData, userDepartment, isAdmin });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting staff data");
-                return Json(new List<StaffDto>());
+                return Json(new { data = new List<StaffDto>(), userDepartment = (string)null, isAdmin = false });
             }
         }
 
@@ -813,8 +856,45 @@ public class DetailDataDto
                     return Json(new { error = "Unauthorized" });
                 }
 
+                var isAdmin = HttpContext.Session.GetString("IsAdmin")?.ToLower() == "true";
+                var svnCode = GetCurrentSVNCode();
+
+                // Lấy bộ phận của user từ ZKBio bằng 1 query JOIN duy nhất
+                string userDepartment = null;
+                if (!isAdmin && !string.IsNullOrEmpty(svnCode))
+                {
+                    var deptResult = _zkContext.Database
+                        .SqlQueryRaw<DepartmentNameDto>(@"
+                            SELECT TOP 1 ISNULL(d.dept_name, '') AS deptName
+                            FROM personnel_employee e
+                            LEFT JOIN personnel_department d ON e.department_id = d.id
+                            WHERE e.emp_code = {0}", svnCode)
+                        .ToList()
+                        .FirstOrDefault();
+
+                    if (deptResult != null && !string.IsNullOrEmpty(deptResult.deptName))
+                        userDepartment = deptResult.deptName;
+
+                    // Fallback: lấy từ SVN_StaffDetail nếu ZKBio không có
+                    if (string.IsNullOrEmpty(userDepartment))
+                    {
+                        userDepartment = _context.SVN_StaffDetail
+                            .Where(s => s.SVNStaff == svnCode && s.Department != null && s.Department != "")
+                            .Select(s => s.Department)
+                            .FirstOrDefault();
+                    }
+                }
+
                 // Lấy dữ liệu từ bảng SVN_StaffDetail
-                var data = _context.SVN_StaffDetail
+                var query = _context.SVN_StaffDetail.AsQueryable();
+
+                // Nếu không phải admin và tìm được bộ phận → chỉ lấy bản ghi của bộ phận đó
+                if (!isAdmin && !string.IsNullOrEmpty(userDepartment))
+                {
+                    query = query.Where(s => s.Department == userDepartment);
+                }
+
+                var data = query
                     .OrderByDescending(s => s.WorkDate)
                     .ThenByDescending(s => s.CreateDate)
                     .Select(s => new
@@ -835,7 +915,7 @@ public class DetailDataDto
                     })
                     .ToList();
 
-                return Json(data);
+                return Json(new { data, userDepartment, isAdmin });
             }
             catch (Exception ex)
             {

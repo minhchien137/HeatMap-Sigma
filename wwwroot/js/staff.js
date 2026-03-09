@@ -5,6 +5,7 @@ let currentPage = 1;
 let recordsPerPage = 50;
 let sortColumn = 'emp_code';
 let sortDirection = 'asc';
+let userDepartment = null;  // bo phan cua user dang dang nhap (null = admin, xem tat ca)
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -19,12 +20,23 @@ async function loadData() {
             throw new Error('Network response was not ok');
         }
         
-        const data = await response.json();
+        const json = await response.json();
+        const data = json.data ?? json;
+        userDepartment = json.userDepartment ?? null;
+        
         allData = data;
         filteredData = [...allData];
         
         // Populate filter dropdowns
         populateFilters();
+        
+        // Neu la user thuong -> lock filter bo phan
+        if (userDepartment) {
+            const deptSelect = document.getElementById('filterDepartment');
+            deptSelect.value = userDepartment;
+            deptSelect.disabled = true;
+            deptSelect.title = 'Ban chi co the xem nhan vien trong bo phan cua minh';
+        }
         
         // Update stats
         updateStats();
@@ -56,10 +68,10 @@ function applyFilters() {
     const gender = document.getElementById('filterGender').value;
     const status = document.getElementById('filterStatus').value;
     const searchText = document.getElementById('searchInput').value.toLowerCase();
-
+    
     filteredData = allData.filter(item => {
         let matches = true;
-
+        
         if (department && item.department !== department) matches = false;
         if (gender && item.gender !== gender) matches = false;
         if (status !== '' && item.status.toString() !== status) matches = false;
@@ -68,10 +80,10 @@ function applyFilters() {
             const searchableText = `${item.emp_code} ${item.full_name}`.toLowerCase();
             if (!searchableText.includes(searchText)) matches = false;
         }
-
+        
         return matches;
     });
-
+    
     currentPage = 1;
     updateStats();
     displayData();
@@ -79,7 +91,10 @@ function applyFilters() {
 
 // Reset filters
 function resetFilters() {
-    document.getElementById('filterDepartment').value = '';
+    // Neu la user thuong thi giu nguyen bo phan, khong reset
+    if (!userDepartment) {
+        document.getElementById('filterDepartment').value = '';
+    }
     document.getElementById('filterGender').value = '';
     document.getElementById('filterStatus').value = '0';
     document.getElementById('searchInput').value = '';
@@ -169,7 +184,7 @@ function displayData() {
     
     // Update showing records text
     document.getElementById('showingRecords').textContent = 
-        `${startIndex + 1}-${endIndex} trong tổng số ${sortedData.length}`;
+    `${startIndex + 1}-${endIndex} trong tổng số ${sortedData.length}`;
     
     // Render desktop table rows
     pageData.forEach((item) => {
@@ -178,8 +193,8 @@ function displayData() {
         
         const genderText = item.gender === 'M' ? 'Nam' : item.gender === 'F' ? 'Nữ' : '';
         const statusBadge = item.status === 0 
-            ? '<span class="badge badge-green">Đang làm việc</span>'
-            : '<span class="badge badge-gray">Đã nghỉ việc</span>';
+        ? '<span class="badge badge-green">Đang làm việc</span>'
+        : '<span class="badge badge-gray">Đã nghỉ việc</span>';
         
         row.innerHTML = `
             <td class="table-cell">
@@ -208,8 +223,8 @@ function displayData() {
         pageData.forEach((item) => {
             const genderText = item.gender === 'M' ? 'Nam' : item.gender === 'F' ? 'Nữ' : '';
             const statusBadge = item.status === 0 
-                ? '<span class="badge badge-green">Đang làm việc</span>'
-                : '<span class="badge badge-gray">Đã nghỉ việc</span>';
+            ? '<span class="badge badge-green">Đang làm việc</span>'
+            : '<span class="badge badge-gray">Đã nghỉ việc</span>';
             
             const card = document.createElement('div');
             card.className = 'p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors';

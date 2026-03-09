@@ -6,6 +6,7 @@ let recordsPerPage = 25;
 let sortColumn = 'WorkDate';
 let sortDirection = 'desc';
 let deleteRecordId = null;
+let userDepartment = null;  // bo phan user dang nhap (null = admin)
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -27,12 +28,23 @@ async function loadData() {
             throw new Error('Network response was not ok');
         }
         
-        const data = await response.json();
+        const json = await response.json();
+        const data = json.data ?? json;
+        userDepartment = json.userDepartment ?? null;
+        
         allData = data;
         filteredData = [...allData];
         
         // Populate filter dropdowns
         populateFilters();
+        
+        // Neu la user thuong -> lock filter bo phan
+        if (userDepartment) {
+            const deptSelect = document.getElementById('filterDepartment');
+            deptSelect.value = userDepartment;
+            deptSelect.disabled = true;
+            deptSelect.title = 'Ban chi co the xem ban ghi trong bo phan cua minh';
+        }
         
         // Update stats
         updateStats();
@@ -170,7 +182,9 @@ function applyFilters() {
 
 // Reset filters
 function resetFilters() {
-    document.getElementById('filterDepartment').value = '';
+    if (!userDepartment) {
+        document.getElementById('filterDepartment').value = '';
+    }
     document.getElementById('filterProject').value = '';
     document.getElementById('filterCustomer').value = '';
     document.getElementById('filterProjectPhase').value = '';
