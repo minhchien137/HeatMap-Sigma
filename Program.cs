@@ -79,8 +79,7 @@ app.UseRouting();
 
 app.UseSession();
 
-// ✅ FIX: Middleware tự động restore session từ RefreshToken
-// Giải quyết tình trạng F5 bị out do session in-memory bị reset
+
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value?.ToLower() ?? "";

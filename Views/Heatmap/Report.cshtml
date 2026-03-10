@@ -13,10 +13,10 @@
                 <div>
                     <h1 class="text-2xl sm:text-4xl font-black mb-1 sm:mb-2">
                         <span class="bg-gradient-to-r from-gray-900 to-red-600 bg-clip-text text-transparent">
-                            Báo cáo & Phân tích
+                            <span data-i18n="report.title">Báo cáo & Phân tích</span>
                         </span>
                     </h1>
-                    <p class="text-gray-500 font-medium text-xs sm:text-base">Project Resource Capacity & Utilization Report</p>
+                    <p class="text-gray-500 font-medium text-xs sm:text-base" data-i18n="report.subtitle">Project Resource Capacity & Utilization Report</p>
                 </div>
                 <div class="flex gap-2 sm:gap-3">
                     <button onclick="exportReport()"
@@ -26,8 +26,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        <span class="hidden sm:inline">Xuất báo cáo</span>
-                        <span class="sm:hidden">Xuất</span>
+                        <span class="hidden sm:inline" data-i18n="report.btn.export">Xuất báo cáo</span>
+                        <span class="sm:hidden" data-i18n="report.btn.export_short">Xuất</span>
                     </button>
                     <button onclick="refreshData()"
                             class="flex-1 sm:flex-none px-3 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-red-700 rounded-xl font-bold text-white hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm">
@@ -36,8 +36,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        <span class="hidden sm:inline">Làm mới</span>
-                        <span class="sm:hidden">Mới</span>
+                        <span class="hidden sm:inline" data-i18n="report.btn.refresh">Làm mới</span>
+                        <span class="sm:hidden" data-i18n="report.btn.refresh_short">Mới</span>
                     </button>
                 </div>
             </div>
@@ -47,52 +47,52 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
                     <!-- Time Range -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Khoảng thời gian</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2" data-i18n="report.filter.time_range">Khoảng thời gian</label>
                         <select id="timeRange"
                                 class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-red-600 focus:outline-none font-medium text-sm">
-                            <option value="current_week">Tuần hiện tại</option>
-                            <option value="last_week">Tuần trước</option>
-                            <option value="current_month">Tháng hiện tại</option>
-                            <option value="last_month">Tháng trước</option>
-                            <option value="current_quarter">Quý hiện tại</option>
-                            <option value="current_year">Năm hiện tại</option>
-                            <option value="custom">Tùy chỉnh</option>
+                            <option value="current_week" data-i18n="report.time.cur_week">Tuần hiện tại</option>
+                            <option value="last_week" data-i18n="report.time.last_week">Tuần trước</option>
+                            <option value="current_month" data-i18n="report.time.cur_month">Tháng hiện tại</option>
+                            <option value="last_month" data-i18n="report.time.last_month">Tháng trước</option>
+                            <option value="current_quarter" data-i18n="report.time.cur_quarter">Quý hiện tại</option>
+                            <option value="current_year" data-i18n="report.time.cur_year">Năm hiện tại</option>
+                            <option value="custom" data-i18n="report.time.custom">Tùy chỉnh</option>
                         </select>
                     </div>
 
                     <!-- Year -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Năm</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2" data-i18n="common.year">Năm</label>
                         <select id="yearFilter"
                                 class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-red-600 focus:outline-none font-medium text-sm">
-                            <option value="">Tất cả</option>
+                            <option value="" data-i18n="report.filter.all">Tất cả</option>
                         </select>
                     </div>
 
                     <!-- Customer -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Customer</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2" data-i18n="report.filter.customer">Customer</label>
                         <select id="customerFilter"
                                 class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-red-600 focus:outline-none font-medium text-sm">
-                            <option value="">Tất cả customer</option>
+                            <option value="" data-i18n="report.filter.all_customer">Tất cả customer</option>
                         </select>
                     </div>
 
                     <!-- Department -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Bộ phận</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2" data-i18n="common.dept">Bộ phận</label>
                         <select id="departmentFilter"
                                 class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-red-600 focus:outline-none font-medium text-sm">
-                            <option value="">Tất cả bộ phận</option>
+                            <option value="" data-i18n="report.filter.all_dept">Tất cả bộ phận</option>
                         </select>
                     </div>
 
                     <!-- Project -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Dự án</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2" data-i18n="common.project">Dự án</label>
                         <select id="projectFilter"
                                 class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-red-600 focus:outline-none font-medium text-sm">
-                            <option value="">Tất cả dự án</option>
+                            <option value="" data-i18n="report.filter.all_project">Tất cả dự án</option>
                         </select>
                     </div>
 
@@ -100,7 +100,7 @@
                     <div class="flex items-end">
                         <button onclick="applyFilters()"
                                 class="w-full px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-xl font-bold text-white hover:shadow-lg hover:shadow-red-600/30 transition-all">
-                            Áp dụng
+                            <span data-i18n="report.btn.apply">Áp dụng</span>
                         </button>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                     <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block">Actual Hours</span>
                 </div>
                 <div class="text-2xl sm:text-4xl font-black text-gray-900 mb-1" id="kpi_totalHours">0</div>
-                <div class="text-sm font-medium text-gray-500">Tổng giờ đã làm</div>
+                <div class="text-sm font-medium text-gray-500" data-i18n="report.kpi.total_hours">Tổng giờ đã làm</div>
             </div>
 
              <!-- Available Capacity -->
@@ -156,7 +156,7 @@
                     <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block">Available Capacity</span>
                 </div>
                 <div class="text-2xl sm:text-4xl font-black text-gray-900 mb-1" id="kpi_availableCapacity">0</div>
-                <div class="text-sm font-medium text-gray-500">Tổng giờ có thể làm</div>
+                <div class="text-sm font-medium text-gray-500" data-i18n="report.kpi.avail_hours">Tổng giờ có thể làm</div>
             </div>
 
             <!-- Average Utilization -->
@@ -170,10 +170,10 @@
                                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
-                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block">Hiệu suất</span>
+                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block" data-i18n="report.kpi.util_badge">Hiệu suất</span>
                 </div>
                 <div class="text-2xl sm:text-4xl font-black text-gray-900 mb-1" id="kpi_avgUtilization">0%</div>
-                <div class="text-sm font-medium text-gray-500">Tỷ lệ sử dụng nguồn lực</div>
+                <div class="text-sm font-medium text-gray-500" data-i18n="report.kpi.utilization">Tỷ lệ sử dụng nguồn lực</div>
             </div>
 
             <!-- Active Projects -->
@@ -187,10 +187,10 @@
                                   d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                         </svg>
                     </div>
-                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block">Dự án</span>
+                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block" data-i18n="common.project">Dự án</span>
                 </div>
                 <div class="text-2xl sm:text-4xl font-black text-gray-900 mb-1" id="kpi_activeProjects">0</div>
-                <div class="text-sm font-medium text-gray-500">Dự án đang hoạt động</div>
+                <div class="text-sm font-medium text-gray-500" data-i18n="report.kpi.active_proj">Dự án đang hoạt động</div>
             </div>
 
             <!-- Staff Count -->
@@ -204,10 +204,10 @@
                                   d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
-                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block">Nhân sự</span>
+                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block" data-i18n="report.kpi.staff_badge">Nhân sự</span>
                 </div>
                 <div class="text-2xl sm:text-4xl font-black text-gray-900 mb-1" id="kpi_staffCount">0</div>
-                <div class="text-sm font-medium text-gray-500">Tổng số nhân viên</div>
+                <div class="text-sm font-medium text-gray-500" data-i18n="report.kpi.staff">Tổng số nhân viên</div>
             </div>
         </div>
 
@@ -216,15 +216,15 @@
             <!-- Trend Chart -->
             <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-black text-gray-900">Biểu đồ xu hướng </h2>
+                    <h2 class="text-xl font-black text-gray-900" data-i18n="report.section.trend">Biểu đồ xu hướng</h2>
                     <div class="flex gap-1 sm:gap-2">
                         <button onclick="toggleChartView('week')" data-view="week"
                                 class="chart-view-btn active px-3 py-1.5 rounded-lg text-sm font-bold transition-all">
-                            Tuần
+                            <span data-i18n="common.week">Tuần</span>
                         </button>
                         <button onclick="toggleChartView('month')" data-view="month"
                                 class="chart-view-btn px-3 py-1.5 rounded-lg text-sm font-bold transition-all">
-                            Tháng
+                            <span data-i18n="report.month">Tháng</span>
                         </button>
                     </div>
                 </div>
@@ -236,7 +236,7 @@
             <!-- Department Chart -->
             <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-black text-gray-900">Phân bổ theo bộ phận</h2>
+                    <h2 class="text-xl font-black text-gray-900" data-i18n="report.section.dept_dist">Phân bổ theo bộ phận</h2>
                 </div>
                 <div class="h-80">
                     <canvas id="departmentChart"></canvas>
@@ -248,8 +248,8 @@
         <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 mb-6 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
-                    <h2 class="text-lg sm:text-xl font-black text-gray-900">Công suất theo bộ phận (Utilization By Function)</h2>
-                    <p class="text-sm text-gray-500 mt-1">Phân tích công suất sử dụng theo bộ phận</p>
+                    <h2 class="text-lg sm:text-xl font-black text-gray-900" data-i18n="report.section.util_func">Công suất theo bộ phận (Utilization By Function)</h2>
+                    <p class="text-sm text-gray-500 mt-1" data-i18n="report.section.util_func.sub">Phân tích công suất sử dụng theo bộ phận</p>
                 </div>
                 <span id="functionWeekLabel" class="text-sm font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg"></span>
                 <div class="flex gap-1 sm:gap-2 flex-wrap">
@@ -267,7 +267,7 @@
             <div id="functionTableView" class="overflow-x-auto">
                 <table class="phase-pivot w-full text-sm" id="functionTable">
                     <thead id="functionTableHead">
-                        <tr><th colspan="10" class="phase-loading">Đang tải dữ liệu...</th></tr>
+                        <tr><th colspan="10" class="phase-loading"><span data-i18n="common.loading">Đang tải dữ liệu...</span></th></tr>
                     </thead>
                     <tbody id="functionTableBody"></tbody>
                     <tfoot id="functionTableFoot"></tfoot>
@@ -283,8 +283,8 @@
         <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 mb-6 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
-                    <h2 class="text-lg sm:text-xl font-black text-gray-900">Phân bổ giờ theo giai đoạn dự án (By Phase)</h2>
-                    <p class="text-sm text-gray-500 mt-1">Tổng giờ làm việc theo Phase × Bộ phận</p>
+                    <h2 class="text-lg sm:text-xl font-black text-gray-900" data-i18n="report.section.phase">Phân bổ giờ theo giai đoạn dự án (By Phase)</h2>
+                    <p class="text-sm text-gray-500 mt-1" data-i18n="report.section.phase.sub">Tổng giờ làm việc theo Phase × Bộ phận</p>
                 </div>
                 <span id="phaseWeekLabel" class="text-sm font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg"></span>
                 <div class="flex gap-1 sm:gap-2 flex-wrap">
@@ -306,7 +306,7 @@
             <div id="phaseTableView" class="overflow-x-auto">
                 <table class="phase-pivot w-full text-sm">
                     <thead id="phaseTableHead">
-                        <tr><th colspan="10" class="phase-loading">Đang tải dữ liệu...</th></tr>
+                        <tr><th colspan="10" class="phase-loading"><span data-i18n="common.loading">Đang tải dữ liệu...</span></th></tr>
                     </thead>
                     <tbody id="phaseTableBody"></tbody>
                     <tfoot id="phaseTableFoot"></tfoot>
@@ -322,8 +322,8 @@
         <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 mb-6 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
-                    <h2 class="text-lg sm:text-xl font-black text-gray-900">Tổng giờ theo khách hàng (Total - By Customer)</h2>
-                    <p class="text-sm text-gray-500 mt-1">Tổng số giờ theo Customer × Bộ phận</p>
+                    <h2 class="text-lg sm:text-xl font-black text-gray-900" data-i18n="report.section.customer">Tổng giờ theo khách hàng (Total - By Customer)</h2>
+                    <p class="text-sm text-gray-500 mt-1" data-i18n="report.section.customer.sub">Tổng số giờ theo Customer × Bộ phận</p>
                 </div>
                 <span id="customerWeekLabel" class="text-sm font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg"></span>
                 <div class="flex gap-1 sm:gap-2 flex-wrap">
@@ -341,7 +341,7 @@
             <div id="customerTableView" class="overflow-x-auto">
                 <table class="phase-pivot w-full text-sm">
                     <thead id="customerTableHead">
-                        <tr><th colspan="10" class="phase-loading">Đang tải dữ liệu...</th></tr>
+                        <tr><th colspan="10" class="phase-loading"><span data-i18n="common.loading">Đang tải dữ liệu...</span></th></tr>
                     </thead>
                     <tbody id="customerTableBody"></tbody>
                     <tfoot id="customerTableFoot"></tfoot>
@@ -357,14 +357,14 @@
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 pb-4 gap-3">
                 <div>
-                    <h2 class="text-lg sm:text-xl font-black text-gray-900">Tóm tắt từng nhân viên</h2>
-                    <p class="text-sm text-gray-500 mt-1">Phân bổ giờ theo ngày — Customer × Project × Phase</p>
+                    <h2 class="text-lg sm:text-xl font-black text-gray-900" data-i18n="report.section.staff_summary">Tóm tắt từng nhân viên</h2>
+                    <p class="text-sm text-gray-500 mt-1" data-i18n="report.section.staff_summary.sub">Phân bổ giờ theo ngày — Customer × Project × Phase</p>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="detail-pivot w-full text-sm" id="detailPivotTable">
                     <thead id="detailPivotHead">
-                        <tr><th colspan="10" style="padding:2rem;text-align:center;color:#9ca3af;font-weight:500;background:#fff;border:none">Đang tải dữ liệu...</th></tr>
+                        <tr><th colspan="10" style="padding:2rem;text-align:center;color:#9ca3af;font-weight:500;background:#fff;border:none"><span data-i18n="common.loading">Đang tải dữ liệu...</span></th></tr>
                     </thead>
                     <tbody id="detailPivotBody"></tbody>
                     <tfoot id="detailPivotFoot"></tfoot>
@@ -380,7 +380,7 @@
     <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl mx-2 sm:mx-0">
         <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between">
-                <h3 class="text-2xl font-black text-gray-900" id="modalTitle">Chi tiết</h3>
+                <h3 class="text-2xl font-black text-gray-900" id="modalTitle" data-i18n="report.modal.title">Chi tiết</h3>
                 <button onclick="closeDetailModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -394,6 +394,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="~/js/i18n.js"></script>
 <script src="~/js/report.js"></script>
 
 <style>

@@ -21,15 +21,15 @@
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <button id="modeBtn1" onclick="switchMode(1)"
                         class="mode-btn active px-5 py-3 rounded-2xl font-bold text-sm transition-all border-2 w-full sm:w-auto">
-                    Một người - Một ngày
+                    <span data-i18n="import.mode1">Một người - Một ngày</span>
                 </button>
                 <button id="modeBtn2" onclick="switchMode(2)"
                         class="mode-btn px-5 py-3 rounded-2xl font-bold text-sm transition-all border-2 w-full sm:w-auto">
-                    Một người - Nhiều ngày
+                    <span data-i18n="import.mode2">Một người - Nhiều ngày</span>
                 </button>
                 <button id="modeBtn3" onclick="switchMode(3)"
                         class="mode-btn px-5 py-3 rounded-2xl font-bold text-sm transition-all border-2 w-full sm:w-auto">
-                    Nhiều người - Nhiều ngày
+                    <span data-i18n="import.mode3">Nhiều người - Nhiều ngày</span>
                 </button>
             </div>
         </div>
@@ -41,10 +41,9 @@
                 <div class="flex-[2] space-y-6">
                     <!-- Bộ phận -->
                     <div class="group">
-                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
-                            phận</label>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="common.dept">Bộ phận</label>
                             <select id="department1" class="input-field" disabled="@(ViewBag.UserDepartmentId != null ? "disabled" : null)">
-                                <option value="">-- Chọn bộ phận --</option>
+                                <option value="" data-i18n="import.opt.dept">-- Chọn bộ phận --</option>
                                 @foreach (var dept in ViewBag.Departments)
                                 {
                                     @if (ViewBag.UserDepartmentId != null && dept.id == (int)ViewBag.UserDepartmentId)
@@ -62,23 +61,23 @@
                         <!-- Tên -->
                         <div class="group">
                             <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
+                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="import.label.name">Tên</label>
                             <!-- Hidden select - giữ nguyên để submit code không đổi -->
                             <select id="employee1" class="hidden" aria-hidden="true">
-                                <option value="">-- Chọn bộ phận trước --</option>
+                                <option value="" data-i18n="import.opt.dept_first">-- Chọn bộ phận trước --</option>
                             </select>
                             <!-- Custom searchable dropdown -->
                             <div class="searchable-select" id="employee1-sd" data-target="employee1">
                                 <div class="searchable-select-trigger input-field" onclick="toggleSearchableSelect('employee1-sd')">
-                                    <span class="searchable-select-display">-- Chọn bộ phận trước --</span>
+                                    <span class="searchable-select-display" data-i18n="import.opt.dept_first">-- Chọn bộ phận trước --</span>
                                     <svg class="searchable-select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
                                 <div class="searchable-select-dropdown">
                                     <div class="searchable-select-search-wrap">
-                                        <input class="searchable-select-search" placeholder="Tìm nhân viên..." oninput="filterSearchableSelect('employee1-sd', this.value)" />
+                                        <input class="searchable-select-search" placeholder="Tìm nhân viên..." data-i18n-placeholder="import.search_emp" oninput="filterSearchableSelect('employee1-sd', this.value)" />
                                     </div>
                                     <div class="searchable-select-options">
-                                        <div class="searchable-select-placeholder">-- Chọn bộ phận trước --</div>
+                                        <div class="searchable-select-placeholder" data-i18n="import.opt.dept_first">-- Chọn bộ phận trước --</div>
                                     </div>
                                 </div>
                             </div>
@@ -87,40 +86,39 @@
                         <!-- Dự án (multi) -->
                         <div class="group">
                             <div class="flex items-center justify-between mb-2 ml-2">
-                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400">Dự án & Giờ làm</label>
+                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400" data-i18n="import.label.project_hours">Dự án & Giờ làm</label>
                             </div>
                             <!-- Column labels -->
                             <div class="bulk-row-label" style="border-radius:0.75rem 0.75rem 0 0; border:2px solid #e5e7eb; border-bottom:1px solid #f3f4f6;">
-                                <span>Customer</span><span>Project</span><span>Proj.Phase</span><span>Số giờ</span><span></span>
+                                <span>Customer</span><span>Project</span><span>Proj.Phase</span><span data-i18n="import.label.hours">Số giờ</span><span></span>
                             </div>
                             <!-- Rows container -->
                             <div id="projectRows1" style="border:2px solid #e5e7eb; border-top:none; border-bottom:none;"></div>
                             <!-- Add button -->
                             <button type="button" class="bulk-add-btn" style="border-radius:0 0 0.75rem 0.75rem; border:2px solid #e5e7eb; border-top:1px dashed #e5e7eb;"
-                                    onclick="addMode1ProjectRow()">+ Thêm dự án</button>
+                                    onclick="addMode1ProjectRow()"><span data-i18n="import.btn.add_project">+ Thêm dự án</span></button>
                         </div>
 
                         <!-- Tuần -->
                         <div class="group">
                             <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="common.week">Tuần</label>
                             <select id="week1" class="input-field">
-                                <option value="">-- Chọn tuần --</option>
+                                <option value="" data-i18n="import.opt.week">-- Chọn tuần --</option>
                             </select>
                         </div>
 
                         <!-- Ngày -->
                         <div class="group">
                             <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Ngày</label>
+                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="import.label.date">Ngày</label>
                             <input type="date" id="day1" class="input-field" />
                         </div>
                     </div>
 
                     <!-- Right Column - Image -->
                     <div class="flex-1 hidden lg:flex flex-col items-center justify-start">
-                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Image
-                            User</label>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3" data-i18n="import.label.image">Image User</label>
                             <div class="upload-box">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      class="h-12 w-12 mx-auto mb-3 text-gray-300 group-hover:text-red-400 transition-colors"
@@ -137,7 +135,7 @@
                     <!-- Submit Button -->
                     <div class="mt-12 text-center">
                         <button onclick="handleSubmitMode1()" class="submit-btn w-full sm:w-auto">
-                            Lưu dữ liệu
+                            <span data-i18n="import.btn.save">Lưu dữ liệu</span>
                         </button>
                     </div>
                 </div>
@@ -147,10 +145,9 @@
                     <div class="space-y-6 max-w-3xl mx-auto">
                         <!-- Bộ phận -->
                         <div class="group">
-                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ
-                                phận</label>
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="common.dept">Bộ phận</label>
                                 <select id="department2" class="input-field" disabled="@(ViewBag.UserDepartmentId != null ? "disabled" : null)">
-                                    <option value="">-- Chọn bộ phận --</option>
+                                    <option value="" data-i18n="import.opt.dept">-- Chọn bộ phận --</option>
                                     @foreach (var dept in ViewBag.Departments)
                                     {
                                         @if (ViewBag.UserDepartmentId != null && dept.id == (int)ViewBag.UserDepartmentId)
@@ -168,23 +165,23 @@
                             <!-- Tên -->
                             <div class="group">
                                 <label
-                                class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tên</label>
+                                class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="import.label.name">Tên</label>
                                 <!-- Hidden select - giữ nguyên để submit code không đổi -->
                                 <select id="employee2" class="hidden" aria-hidden="true">
-                                    <option value="">-- Chọn bộ phận trước --</option>
+                                    <option value="" data-i18n="import.opt.dept_first">-- Chọn bộ phận trước --</option>
                                 </select>
                                 <!-- Custom searchable dropdown -->
                                 <div class="searchable-select" id="employee2-sd" data-target="employee2">
                                     <div class="searchable-select-trigger input-field" onclick="toggleSearchableSelect('employee2-sd')">
-                                        <span class="searchable-select-display">-- Chọn bộ phận trước --</span>
+                                        <span class="searchable-select-display" data-i18n="import.opt.dept_first">-- Chọn bộ phận trước --</span>
                                         <svg class="searchable-select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                                     </div>
                                     <div class="searchable-select-dropdown">
                                         <div class="searchable-select-search-wrap">
-                                            <input class="searchable-select-search" placeholder="Tìm nhân viên..." oninput="filterSearchableSelect('employee2-sd', this.value)" />
+                                            <input class="searchable-select-search" placeholder="Tìm nhân viên..." data-i18n-placeholder="import.search_emp" oninput="filterSearchableSelect('employee2-sd', this.value)" />
                                         </div>
                                         <div class="searchable-select-options">
-                                            <div class="searchable-select-placeholder">-- Chọn bộ phận trước --</div>
+                                            <div class="searchable-select-placeholder" data-i18n="import.opt.dept_first">-- Chọn bộ phận trước --</div>
                                         </div>
                                     </div>
                                 </div>
@@ -192,15 +189,15 @@
 
                             <!-- Tuần -->
                             <div class="group">
-                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="common.week">Tuần</label>
                                 <select id="week2" class="input-field">
-                                    <option value="">-- Chọn tuần --</option>
+                                    <option value="" data-i18n="import.opt.week">-- Chọn tuần --</option>
                                 </select>
                             </div>
 
                             <!-- Chọn các ngày trong tuần -->
                             <div class="group">
-                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn ngày</label>
+                                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2" data-i18n="import.label.select_day">Chọn ngày</label>
                                 <div id="dayCheckboxes2" class="grid grid-cols-1 gap-3">
                                     <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
                                 </div>
@@ -209,10 +206,10 @@
                             <!-- List nhập dự án & giờ cho từng ngày -->
                             <div class="group" id="dayHoursSection2" style="display: none;">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Nhập dự án & giờ làm việc</label>
+                                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 ml-2" data-i18n="import.label.project_hours_full">Nhập dự án & giờ làm việc</label>
                                     <button type="button" onclick="copyFirstDayDataToAll()" id="copyFirstDayBtn"
                                             class="copy-btn text-xs px-4 py-2 rounded-lg transition-all font-semibold self-start sm:self-auto">
-                                        📋 Copy ngày đầu cho tất cả
+                                        <span data-i18n="import.btn.copy_day">📋 Copy ngày đầu cho tất cả</span>
                                     </button>
                                 </div>
                                 <div id="dayHoursList2" class="space-y-3">
@@ -223,7 +220,7 @@
                             <!-- Submit Button -->
                             <div class="text-center mt-10">
                                 <button onclick="handleSubmitMode2()" class="submit-btn w-full sm:w-auto">
-                                    Lưu dữ liệu
+                                    <span data-i18n="import.btn.save">Lưu dữ liệu</span>
                                 </button>
                             </div>
                         </div>
@@ -234,9 +231,9 @@
                     <div class="space-y-6 max-w-3xl mx-auto">
                         <!-- Bộ phận -->
                         <div class="group">
-                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Bộ phận</label>
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="common.dept">Bộ phận</label>
                             <select id="department3" class="input-field" disabled="@(ViewBag.UserDepartmentId != null ? "disabled" : null)">
-                                <option value="">-- Chọn bộ phận --</option>
+                                <option value="" data-i18n="import.opt.dept">-- Chọn bộ phận --</option>
                                 @foreach (var dept in ViewBag.Departments)
                                 {
                                     @if (ViewBag.UserDepartmentId != null && dept.id == (int)ViewBag.UserDepartmentId)
@@ -257,7 +254,7 @@
                             <!-- Search box -->
                             <div class="relative mb-3">
                                 <input type="text" id="searchEmployee3" 
-                                       placeholder="Tìm nhân viên..." 
+                                       placeholder="Tìm nhân viên..." data-i18n-placeholder="import.search_emp"
                                        oninput="filterEmployeeCheckboxes(this.value)"
                                        class="input-field pr-10 w-full" />
                                 <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,13 +270,13 @@
                         <div class="group">
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
                             <select id="week3" class="input-field">
-                                <option value="">-- Chọn tuần --</option>
+                                <option value="" data-i18n="import.opt.week">-- Chọn tuần --</option>
                             </select>
                         </div>
 
                         <!-- Chọn các ngày trong tuần -->
                         <div class="group">
-                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn ngày</label>
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2" data-i18n="import.label.select_day">Chọn ngày</label>
                             <div id="dayCheckboxes3" class="grid grid-cols-1 gap-3">
                                 <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
                             </div>
@@ -288,7 +285,7 @@
                         <!-- Button nhập dữ liệu hàng loạt -->
                         <div class="text-center mt-10">
                             <button onclick="showBulkInputPopup()" class="submit-btn w-full sm:w-auto">
-                                Nhập dữ liệu hàng loạt
+                                <span data-i18n="import.btn.bulk">Nhập dữ liệu hàng loạt</span>
                             </button>
                         </div>
                     </div>
@@ -301,7 +298,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Về trang chủ
+                        <span data-i18n="common.back">Về trang chủ</span>
                     </a>
                 </div>
                                             </div>
@@ -320,7 +317,7 @@
                                                             <div class="flex items-center gap-3 flex-shrink-0">
                                                                 <button type="button" onclick="copyFirstDayToAllMode3()"
                                                                         class="copy-btn text-xs px-3 py-2 rounded-lg transition-all font-semibold whitespace-nowrap">
-                                                                    📋 Copy ngày đầu
+                                                                    <span data-i18n="import.btn.copy_day_short">📋 Copy ngày đầu</span>
                                                                 </button>
                                                                 <div id="bulkSummary" class="text-xs text-gray-400 font-semibold text-right"></div>
                                                             </div>
@@ -339,11 +336,11 @@
                                                     <div class="px-4 sm:px-8 py-4 sm:py-5 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
                                                         <button onclick="closeBulkInputPopup()"
                                                                 class="flex-1 sm:flex-none px-5 py-3 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">
-                                                            Hủy
+                                                            <span data-i18n="account.pw.cancel">Hủy</span>
                                                         </button>
                                                         <button onclick="handleSubmitMode3()"
                                                                 class="flex-1 sm:flex-none px-5 py-3 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
-                                                            Xác nhận lưu
+                                                            <span data-i18n="import.btn.confirm_save">Xác nhận lưu</span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -360,16 +357,16 @@
                                                                   d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                         </svg>
                                                     </div>
-                                                    <h3 class="text-3xl font-black mb-4 tracking-tight">Xác nhận?</h3>
+                                                    <h3 class="text-3xl font-black mb-4 tracking-tight" data-i18n="common.confirm">Xác nhận?</h3>
                                                     <p class="text-gray-500 text-lg mb-10 leading-relaxed" id="confirmMessage"></p>
                                                     <div class="flex space-x-5">
                                                         <button onclick="closeConfirmModal()"
                                                                 class="flex-1 py-4 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">
-                                                            Không
+                                                            <span data-i18n="common.no">Không</span>
                                                         </button>
                                                         <button onclick="confirmSubmit()"
                                                                 class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
-                                                            Có, xác nhận
+                                                            <span data-i18n="common.yes_confirm">Có, xác nhận</span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -385,11 +382,11 @@
                                                                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                         </svg>
                                                     </div>
-                                                    <h3 class="text-3xl font-black mb-4 tracking-tight">Thông báo</h3>
+                                                    <h3 class="text-3xl font-black mb-4 tracking-tight" data-i18n="common.notice">Thông báo</h3>
                                                     <p id="errorModalMessage" class="text-gray-500 text-lg mb-10 leading-relaxed"></p>
                                                     <button onclick="closeErrorModal()"
                                                             class="w-full py-4 bg-black text-white rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800">
-                                                        Đã hiểu
+                                                        <span data-i18n="common.understood">Đã hiểu</span>
                                                     </button>
                                                 </div>
                                             </div>
@@ -960,4 +957,5 @@
                                                 ];
                                             </script>
 
-                                            <script src="~/js/import.js"></script> 
+                                            <script src="~/js/i18n.js"></script>
+<script src="~/js/import.js"></script> 
