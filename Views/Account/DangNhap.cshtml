@@ -105,7 +105,7 @@
     <!-- Cột phải: Form Đăng nhập -->
     <div class="form-section w-full md:w-1/2 p-8 sm:p-12 md:p-16 lg:p-24 flex flex-col justify-center bg-white">
         <div class="max-w-md mx-auto w-full text-center">
-            <h2 class="section-title text-gray-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-8 md:mb-16 text-xs sm:text-sm">Đăng nhập tài khoản</h2>
+            <h2 class="section-title text-gray-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-8 md:mb-16 text-xs sm:text-sm" data-i18n="login.section_title">Đăng nhập tài khoản</h2>
 
             @if (TempData["Error"] != null)
             {
@@ -125,13 +125,13 @@
                 <div class="group">
                     <input type="text" id="txtTaiKhoan" name="TaiKhoan" required value="@ViewBag.TaiKhoan"
                            class="form-input w-full px-6 md:px-8 py-4 md:py-5 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base md:text-lg text-gray-700 placeholder-gray-300"
-                           placeholder="Nhập mã SVN Code" />
+                           placeholder="Nhập mã SVN Code" data-i18n-placeholder="login.svn_ph" />
                 </div>
 
                 <div class="group relative">
                     <input type="password" name="Password" id="passwordInput" required value="@ViewBag.Password"
                            class="form-input w-full px-6 md:px-8 py-4 md:py-5 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base md:text-lg text-gray-700 placeholder-gray-300 pr-14 md:pr-16"
-                           placeholder="Nhập mật khẩu" />
+                           placeholder="Nhập mật khẩu" data-i18n-placeholder="login.pw_ph" />
                     <button type="button" onclick="togglePassword('passwordInput', 'eyeIcon', 'eyeOffIcon')"
                             class="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors focus:outline-none">
                         <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none"
@@ -154,25 +154,25 @@
                         <input type="checkbox" name="RememberMe" id="chkRememberMe" @(ViewBag.RememberMe == true ? "checked" : "")
                                class="w-4 h-4 md:w-5 md:h-5 text-red-600 rounded-lg border-gray-200 focus:ring-red-500 transition-all" />
                         <span class="ml-2 md:ml-3 text-[10px] md:text-[11px] text-gray-400 font-black uppercase tracking-widest group-hover:text-gray-600 transition-colors">
-                            Nhớ mật khẩu
+                            <span data-i18n="login.remember">Nhớ mật khẩu</span>
                         </span>
                     </label>
                     <a href="#" onclick="document.getElementById('forgotModal').style.display='flex'; return false;"
                        class="text-[10px] md:text-[11px] text-gray-400 font-black uppercase tracking-widest hover:text-red-600 transition-colors">
-                        Quên mật khẩu
+                        <span data-i18n="login.forgot">Quên mật khẩu</span>
                     </a>
                 </div>
 
                 <button type="button" onclick="openConfirmModal()"
                         class="submit-button w-full py-4 md:py-5 mt-6 md:mt-10 bg-red-600 text-white rounded-xl md:rounded-2xl font-black uppercase tracking-[0.15em] md:tracking-[0.25em] text-base md:text-lg shadow-2xl shadow-red-200 hover:bg-red-700 hover:-translate-y-1 active:scale-[0.98] transition-all">
-                    Đăng nhập
+                    <span data-i18n="login.btn">Đăng nhập</span>
                 </button>
             </form>
 
             <p class="bottom-link mt-12 md:mt-20 text-xs md:text-sm text-gray-400 font-bold tracking-tight">
-                Chưa có tài khoản?
+                <span data-i18n="login.no_account">Chưa có tài khoản?</span>
                 <a href="/Account/DangKy" class="text-red-600 hover:text-red-800 transition-colors ml-1 border-b-2 border-red-100 pb-1">
-                    Đăng ký ngay
+                    <span data-i18n="login.go_register">Đăng ký ngay</span>
                 </a>
             </p>
         </div>
@@ -188,15 +188,11 @@
                       d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
-        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight">Xác nhận?</h3>
-        <p class="modal-text text-gray-500 text-base md:text-lg mb-8 md:mb-10 leading-relaxed">Bạn có muốn tiếp tục đăng nhập vào hệ thống không?</p>
+        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight" data-i18n="common.confirm">Xác nhận?</h3>
+        <p class="modal-text text-gray-500 text-base md:text-lg mb-8 md:mb-10 leading-relaxed" data-i18n="login.confirm_text">Bạn có muốn tiếp tục đăng nhập vào hệ thống không?</p>
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-5">
-            <button onclick="closeConfirmModal()" class="modal-button flex-1 py-3 md:py-4 border-2 border-gray-100 rounded-xl md:rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">
-                Không
-            </button>
-            <button onclick="submitForm()" class="modal-button flex-1 py-3 md:py-4 bg-red-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
-                Có, xác nhận
-            </button>
+            <button onclick="closeConfirmModal()" class="modal-button flex-1 py-3 md:py-4 border-2 border-gray-100 rounded-xl md:rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all" data-i18n="common.no">Không</button>
+            <button onclick="submitForm()" class="modal-button flex-1 py-3 md:py-4 bg-red-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all" data-i18n="common.yes_confirm">Có, xác nhận</button>
         </div>
     </div>
 </div>
@@ -210,14 +206,12 @@
                       d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
             </svg>
         </div>
-        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight">Quên mật khẩu?</h3>
+        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight" data-i18n="login.forgot_title">Quên mật khẩu?</h3>
         <p class="modal-text text-gray-500 text-base md:text-lg mb-8 md:mb-10 leading-relaxed">
-            Vui lòng liên hệ với <span class="font-black text-red-600">Coldzy</span> để được hỗ trợ đặt lại mật khẩu.
+            <span data-i18n="login.forgot_text">Vui lòng liên hệ với</span> <span class="font-black text-red-600">Coldzy</span> <span data-i18n="login.forgot_text2">để được hỗ trợ đặt lại mật khẩu.</span>
         </p>
         <button onclick="document.getElementById('forgotModal').style.display='none'"
-                class="modal-button w-full py-3 md:py-4 bg-red-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
-            Đã hiểu
-        </button>
+                class="modal-button w-full py-3 md:py-4 bg-red-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all" data-i18n="common.understood">Đã hiểu</button>
     </div>
 </div>
 
@@ -230,15 +224,14 @@
                       d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
         </div>
-        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight">Thông báo</h3>
+        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight" data-i18n="common.notice">Thông báo</h3>
         <p id="errorModalMessage" class="modal-text text-gray-500 text-base md:text-lg mb-8 md:mb-10 leading-relaxed"></p>
-        <button onclick="closeErrorModal()" class="modal-button w-full py-3 md:py-4 bg-black text-white rounded-xl md:rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800">
-            Đã hiểu
-        </button>
+        <button onclick="closeErrorModal()" class="modal-button w-full py-3 md:py-4 bg-black text-white rounded-xl md:rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800" data-i18n="common.understood">Đã hiểu</button>
     </div>
 </div>
 
 @section Scripts {
+    <script src="~/js/i18n.js"></script>
     <script>
         function togglePassword(inputId, eyeId, eyeOffId) {
             const passwordInput = document.getElementById(inputId);
@@ -268,9 +261,9 @@
         }
 
         function validatePassword(pass) {
-            if (pass.length <= 6) return "Mật khẩu phải có ít nhất 7 ký tự!";
-            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return "Mật khẩu phải bao gồm cả chữ và số!";
-            if (!/[^\w\s]/.test(pass)) return "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+            if (pass.length <= 6) return typeof t==="function"?t("login.pw_err1"):"Mật khẩu phải có ít nhất 7 ký tự!";
+            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return typeof t==="function"?t("login.pw_err2"):"Mật khẩu phải bao gồm cả chữ và số!";
+            if (!/[^\w\s]/.test(pass)) return typeof t==="function"?t("login.pw_err3"):"Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
             return null;
         }
 
@@ -278,7 +271,7 @@
             const tk = document.getElementById('txtTaiKhoan').value.trim();
             const p = document.getElementById('passwordInput').value;
 
-            if (!tk || !p) { showErrorModal("Vui lòng điền đầy đủ thông tin!"); return; }
+            if (!tk || !p) { showErrorModal(typeof t==="function"?t("common.fill_all"):"Vui lòng điền đầy đủ thông tin!"); return; }
 
             const modal = document.getElementById('confirmModal');
             modal.style.display = 'flex';

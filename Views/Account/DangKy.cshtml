@@ -95,7 +95,7 @@
     <div class="welcome-section w-full md:w-1/2 bg-heatmap-gradient p-8 sm:p-12 md:p-16 lg:p-24 flex flex-col justify-center relative overflow-hidden">
         <div class="relative z-10">
             <h1 class="welcome-title text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 md:mb-8 leading-[1.1]">
-                Đăng ký <br /><span class="text-red-500">tài khoản</span>
+                <span data-i18n="register.title">Đăng ký</span> <br /><span class="text-red-500" data-i18n="register.title2">tài khoản</span>
             </h1>
         </div>
         <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-red-400/20 rounded-full blur-[100px]"></div>
@@ -105,7 +105,7 @@
     <!-- Cột phải: Form Đăng ký -->
     <div class="form-section w-full md:w-1/2 p-8 sm:p-12 md:p-16 lg:p-24 flex flex-col justify-center bg-white">
         <div class="max-w-md mx-auto w-full text-center">
-            <h2 class="section-title text-gray-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-8 md:mb-16 text-xs sm:text-sm">Tạo tài khoản mới</h2>
+            <h2 class="section-title text-gray-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-8 md:mb-16 text-xs sm:text-sm" data-i18n="register.section_title">Tạo tài khoản mới</h2>
 
             @if (TempData["Error"] != null)
             {
@@ -118,13 +118,13 @@
                 <div class="group">
                     <input type="text" id="txtTaiKhoan" name="TaiKhoan" required value="@ViewBag.TaiKhoan"
                            class="form-input w-full px-6 md:px-8 py-4 md:py-5 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base md:text-lg text-gray-700 placeholder-gray-300"
-                           placeholder="Nhập mã SVN Code" />
+                           placeholder="Nhập mã SVN Code" data-i18n-placeholder="login.svn_ph" />
                 </div>
 
                 <div class="group relative">
                     <input type="password" name="Password" id="txtPassword" required
                            class="form-input w-full px-6 md:px-8 py-4 md:py-5 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base md:text-lg text-gray-700 placeholder-gray-300 pr-14 md:pr-16"
-                           placeholder="Mật khẩu" />
+                           placeholder="Mật khẩu" data-i18n-placeholder="login.pw_ph" />
                     <button type="button" onclick="togglePassword('txtPassword', 'eyeIcon1', 'eyeOffIcon1')"
                             class="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors focus:outline-none">
                         <svg id="eyeIcon1" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none"
@@ -145,7 +145,7 @@
                 <div class="group relative">
                     <input type="password" name="ConfirmPassword" id="txtConfirmPassword" required
                            class="form-input w-full px-6 md:px-8 py-4 md:py-5 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base md:text-lg text-gray-700 placeholder-gray-300 pr-14 md:pr-16"
-                           placeholder="Nhập lại mật khẩu" />
+                           placeholder="Nhập lại mật khẩu" data-i18n-placeholder="register.confirm_ph" />
                     <button type="button" onclick="togglePassword('txtConfirmPassword', 'eyeIcon2', 'eyeOffIcon2')"
                             class="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors focus:outline-none">
                         <svg id="eyeIcon2" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none"
@@ -181,20 +181,20 @@
                     </div>
                     <input type="text" id="txtCaptcha" name="CaptchaInput" required
                            class="form-input w-full px-6 md:px-8 py-4 md:py-5 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base md:text-lg text-gray-700 placeholder-gray-300"
-                           placeholder="Nhập mã xác nhận" autocomplete="off" />
+                           placeholder="Nhập mã xác nhận" data-i18n-placeholder="register.captcha_ph" autocomplete="off" />
                     <input type="hidden" id="hiddenCaptcha" name="CaptchaCode" />
                 </div>
 
                 <button type="button" onclick="openConfirmModal()"
                         class="submit-button w-full py-4 md:py-5 mt-6 md:mt-10 bg-red-600 text-white rounded-xl md:rounded-2xl font-black uppercase tracking-[0.15em] md:tracking-[0.25em] text-base md:text-lg shadow-2xl shadow-red-200 hover:bg-red-700 hover:-translate-y-1 active:scale-[0.98] transition-all text-center">
-                    Đăng ký ngay
+                    <span data-i18n="register.btn">Đăng ký ngay</span>
                 </button>
             </form>
 
             <p class="bottom-link mt-12 md:mt-20 text-xs md:text-sm text-gray-400 font-bold tracking-tight">
-                Đã có tài khoản?
+                <span data-i18n="register.have_account">Đã có tài khoản?</span>
                 <a href="/Account/DangNhap" class="text-red-600 hover:text-red-800 transition-colors ml-1 border-b-2 border-red-100 pb-1">
-                    Đăng nhập ngay
+                    <span data-i18n="register.go_login">Đăng nhập ngay</span>
                 </a>
             </p>
         </div>
@@ -210,14 +210,11 @@
                       d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
-        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight">Xác nhận?</h3>
-        <p class="modal-text text-gray-500 text-base md:text-lg mb-8 md:mb-10 leading-relaxed">Bạn có xác nhận thông tin đăng ký này không?</p>
+        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight" data-i18n="common.confirm">Xác nhận?</h3>
+        <p class="modal-text text-gray-500 text-base md:text-lg mb-8 md:mb-10 leading-relaxed" data-i18n="register.confirm_text">Bạn có xác nhận thông tin đăng ký này không?</p>
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-5">
-            <button onclick="closeConfirmModal()" class="modal-button flex-1 py-3 md:py-4 border-2 border-gray-100 rounded-xl md:rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all">
-                Không
-            </button>
-            <button onclick="submitForm()" class="modal-button flex-1 py-3 md:py-4 bg-red-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all">
-                Có, xác nhận
+            <button onclick="closeConfirmModal()" class="modal-button flex-1 py-3 md:py-4 border-2 border-gray-100 rounded-xl md:rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition-all" data-i18n="common.no">Không</button>
+            <button onclick="submitForm()" class="modal-button flex-1 py-3 md:py-4 bg-red-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 transition-all" data-i18n="common.yes_confirm">Có, xác nhận
             </button>
         </div>
     </div>
@@ -232,15 +229,14 @@
                       d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
         </div>
-        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight">Thông báo</h3>
+        <h3 class="modal-title text-2xl md:text-3xl font-black mb-3 md:mb-4 tracking-tight" data-i18n="common.notice">Thông báo</h3>
         <p id="errorModalMessage" class="modal-text text-gray-500 text-base md:text-lg mb-8 md:mb-10 leading-relaxed"></p>
-        <button onclick="closeErrorModal()" class="modal-button w-full py-3 md:py-4 bg-black text-white rounded-xl md:rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800">
-            Đã hiểu
-        </button>
+        <button onclick="closeErrorModal()" class="modal-button w-full py-3 md:py-4 bg-black text-white rounded-xl md:rounded-2xl font-bold shadow-xl transition-all hover:bg-zinc-800" data-i18n="common.understood">Đã hiểu</button>
     </div>
 </div>
 
 @section Scripts {
+    <script src="~/js/i18n.js"></script>
     <script>
         let captchaCode = '';
 
@@ -348,9 +344,9 @@
         }
 
         function validatePassword(pass) {
-            if (pass.length <= 6) return "Mật khẩu phải lớn hơn 6 ký tự!";
-            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return "Mật khẩu phải bao gồm cả chữ và số!";
-            if (!/[^\w\s]/.test(pass)) return "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+            if (pass.length <= 6) return typeof t==="function"?t("login.pw_err1"):"Mật khẩu phải lớn hơn 6 ký tự!";
+            if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) return typeof t==="function"?t("login.pw_err2"):"Mật khẩu phải bao gồm cả chữ và số!";
+            if (!/[^\w\s]/.test(pass)) return typeof t==="function"?t("login.pw_err3"):"Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
             return null;
         }
 
@@ -366,7 +362,7 @@
             }
 
             if (!captchaInput) {
-                showErrorModal("Vui lòng nhập mã xác nhận!");
+                showErrorModal(typeof t==="function"?t("register.captcha_err"):"Vui lòng nhập mã xác nhận!");
                 return;
             }
 
@@ -377,7 +373,7 @@
             }
 
             if (p !== cp) {
-                showErrorModal("Mật khẩu không khớp!");
+                showErrorModal(typeof t==="function"?t("register.pw_mismatch"):"Mật khẩu không khớp!");
                 return;
             }
 
