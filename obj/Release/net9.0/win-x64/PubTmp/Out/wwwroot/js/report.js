@@ -149,7 +149,7 @@ async function loadReportData() {
             currentData = await response.json();
             updateDashboard(currentData);
         } else {
-            showError('Không thể tải dữ liệu báo cáo');
+            showError(typeof t==="function"?t('report.err.load'):'Không thể tải dữ liệu báo cáo');
         }
     } catch (error) {
         console.error('Error loading report data:', error);
@@ -294,7 +294,7 @@ function updateTrendChart(trendData) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Tổng giờ làm việc',
+                    label: typeof t==="function"?t('report.chart.total_hours'):'Tổng giờ làm việc',
                     data: hours,
                     borderColor: '#dc2626',
                     backgroundColor: 'rgba(220, 38, 38, 0.1)',
@@ -303,7 +303,7 @@ function updateTrendChart(trendData) {
                     yAxisID: 'y'
                 },
                 {
-                    label: 'Hiệu suất (%)',
+                    label: typeof t==="function"?t('report.chart.efficiency'):'Hiệu suất (%)',
                     data: utilization,
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.1)',
@@ -349,7 +349,7 @@ function updateTrendChart(trendData) {
                     position: 'left',
                     title: {
                         display: true,
-                        text: 'Giờ làm việc',
+                        text: typeof t==="function"?t('report.chart.work_hours'):'Giờ làm việc',
                         font: {
                             weight: 'bold'
                         }
@@ -364,7 +364,7 @@ function updateTrendChart(trendData) {
                     position: 'right',
                     title: {
                         display: true,
-                        text: 'Hiệu suất (%)',
+                        text: typeof t==="function"?t('report.chart.efficiency'):'Hiệu suất (%)',
                         font: {
                             weight: 'bold'
                         }
@@ -395,7 +395,7 @@ function updateDepartmentChart(departmentData) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Giờ làm việc',
+                label: typeof t==="function"?t('report.chart.work_hours'):'Giờ làm việc',
                 data: hours,
                 backgroundColor: 'rgba(220, 38, 38, 0.8)',
                 borderColor: '#dc2626',
@@ -444,7 +444,7 @@ function updateDepartmentChart(departmentData) {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Giờ làm việc',
+                        text: typeof t==="function"?t('report.chart.work_hours'):'Giờ làm việc',
                         font: {
                             weight: 'bold'
                         }
@@ -493,7 +493,7 @@ function updateFunctionTable(funcData, mode = 'table') {
     const tfoot = document.getElementById('functionTableFoot');
     
     if (!funcData || !funcData.departments || funcData.departments.length === 0) {
-        thead.innerHTML = '<tr><th colspan="5" class="phase-loading">Không có dữ liệu</th></tr>';
+        thead.innerHTML = `<tr><th colspan="5" class="phase-loading">${typeof t==="function"?t('common.no_data'):'Không có dữ liệu'}</th></tr>`;
         tbody.innerHTML = '';
         tfoot.innerHTML = '';
         return;
@@ -649,7 +649,7 @@ function updateDetailTable(detailData) {
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p class="font-medium">Không có dữ liệu</p>
+                    <p class="font-medium">${typeof t==="function"?t('common.no_data'):'Không có dữ liệu'}</p>
                 </td>
             </tr>
         `;
@@ -1332,7 +1332,7 @@ function updatePhaseChart(phaseData) {
     // BƯỚC 3: Nếu không có data thì hiện thông báo và dừng
     if (!phaseData || phaseData.length === 0) {
         if (container) {
-            container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9ca3af;font-size:0.875rem;font-weight:500;letter-spacing:0.05em;">KHÔNG CÓ DỮ LIỆU</div>`;
+            container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9ca3af;font-size:0.875rem;font-weight:500;letter-spacing:0.05em;">${typeof t==="function"?t('common.no_data').toUpperCase():'KHÔNG CÓ DỮ LIỆU'}</div>`;
         }
         return;
     }
@@ -1421,7 +1421,7 @@ function updatePhaseChart(phaseData) {
                     max: 100,
                     ticks: { callback: v => v + '%' },
                     grid: { color: '#f3f4f6' },
-                    title: { display: true, text: 'Phân bổ theo Project Phase (%)', font: { weight: 'bold' } }
+                    title: { display: true, text: typeof t==="function"?t('report.chart.phase_pct'):'Phân bổ theo Project Phase (%)', font: { weight: 'bold' } }
                 }
             }
         },
@@ -1435,7 +1435,7 @@ function updatePhaseTable(phaseData, mode = 'hours') {
     const tfoot = document.getElementById('phaseTableFoot');
     
     if (!phaseData || phaseData.length === 0) {
-        thead.innerHTML = '<tr><th colspan="10" class="phase-loading">Không có dữ liệu</th></tr>';
+        thead.innerHTML = `<tr><th colspan="10" class="phase-loading">${typeof t==="function"?t('common.no_data'):'Không có dữ liệu'}</th></tr>`;
         tbody.innerHTML = '';
         tfoot.innerHTML = '';
         return;
@@ -1547,7 +1547,7 @@ function updateCustomerTable(customerData) {
     const tfoot = document.getElementById('customerTableFoot');
     
     if (!customerData || customerData.length === 0) {
-        thead.innerHTML = '<tr><th colspan="10" class="phase-loading">Không có dữ liệu</th></tr>';
+        thead.innerHTML = `<tr><th colspan="10" class="phase-loading">${typeof t==="function"?t('common.no_data'):'Không có dữ liệu'}</th></tr>`;
         tbody.innerHTML = '';
         tfoot.innerHTML = '';
         return;
@@ -1570,7 +1570,7 @@ function updateCustomerTable(customerData) {
     // Group: customer → projects
     const customerMap = {};
     customerData.forEach(row => {
-        const cust = row.customer || '(Không có)';
+        const cust = row.customer || (typeof t==="function"?'('+t('report.none')+')':'(Không có)');
         if (!customerMap[cust]) customerMap[cust] = {};
         const proj = row.project;
         if (!customerMap[cust][proj]) customerMap[cust][proj] = {};
@@ -1632,7 +1632,7 @@ function updateCustomerChart(customerData) {
     const canvas = document.getElementById('customerChart');
     
     if (!customerData || customerData.length === 0) {
-        if (container) container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9ca3af;font-size:0.875rem;font-weight:500;">KHÔNG CÓ DỮ LIỆU</div>`;
+        if (container) container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9ca3af;font-size:0.875rem;font-weight:500;">${typeof t==="function"?t('common.no_data').toUpperCase():'KHÔNG CÓ DỮ LIỆU'}</div>`;
         return;
     }
     if (!canvas) return;
@@ -1689,7 +1689,7 @@ function updateCustomerChart(customerData) {
                     beginAtZero: true,
                     grid: { color: '#f3f4f6' },
                     ticks: { callback: v => formatHours(v) + 'h' },
-                    title: { display: true, text: 'Tổng giờ làm', font: { weight: 'bold' } }
+                    title: { display: true, text: typeof t==="function"?t('report.chart.total_hours_short'):'Tổng giờ làm', font: { weight: 'bold' } }
                 }
             }
         },
@@ -1705,7 +1705,7 @@ function updateDetailPivotTable(pivotData) {
     if (!thead || !tbody || !tfoot) return;
     
     if (!pivotData || !pivotData.rows || pivotData.rows.length === 0) {
-        thead.innerHTML = '<tr><th colspan="10" style="padding:2rem;text-align:center;color:#9ca3af;font-weight:500;background:#fff;border:none">Không có dữ liệu</th></tr>';
+        thead.innerHTML = `<tr><th colspan="10" style="padding:2rem;text-align:center;color:#9ca3af;font-weight:500;background:#fff;border:none">${typeof t==="function"?t('common.no_data'):'Không có dữ liệu'}</th></tr>`;
         tbody.innerHTML = '';
         tfoot.innerHTML = '';
         return;
