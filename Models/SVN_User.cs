@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace HeatmapSystem.Models
 {
-
     [Table("SVN_User")]
     public class SVN_User
     {
@@ -31,26 +30,31 @@ namespace HeatmapSystem.Models
         [Column("IsAdmin")]
         public bool IsAdmin { get; set; } = false;
 
+        [Column("IsHR")]
+        public bool IsHR { get; set; } = false;
 
         [Column("Permission")]
         [StringLength(20)]
         public string Permission { get; set; } = "Update";
 
 
-        /* Helper properties*/
+        /* Helper properties */
 
         [NotMapped]
-        public string RoleName => IsAdmin ? "Admin" : "User";
-
-
-        [NotMapped]
-        public bool HasReadPermission => IsAdmin || Permission == "Read" || Permission == "Update";
+        public string RoleName => IsAdmin ? "Admin" : IsHR ? "HR" : "User";
 
         [NotMapped]
-        public bool HasUpdatePermission => IsAdmin || Permission == "Update";
+        public bool HasReadPermission => IsAdmin || IsHR || Permission == "Read" || Permission == "Update";
 
-         [NotMapped]
-        public bool HasNoPermission => !IsAdmin && Permission == "None";
-        
+        [NotMapped]
+        public bool HasUpdatePermission => IsAdmin || IsHR || Permission == "Update";
+
+        [NotMapped]
+        public bool HasNoPermission => !IsAdmin && !IsHR && Permission == "None";
+
+        // HR và Admin đều xem được toàn bộ dữ liệu (không bị lọc bộ phận)
+  
+        [NotMapped]
+        public bool CanViewAllDepartments => IsAdmin || IsHR;
     }
 }

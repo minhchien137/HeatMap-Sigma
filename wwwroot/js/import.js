@@ -950,7 +950,7 @@ function handleSubmitMode1() {
             .then(r => r.json())
             .then(result => {
                 if (result.success) {
-                    showSuccessModal(`✓ Đã lưu ${projectRows.length} dự án thành công!`);
+                    showSuccessModal(typeof t==="function"?t('import.success.save1').replace('{n}',projectRows.length):`✓ Saved ${projectRows.length} projects!`);
                     if (!window.userDepartmentId) {
                         document.getElementById('department1').selectedIndex = 0;
                     }
@@ -1023,7 +1023,7 @@ function handleSubmitMode2() {
             .then(r => r.json())
             .then(result => {
                 if (result.success) {
-                    showSuccessModal(`✓ Lưu thành công ${selectedDays.length} ngày!`);
+                    showSuccessModal(typeof t==="function"?t('import.success.save2').replace('{n}',selectedDays.length):`✓ Saved ${selectedDays.length} days!`);
                     // Reset: giữ bộ phận/tuần, xóa ngày tick và dayDataState
                     const dept2 = window.userDepartmentId ? String(window.userDepartmentId) : document.getElementById('department2').value;
                     if (dept2) loadEmployees(dept2, 'employee2');
@@ -1105,7 +1105,7 @@ function handleSubmitMode3() {
             const result = await response.json();
             if (result.success) {
                 closeBulkInputPopup();
-                showSuccessModal(`✅ Đã lưu thành công ${result.total} bản ghi!`);
+                showSuccessModal(typeof t==="function"?t('import.success.save3').replace('{n}',result.total):`✅ Saved ${result.total} records!`);
                 // Reset Mode 3
                 bulkAllData = {};
                 bulkActiveEmpId = null;
@@ -1136,11 +1136,18 @@ function closeErrorModal() {
     document.getElementById('errorModal').classList.add('hidden'); document.getElementById('errorModal').classList.remove('flex');
 }
 
-// Thêm hàm mới để hiển thị thông báo thành công
 function showSuccessModal(message) {
-    // Sử dụng modal error nhưng với nội dung thành công
-    document.getElementById('errorModalMessage').textContent = message;
-    document.getElementById('errorModal').classList.remove('hidden'); document.getElementById('errorModal').classList.add('flex');
+    document.getElementById('successModalMessage').textContent = message;
+    const modal = document.getElementById('successModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    if (typeof applyI18n === 'function') applyI18n();
+}
+
+function closeSuccessModal() {
+    const modal = document.getElementById('successModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
 }
 
 function showConfirmModal(message, callback) {

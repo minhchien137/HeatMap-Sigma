@@ -194,8 +194,83 @@
 
     <footer
         class="py-8 md:py-12 text-center text-gray-400 text-[10px] md:text-xs uppercase tracking-[0.3em] md:tracking-[0.4em] font-black">
-        &copy; @DateTime.Now.Year HEATMAP SIGMA • Coldzy
+        <span>&copy; @DateTime.Now.Year HEATMAP SIGMA </span>
     </footer>
+
+    <!-- Language Switcher — fixed right side, vertically centered -->
+    <div id="langSwitcher"
+         class="fixed right-5 top-1/2 -translate-y-1/2 z-[300] flex flex-col gap-2">
+
+        <!-- VI button -->
+        <button id="footerLangVI" onclick="footerSwitchLang('vi')"
+            title="Tiếng Việt"
+            class="lang-pill group flex items-center gap-0 overflow-hidden rounded-2xl border-2 transition-all duration-300 shadow-sm hover:shadow-md bg-white">
+            <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                <img src="/images/vn.png" alt="VI" class="w-6 h-6 object-contain" />
+            </div>
+            <span class="lang-pill-label max-w-0 group-hover:max-w-[60px] overflow-hidden whitespace-nowrap transition-all duration-300 text-xs font-black uppercase tracking-wider pr-0 group-hover:pr-3 text-gray-700">
+                Tiếng Việt
+            </span>
+        </button>
+
+        <!-- EN button -->
+        <button id="footerLangEN" onclick="footerSwitchLang('en')"
+            title="English"
+            class="lang-pill group flex items-center gap-0 overflow-hidden rounded-2xl border-2 transition-all duration-300 shadow-sm hover:shadow-md bg-white">
+            <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                <img src="/images/en.png" alt="EN" class="w-6 h-6 object-contain" />
+            </div>
+            <span class="lang-pill-label max-w-0 group-hover:max-w-[60px] overflow-hidden whitespace-nowrap transition-all duration-300 text-xs font-black uppercase tracking-wider pr-0 group-hover:pr-3 text-gray-700">
+                English
+            </span>
+        </button>
+    </div>
+
+    <style>
+        .lang-pill         { border-color: #e5e7eb; }
+        .lang-pill.active  { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
+
+        /* Thu nhỏ nút ngôn ngữ trên mobile */
+        @@media (max-width: 640px) {
+            #langSwitcher {
+                right: 8px;
+                gap: 6px;
+            }
+            #langSwitcher .lang-pill {
+                border-radius: 12px;
+                border-width: 1.5px;
+            }
+            #langSwitcher .lang-pill > div {
+                width: 28px !important;
+                height: 28px !important;
+            }
+            #langSwitcher .lang-pill img {
+                width: 16px !important;
+                height: 16px !important;
+            }
+            #langSwitcher .lang-pill-label {
+                display: none !important;
+            }
+        }
+    </style>
+    <script>
+        function footerSwitchLang(lang) {
+            if (typeof setLang === 'function') setLang(lang);
+            updateFooterLang(lang);
+        }
+        function updateFooterLang(lang) {
+            ['en', 'vi'].forEach(l => {
+                document.getElementById('footerLang' + l.toUpperCase())
+                    ?.classList.toggle('active', l === lang);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            updateFooterLang(localStorage.getItem('heatmap_lang') || 'vi');
+        });
+        document.addEventListener('i18n:applied', function () {
+            updateFooterLang(localStorage.getItem('heatmap_lang') || 'vi');
+        });
+    </script>
 
     <!-- JavaScript cho chức năng Back/Forward -->
     <script>

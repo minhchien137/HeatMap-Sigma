@@ -83,6 +83,7 @@ namespace HeatmapSystem.Controllers
                                     
                                     HttpContext.Session.SetString("SVNCode", user.SVNCode);
                                     HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower());
+                                    HttpContext.Session.SetString("IsHR", user.IsHR.ToString().ToLower());
                                     HttpContext.Session.SetString("Permission", user.Permission ?? "None"); // LƯU PERMISSION VÀO SESSION
                                     
                                     // Ghi log
@@ -222,6 +223,7 @@ namespace HeatmapSystem.Controllers
 
                 HttpContext.Session.SetString("SVNCode", user.SVNCode);
                 HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString().ToLower());
+                HttpContext.Session.SetString("IsHR", user.IsHR.ToString().ToLower());
                 HttpContext.Session.SetString("Permission", user.Permission ?? "None"); // LƯU PERMISSION VÀO SESSION
 
                 // Tạo Refresh Token nếu chọn "Remember Me"

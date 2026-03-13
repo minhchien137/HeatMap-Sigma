@@ -154,6 +154,14 @@ public class DetailDataDto
             return !string.IsNullOrEmpty(GetCurrentSVNCode());
         }
 
+        // Helper: Admin hoặc HR đều xem toàn bộ dữ liệu (không lọc bộ phận)
+        private bool IsAdminOrHR()
+        {
+            if (HttpContext.Session.GetString("IsAdmin")?.ToLower() == "true") return true;
+            if (HttpContext.Session.GetString("IsHR")?.ToLower() == "true") return true;
+            return false;
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -192,6 +200,8 @@ public class DetailDataDto
 
             // Tìm bộ phận của user đang đăng nhập (nếu không phải admin)
             var isAdminImport = HttpContext.Session.GetString("IsAdmin")?.ToLower() == "true";
+            var isHRImport = HttpContext.Session.GetString("IsHR")?.ToLower() == "true";
+            ViewBag.IsHR = isHRImport;
             var svnCodeImport = GetCurrentSVNCode();
             int? userDeptId = null;
             if (!isAdminImport && !string.IsNullOrEmpty(svnCodeImport))
@@ -809,7 +819,7 @@ public class DetailDataDto
 
                 // Neu khong phai admin -> chi tra ve nhan vien cung bo phan voi user dang nhap
                 string userDepartment = null;
-                if (!isAdmin && !string.IsNullOrEmpty(svnCode))
+                if (!IsAdminOrHR() && !string.IsNullOrEmpty(svnCode))
                 {
                     var currentUser = staffData.FirstOrDefault(e =>
                         e.emp_code.Equals(svnCode, StringComparison.OrdinalIgnoreCase));
@@ -861,7 +871,7 @@ public class DetailDataDto
 
                 // Lấy bộ phận của user từ ZKBio bằng 1 query JOIN duy nhất
                 string userDepartment = null;
-                if (!isAdmin && !string.IsNullOrEmpty(svnCode))
+                if (!IsAdminOrHR() && !string.IsNullOrEmpty(svnCode))
                 {
                     var deptResult = _zkContext.Database
                         .SqlQueryRaw<DepartmentNameDto>(@"
@@ -888,8 +898,8 @@ public class DetailDataDto
                 // Lấy dữ liệu từ bảng SVN_StaffDetail
                 var query = _context.SVN_StaffDetail.AsQueryable();
 
-                // Nếu không phải admin và tìm được bộ phận → chỉ lấy bản ghi của bộ phận đó
-                if (!isAdmin && !string.IsNullOrEmpty(userDepartment))
+                // Nếu không phải admin/HR và tìm được bộ phận → chỉ lấy bản ghi của bộ phận đó
+                if (!IsAdminOrHR() && !string.IsNullOrEmpty(userDepartment))
                 {
                     query = query.Where(s => s.Department == userDepartment);
                 }
