@@ -173,11 +173,58 @@
 /* ── Mobile ── */
 @media (max-width: 640px) {
     #chatbotWindow {
-        left: 10px; right: 10px;
+        left: 8px;
+        right: 8px;
         width: auto;
-        bottom: 84px;
-        max-height: 70vh;
+        bottom: 70px;
+        max-height: 52vh;        /* Giới hạn chiều cao, để lộ trang phía sau */
+        border-radius: 16px;
+        font-size: 13px;
     }
-    #chatbotBubble { left: 16px; bottom: 24px; width: 46px; height: 46px; }
-    #chatbotBubble svg { width: 20px; height: 20px; }
+    #chatbotHeader {
+        padding: 10px 12px;
+    }
+    #chatbotMessages {
+        padding: 10px 10px 6px;
+        gap: 7px;
+    }
+    .cb-msg-bot, .cb-msg-user {
+        font-size: 12px;
+        padding: 7px 10px;
+    }
+    #chatbotSuggestions {
+        padding: 4px 10px 6px;
+        gap: 4px;
+    }
+    .cb-suggestion {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+    #chatbotInputArea {
+        padding: 8px 10px;
+        gap: 6px;
+    }
+    #chatbotInput {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    #chatbotSendBtn {
+        width: 32px;
+        height: 32px;
+    }
+    #chatbotBubble {
+        left: 14px;
+        bottom: 18px;
+        width: 44px;
+        height: 44px;
+    }
+    #chatbotBubble svg { width: 18px; height: 18px; }
+    #chatbotBubble img { width: 44px; height: 44px; }
+}
+
+/* Màn hình rất nhỏ (< 380px) */
+@media (max-width: 380px) {
+    #chatbotWindow {
+        max-height: 46vh;
+    }
 }

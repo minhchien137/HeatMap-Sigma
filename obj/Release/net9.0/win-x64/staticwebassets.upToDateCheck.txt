@@ -1,6 +1,7 @@
 wwwroot\css\import.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\images\chatbot.png
 wwwroot\images\en.png
 wwwroot\images\heatmap.png
 wwwroot\images\logo.png
@@ -72,7 +73,6 @@ wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
 wwwroot\css\chatbot.css
-wwwroot\images\chatbot.png
 C:\HeatMap-Sigma\wwwroot\css\import.css
 C:\HeatMap-Sigma\wwwroot\css\site.css
 C:\HeatMap-Sigma\wwwroot\favicon.ico
