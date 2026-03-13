@@ -28,6 +28,10 @@ namespace HeatmapSystem.Models
 
         public bool IsActive { get; set; } = true;
 
+        /// <summary>'vi' hoặc 'en'</summary>
+        [MaxLength(5)]
+        public string Language { get; set; } = "vi";
+
         public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }

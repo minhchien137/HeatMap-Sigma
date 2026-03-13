@@ -16,14 +16,16 @@ namespace HeatmapSystem.Controllers
             _logger = logger;
         }
 
-        // GET /Chatbot/GetFAQ — trả về toàn bộ FAQ active
+        // GET /Chatbot/GetFAQ?lang=vi  — trả về FAQ active theo ngôn ngữ
         [HttpGet("GetFAQ")]
-        public async Task<IActionResult> GetFAQ()
+        public async Task<IActionResult> GetFAQ(string lang = "vi")
         {
             try
             {
+                var language = (lang == "en") ? "en" : "vi";
+
                 var faqs = await _context.SVN_ChatbotFAQ
-                    .Where(f => f.IsActive)
+                    .Where(f => f.IsActive && f.Language == language)
                     .OrderBy(f => f.SortOrder)
                     .Select(f => new
                     {
@@ -44,7 +46,7 @@ namespace HeatmapSystem.Controllers
             }
         }
 
-        // POST /Chatbot/Search — tìm kiếm theo từ khóa
+        // POST /Chatbot/Search — tìm kiếm theo từ khóa và ngôn ngữ
         [HttpPost("Search")]
         public async Task<IActionResult> Search([FromBody] SearchRequest request)
         {
@@ -53,14 +55,14 @@ namespace HeatmapSystem.Controllers
                 if (string.IsNullOrWhiteSpace(request?.Query))
                     return Json(new List<object>());
 
-                var query = request.Query.Trim().ToLower();
+                var query    = request.Query.Trim().ToLower();
+                var language = (request.Lang == "en") ? "en" : "vi";
 
                 var faqs = await _context.SVN_ChatbotFAQ
-                    .Where(f => f.IsActive)
+                    .Where(f => f.IsActive && f.Language == language)
                     .OrderBy(f => f.SortOrder)
                     .ToListAsync();
 
-                // Tìm kiếm đơn giản: khớp câu hỏi hoặc keywords
                 var results = faqs
                     .Where(f =>
                         f.Question.ToLower().Contains(query) ||
@@ -82,6 +84,7 @@ namespace HeatmapSystem.Controllers
         public class SearchRequest
         {
             public string Query { get; set; }
+            public string Lang  { get; set; } = "vi";
         }
     }
 }

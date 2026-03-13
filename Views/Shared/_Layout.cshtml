@@ -322,8 +322,8 @@
                         </svg>
                     </div>
                     <div>
-                        <div style="font-weight:800;font-size:14px">Trợ lý Heatmap</div>
-                        <div style="font-size:11px;opacity:0.85">Hỏi bất cứ điều gì!</div>
+                        <div id="cbHeaderTitle" style="font-weight:800;font-size:14px">Trợ lý Heatmap</div>
+                        <div id="cbHeaderSubtitle" style="font-size:11px;opacity:0.85">Hỏi bất cứ điều gì!</div>
                     </div>
                 </div>
                 <button onclick="chatbotToggle()" style="background:none;border:none;color:white;cursor:pointer;padding:4px;border-radius:6px;line-height:0" title="Đóng">
@@ -543,12 +543,65 @@
     <script>
     (function () {
         let faqData = [];
-        let isOpen = false;
+        let isOpen  = false;
+        let currentLang = localStorage.getItem('heatmap_lang') || 'vi';
 
+        // ── Text strings theo ngôn ngữ ─────────────────────────
+        const CB_TEXT = {
+            vi: {
+                greeting:    '👋 Xin chào! Tôi có thể giúp gì cho bạn?<br>Chọn câu hỏi gợi ý hoặc gõ câu hỏi của bạn bên dưới.',
+                noAnswer:    'Xin lỗi, tôi chưa có câu trả lời cho câu hỏi này. 😅<br>Vui lòng liên hệ <b>Admin</b> hoặc phòng IT để được hỗ trợ.',
+                found:       count => 'Tôi tìm thấy ' + count + ' câu hỏi liên quan. Bạn muốn hỏi về:',
+                error:       'Có lỗi xảy ra. Vui lòng thử lại sau.',
+                placeholder: 'Nhập câu hỏi của bạn...',
+                title:       'Trợ lý Heatmap',
+                subtitle:    'Hỏi bất cứ điều gì!',
+            },
+            en: {
+                greeting:    '👋 Hello! How can I help you?<br>Choose a suggested question or type your question below.',
+                noAnswer:    "Sorry, I don't have an answer for that yet. 😅<br>Please contact <b>Admin</b> or the IT department for support.",
+                found:       count => 'I found ' + count + ' related questions. Which one do you mean:',
+                error:       'An error occurred. Please try again later.',
+                placeholder: 'Type your question...',
+                title:       'Heatmap Assistant',
+                subtitle:    'Ask me anything!',
+            }
+        };
+
+        function t() { return CB_TEXT[currentLang] || CB_TEXT['vi']; }
+
+        // ── Cập nhật UI text theo lang ─────────────────────────
+        function applyLang(lang) {
+            currentLang = lang;
+            const txt = t();
+            const titleEl    = document.getElementById('cbHeaderTitle');
+            const subtitleEl = document.getElementById('cbHeaderSubtitle');
+            const inputEl    = document.getElementById('chatbotInput');
+            if (titleEl)    titleEl.textContent    = txt.title;
+            if (subtitleEl) subtitleEl.textContent = txt.subtitle;
+            if (inputEl)    inputEl.placeholder    = txt.placeholder;
+        }
+
+        // ── Lắng nghe sự kiện đổi ngôn ngữ từ i18n.js ─────────
+        document.addEventListener('i18n:applied', function (e) {
+            const newLang = e.detail && e.detail.lang;
+            if (!newLang || newLang === currentLang) return;
+
+            // Reload FAQ theo ngôn ngữ mới, reset chat
+            currentLang = newLang;
+            faqData = [];
+            document.getElementById('chatbotMessages').innerHTML = '';
+            hideSuggestions();
+            loadFAQ();
+            applyLang(newLang);
+        });
+
+        // ── Load FAQ theo lang hiện tại ────────────────────────
         async function loadFAQ() {
             try {
-                const res = await fetch('/Chatbot/GetFAQ');
-                faqData = await res.json();
+                const lang = localStorage.getItem('heatmap_lang') || 'vi';
+                const res  = await fetch('/Chatbot/GetFAQ?lang=' + lang);
+                faqData    = await res.json();
                 renderSuggestions(faqData.slice(0, 4));
             } catch (e) {
                 console.warn('Chatbot: không thể tải FAQ', e);
@@ -557,22 +610,22 @@
 
         window.chatbotToggle = function () {
             isOpen = !isOpen;
-            const win = document.getElementById('chatbotWindow');
+            const win      = document.getElementById('chatbotWindow');
             const iconOpen = document.getElementById('chatbotIconOpen');
-            const iconClose = document.getElementById('chatbotIconClose');
+            const iconClose= document.getElementById('chatbotIconClose');
 
             if (isOpen) {
-                win.style.display = 'flex';
-                iconOpen.style.display = 'none';
+                win.style.display  = 'flex';
+                iconOpen.style.display  = 'none';
                 iconClose.style.display = 'block';
                 if (faqData.length === 0) loadFAQ();
                 if (document.getElementById('chatbotMessages').children.length === 0) {
-                    addBotMessage('👋 Xin chào! Tôi có thể giúp gì cho bạn?<br>Chọn câu hỏi gợi ý hoặc gõ câu hỏi của bạn bên dưới.');
+                    addBotMessage(t().greeting);
                 }
                 setTimeout(() => document.getElementById('chatbotInput').focus(), 100);
             } else {
-                win.style.display = 'none';
-                iconOpen.style.display = 'block';
+                win.style.display  = 'none';
+                iconOpen.style.display  = 'block';
                 iconClose.style.display = 'none';
             }
         };
@@ -589,27 +642,28 @@
             const typingId = addTyping();
 
             try {
-                const res = await fetch('/Chatbot/Search', {
+                const lang = localStorage.getItem('heatmap_lang') || 'vi';
+                const res  = await fetch('/Chatbot/Search', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
+                    body: JSON.stringify({ query, lang })
                 });
                 const results = await res.json();
                 removeTyping(typingId);
 
                 if (results.length === 0) {
-                    addBotMessage('Xin lỗi, tôi chưa có câu trả lời cho câu hỏi này. 😅<br>Vui lòng liên hệ <b>Admin</b> hoặc phòng IT để được hỗ trợ.');
+                    addBotMessage(t().noAnswer);
                     renderSuggestions(faqData.slice(0, 4));
                 } else if (results.length === 1) {
                     addBotMessage(results[0].answer);
                     renderSuggestions(faqData.filter(f => f.id !== results[0].id).slice(0, 3));
                 } else {
-                    addBotMessage('Tôi tìm thấy ' + results.length + ' câu hỏi liên quan. Bạn muốn hỏi về:');
+                    addBotMessage(t().found(results.length));
                     renderSuggestions(results, true);
                 }
             } catch (e) {
                 removeTyping(typingId);
-                addBotMessage('Có lỗi xảy ra. Vui lòng thử lại sau.');
+                addBotMessage(t().error);
             }
         };
 
@@ -641,7 +695,7 @@
         }
 
         function addTyping() {
-            const id = 'typing_' + Date.now();
+            const id  = 'typing_' + Date.now();
             const div = document.createElement('div');
             div.className = 'cb-msg-bot';
             div.id = id;
@@ -662,7 +716,7 @@
             if (!items || items.length === 0) return;
             items.forEach(item => {
                 const btn = document.createElement('button');
-                btn.className = 'cb-suggestion';
+                btn.className   = 'cb-suggestion';
                 btn.textContent = item.question;
                 btn.onclick = () => chatbotPickSuggestion(item.id);
                 container.appendChild(btn);
@@ -679,6 +733,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            applyLang(currentLang);
             setTimeout(loadFAQ, 1500);
         });
     })();
