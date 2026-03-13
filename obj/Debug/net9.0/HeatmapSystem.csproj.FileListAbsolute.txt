@@ -457,3 +457,4 @@ C:\HeatMap-Sigma\obj\Debug\net9.0\HeatmapSystem.pdb
 C:\HeatMap-Sigma\obj\Debug\net9.0\HeatmapSystem.genruntimeconfig.cache
 C:\HeatMap-Sigma\obj\Debug\net9.0\ref\HeatmapSystem.dll
 C:\HeatMap-Sigma\obj\Debug\net9.0\compressed\rd19wqedbx-{0}-xf1ezvjexx-xf1ezvjexx.gz
+C:\HeatMap-Sigma\obj\Debug\net9.0\compressed\ll8sacrwcv-{0}-hqqe5s40m1-hqqe5s40m1.gz

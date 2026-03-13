@@ -20,6 +20,8 @@ namespace HeatmapSystem.Models
 
         public DbSet<SVN_ProjectPhase> SVN_ProjectPhase { get; set; }
 
+        public DbSet<SVN_ChatbotFAQ> SVN_ChatbotFAQ { get; set; }
+
         // authencation
         public DbSet<AuthToken> AuthTokens { get; set; }
         public DbSet<LoginAttempt> LoginAttempts { get; set; }
