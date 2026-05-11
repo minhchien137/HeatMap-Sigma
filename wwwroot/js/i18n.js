@@ -414,7 +414,7 @@ const I18N = {
         'admin.perm.read':          '👁️ Read',
         'admin.perm.none':          '🚫 No Access',
         'admin.perm.no_edit':       'Không thể chỉnh sửa Admin',
-        'admin.col.svn':            'Mã SVN',
+        'admin.col.svn':            'Mã SM',
         'admin.col.role':           'Quyền',
         'admin.col.created':        'Ngày tạo',
         'admin.col.last_login':     'Đăng nhập cuối',
