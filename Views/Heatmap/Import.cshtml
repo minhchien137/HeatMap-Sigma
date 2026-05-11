@@ -1,6 +1,6 @@
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Nhập dữ liệu";
+    ViewData["Title"] = "Data Import / 数据导入";
     ViewData["PageName"] = "Import";
 }
 
@@ -10,7 +10,7 @@
 
         <!-- Header -->
         <div class="text-center mb-8">
-            <h2 class="text-gray-400 font-black uppercase tracking-[0.3em] mb-3 text-xs">Nhập dữ liệu</h2>
+            <h2 class="text-gray-400 font-black uppercase tracking-[0.3em] mb-3 text-xs">Data Import</h2>
             <h1 class="text-5xl md:text-6xl font-black leading-[1.1] text-red-600">
                 Heatmap
             </h1>
@@ -90,12 +90,12 @@
                             </div>
                             <!-- Column labels -->
                             <div class="bulk-row-label" style="border-radius:0.75rem 0.75rem 0 0; border:2px solid #e5e7eb; border-bottom:1px solid #f3f4f6;">
-                                <span>Customer</span><span>Project</span><span>Proj.Phase</span><span data-i18n="import.label.hours">Số giờ</span><span></span>
+                                <span>Project</span><span>Customer</span><span>Proj.Phase</span><span data-i18n="import.label.hours">Số giờ</span><span></span>
                             </div>
                             <!-- Rows container -->
                             <div id="projectRows1" style="border:2px solid #e5e7eb; border-top:none; border-bottom:none;"></div>
                             <!-- Add button -->
-                            <button type="button" class="bulk-add-btn" style="border-radius:0 0 0.75rem 0.75rem; border:2px solid #e5e7eb; border-top:1px dashed #e5e7eb;"
+                            <button type="button" class="bulk-add-btn" style="display:none;"
                                     onclick="addMode1ProjectRow()"><span data-i18n="import.btn.add_project">+ Thêm dự án</span></button>
                         </div>
 
@@ -250,7 +250,7 @@
 
                         <!-- Chọn nhân viên (checkboxes) -->
                         <div class="group">
-                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Chọn nhân viên</label>
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Select employees</label>
                             <!-- Search box -->
                             <div class="relative mb-3">
                                 <input type="text" id="searchEmployee3" 
@@ -262,15 +262,15 @@
                                 </svg>
                             </div>
                             <div id="employeeCheckboxes3" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                                <p class="text-gray-400 text-center py-4">Vui lòng chọn bộ phận</p>
+                                <p class="text-gray-400 text-center py-4">Please select the department first</p>
                             </div>
                         </div>
 
                         <!-- Tuần -->
                         <div class="group">
-                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Tuần</label>
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2">Week</label>
                             <select id="week3" class="input-field">
-                                <option value="" data-i18n="import.opt.week">-- Chọn tuần --</option>
+                                <option value="" data-i18n="import.opt.week">-- Choose Week --</option>
                             </select>
                         </div>
 
@@ -278,14 +278,14 @@
                         <div class="group">
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3 ml-2" data-i18n="import.label.select_day">Chọn ngày</label>
                             <div id="dayCheckboxes3" class="grid grid-cols-1 gap-3">
-                                <p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>
+                                <p class="text-gray-400 text-center py-4">Please select a week</p>
                             </div>
                         </div>
 
                         <!-- Button nhập dữ liệu hàng loạt -->
                         <div class="text-center mt-10">
                             <button onclick="showBulkInputPopup()" class="submit-btn w-full sm:w-auto">
-                                <span data-i18n="import.btn.bulk">Nhập dữ liệu hàng loạt</span>
+                                <span data-i18n="import.btn.bulk">Bulk data import</span>
                             </button>
                         </div>
                     </div>
@@ -293,7 +293,7 @@
 
                 <!-- Back to Home Button -->
                 <div class="text-center mt-10">
-                    <a href="/Heatmap/Home"
+                    <a href="@Url.Content("~/Heatmap/Home")"
                            class="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -311,13 +311,13 @@
                                                     <div class="px-4 sm:px-8 py-4 sm:py-6 border-b border-gray-100 flex-shrink-0">
                                                         <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
                                                             <div>
-                                                                <h3 class="text-xl sm:text-2xl font-black text-gray-900">Nhập dữ liệu hàng loạt</h3>
-                                                                <p class="text-sm text-gray-400 mt-1">Mỗi nhân viên có thể làm nhiều dự án trong một ngày</p>
+                                                                <h3 class="text-xl sm:text-2xl font-black text-gray-900">Bulk data import</h3>
+                                                                <p class="text-sm text-gray-400 mt-1">Each employee can work on multiple projects in a single day.</p>
                                                             </div>
                                                             <div class="flex items-center gap-3 flex-shrink-0">
                                                                 <button type="button" onclick="copyFirstDayToAllMode3()"
                                                                         class="copy-btn text-xs px-3 py-2 rounded-lg transition-all font-semibold whitespace-nowrap">
-                                                                    <span data-i18n="import.btn.copy_day_short">📋 Copy ngày đầu</span>
+                                                                    <span data-i18n="import.btn.copy_day_short">📋 Copy first day</span>
                                                                 </button>
                                                                 <div id="bulkSummary" class="text-xs text-gray-400 font-semibold text-right"></div>
                                                             </div>
@@ -961,6 +961,7 @@
 
 
                                             <script>
+                                                window.pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
                                                 window.userDepartmentId = @(ViewBag.UserDepartmentId?.ToString() ?? "null");
                                                 window.projectsData = [
                                                     @foreach (var project in ViewBag.Projects)

@@ -3,6 +3,7 @@ let currentMode = 1;
 let confirmCallback = null;
 let projectMode = 1; // 1 = một dự án cho tất cả, 2 = dự án riêng từng ngày
 let dayDataState = {};
+const pathBase = window.pathBase || '';
 
 // ============================================================
 // SEARCHABLE SELECT COMPONENT
@@ -349,7 +350,7 @@ function loadEmployees(departmentId, targetSelectId) {
         return;
     }
     
-    fetch(`/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`)
+    fetch(`${pathBase}/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`)
     .then(response => response.json())
     .then(employees => {
         // Populate hidden select (giữ cho code submit hoạt động)
@@ -386,7 +387,7 @@ function loadEmployeesAsCheckboxes(departmentId) {
     const searchBox = document.getElementById('searchEmployee3');
     if (searchBox) searchBox.value = '';
     
-    fetch(`/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`)
+    fetch(`${pathBase}/Heatmap/GetEmployeesByDepartment?departmentId=${departmentId}`)
     .then(response => response.json())
     .then(employees => {
         container.innerHTML = '';
@@ -513,6 +514,8 @@ function handleDayCheckboxChange(checkbox, containerId) {
 // MODE 1 - Multi project rows
 // ============================================================
 function addMode1ProjectRow(savedData) {
+    // Không dùng trực tiếp nữa — multi-select xử lý việc thêm row
+    // Giữ lại để không break các chỗ gọi khác nếu có
     const container = document.getElementById('projectRows1');
     addProjectRow(container, savedData || null);
 }
@@ -521,7 +524,7 @@ function initMode1ProjectRows() {
     const container = document.getElementById('projectRows1');
     if (!container) return;
     container.innerHTML = '';
-    addProjectRow(container, null);
+    initProjectBlock(container, null);
 }
 
 // ============================================================
@@ -536,9 +539,12 @@ function saveAllDayBlocks() {
         if (!dateStr) return;
         const rows = [];
         block.querySelectorAll('.bulk-project-row').forEach(row => {
+            const pid = row.querySelector('.bulk-project')?.value || '';
+            const found = pid ? window.projectsData.find(p => String(p.IdProject) === String(pid)) : null;
             rows.push({
                 customer:     row.querySelector('.bulk-customer')?.value || '',
-                project:      row.querySelector('.bulk-project')?.value || '',
+                project:      pid,
+                projectName:  found ? found.NameProject : '',
                 projectPhase: row.querySelector('.bulk-pp')?.value || '',
                 hours:        row.querySelector('.bulk-hours-input')?.value || ''
             });
@@ -587,7 +593,7 @@ function renderDayHoursList() {
         // Column labels
         const labels = document.createElement('div');
         labels.className = 'bulk-row-label';
-        labels.innerHTML = `<span>Customer</span><span>Project</span><span>Proj. Phase</span><span>Số giờ</span><span></span>`;
+        labels.innerHTML = `<span>Project</span><span>Customer</span><span>Proj. Phase</span><span>Số giờ</span><span></span>`;
         block.appendChild(labels);
         
         // Rows container
@@ -595,19 +601,13 @@ function renderDayHoursList() {
         rowsContainer.className = 'bulk-rows-container';
         block.appendChild(rowsContainer);
         
-        // Add button
-        const addBtn = document.createElement('button');
-        addBtn.type = 'button';
-        addBtn.className = 'bulk-add-btn';
-        addBtn.textContent = '+ Thêm dự án';
-        addBtn.onclick = () => addProjectRow(rowsContainer, null);
-        block.appendChild(addBtn);
-        
-        // Restore saved rows hoặc tạo 1 row mặc định
-        const savedRows = dayDataState[dateStr]?.rows || [{ customer: '', project: '', hours: '' }];
-        savedRows.forEach(r => addProjectRow(rowsContainer, r));
-        
         container.appendChild(block);
+        
+        // Restore saved rows hoặc tạo 1 row mặc định — initProjectBlock tạo multi-select + rows
+        const savedRows = (dayDataState[dateStr]?.rows?.length > 0)
+        ? dayDataState[dateStr].rows.filter(r => r.project)
+        : null;
+        initProjectBlock(rowsContainer, savedRows);
     });
 }
 
@@ -686,7 +686,7 @@ function showBulkInputPopup() {
             // Nếu đã có data cũ → giữ nguyên, chưa có → tạo mới
             newBulkAllData[empId].days[date] =
             bulkAllData[empId]?.days[date] ||
-            { label: dayCb.dataset.label, rows: [{ customer: '', project: '', hours: '' }] };
+            { label: dayCb.dataset.label, rows: [] };
         });
     });
     bulkAllData = newBulkAllData;
@@ -720,9 +720,12 @@ function saveBulkCurrentData() {
         const date = block.dataset.date;
         const rows = [];
         block.querySelectorAll('.bulk-project-row').forEach(row => {
+            const pid = row.querySelector('.bulk-project')?.value || '';
+            const found = pid ? window.projectsData.find(p => String(p.IdProject) === String(pid)) : null;
             rows.push({
                 customer:     row.querySelector('.bulk-customer').value,
-                project:      row.querySelector('.bulk-project').value,
+                project:      pid,
+                projectName:  found ? found.NameProject : '',
                 projectPhase: row.querySelector('.bulk-pp')?.value || '',
                 hours:        row.querySelector('.bulk-hours-input').value
             });
@@ -768,49 +771,217 @@ function createBulkBlock(empId, empName, date, dateLabel, savedRows) {
     
     const labels = document.createElement('div');
     labels.className = 'bulk-row-label';
-    labels.innerHTML = `<span>Customer</span><span>Project</span><span>Proj.Phase</span><span>Số giờ</span><span></span>`;
+    labels.innerHTML = `<span>Project</span><span>Customer</span><span>Proj.Phase</span><span>Số giờ</span><span></span>`;
     block.appendChild(labels);
     
     const rowsContainer = document.createElement('div');
     rowsContainer.className = 'bulk-rows-container';
     block.appendChild(rowsContainer);
     
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.className = 'bulk-add-btn';
-    addBtn.textContent = '+ Thêm dự án';
-    addBtn.onclick = () => addProjectRow(rowsContainer, null);
-    block.appendChild(addBtn);
-    
-    (savedRows || [{ customer: '', project: '', hours: '' }]).forEach(r => addProjectRow(rowsContainer, r));
+    const validRows = (savedRows || []).filter(r => r.project);
+    initProjectBlock(rowsContainer, validRows.length > 0 ? validRows : null);
     return block;
 }
 
-// Thêm 1 dòng project, restore saved data nếu có
+// ============================================================
+// MULTI-SELECT PROJECT DROPDOWN
+// Mỗi block (rowsContainer) có 1 custom multi-select dropdown ở đầu.
+// Tick project → thêm row; bỏ tick → xóa row.
+// ============================================================
+
+/**
+* Tạo toàn bộ khu vực nhập cho 1 ngày/block.
+* Gồm: 1 multi-select dropdown project ở trên + các rows bên dưới.
+* Gọi thay cho addProjectRow khi khởi tạo block.
+*/
+function initProjectBlock(rowsContainer, savedRows) {
+    // Wrapper bao gồm multi-select + rows
+    rowsContainer._multiSelectOpen = false;
+    
+    // --- Tạo multi-select dropdown ---
+    const msWrap = document.createElement('div');
+    msWrap.className = 'ms-wrap';
+    msWrap.style.cssText = 'position:relative; margin-bottom:0;';
+    
+    const msTrigger = document.createElement('div');
+    msTrigger.className = 'bulk-select ms-trigger';
+    msTrigger.style.cssText = 'display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; background:white;';
+    msTrigger.innerHTML = `<span class="ms-trigger-label" style="color:#6b7280;">-- Project --</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="flex-shrink:0;color:#9ca3af;transition:transform 0.2s;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>`;
+    
+    const msDropdown = document.createElement('div');
+    msDropdown.className = 'ms-dropdown';
+    msDropdown.style.cssText = `display:none; position:fixed; z-index:9999;
+        background:white; border:2px solid #dc2626; border-top:none;
+        border-bottom-left-radius:1rem; border-bottom-right-radius:1rem;
+        box-shadow:0 10px 40px rgba(0,0,0,0.12); max-height:220px; overflow-y:auto;`;
+    // Append vào body để thoát khỏi overflow:hidden của popup
+    document.body.appendChild(msDropdown);
+    msDropdown._triggerEl = msTrigger; // reference để đóng từ ngoài
+    
+    // Search box trong dropdown
+    const msSearch = document.createElement('input');
+    msSearch.type = 'text';
+    msSearch.placeholder = 'Tìm project...';
+    msSearch.style.cssText = 'width:100%; padding:8px 12px; border:none; border-bottom:1px solid #f3f4f6; font-size:0.85rem; outline:none; box-sizing:border-box;';
+    msSearch.oninput = function() {
+        const kw = this.value.toLowerCase();
+        msDropdown.querySelectorAll('.ms-item').forEach(item => {
+            item.style.display = item.dataset.name.toLowerCase().includes(kw) ? '' : 'none';
+        });
+    };
+    msDropdown.appendChild(msSearch);
+    
+    // Render checkbox items
+    window.projectsData.forEach(p => {
+        const item = document.createElement('label');
+        item.className = 'ms-item';
+        item.dataset.name = p.NameProject;
+        item.style.cssText = 'display:flex; align-items:center; gap:10px; padding:9px 14px; cursor:pointer; font-size:0.875rem; color:#374151; transition:background 0.1s;';
+        item.onmouseenter = () => item.style.background = '#fef2f2';
+        item.onmouseleave = () => { if (!item.querySelector('input').checked) item.style.background = ''; else item.style.background = '#fff5f5'; }
+        
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = p.IdProject;
+        cb.dataset.customer = p.NameCustomer || '';
+        cb.dataset.projectName = p.NameProject;
+        cb.style.cssText = 'accent-color:#dc2626; width:16px; height:16px; flex-shrink:0; cursor:pointer;';
+        
+        cb.onchange = function() {
+            if (this.checked) {
+                item.style.background = '#fff5f5';
+                addProjectRow(rowsContainer, { project: p.IdProject, customer: p.NameCustomer, projectName: p.NameProject });
+            } else {
+                item.style.background = '';
+                const toRemove = rowsContainer.querySelector(`.bulk-project-row[data-project-id="${p.IdProject}"]`);
+                if (toRemove) toRemove.remove();
+            }
+            updateMsTriggerLabel(msTrigger, msDropdown);
+        };
+        
+        item.appendChild(cb);
+        item.appendChild(document.createTextNode(p.NameProject));
+        msDropdown.appendChild(item);
+    });
+    
+    // Toggle dropdown
+    msTrigger.onclick = function(e) {
+        const isOpen = msDropdown.style.display === 'block';
+        if (isOpen) {
+            msDropdown.style.display = 'none';
+            msTrigger.style.borderBottomLeftRadius = '';
+            msTrigger.style.borderBottomRightRadius = '';
+            msTrigger.querySelector('svg').style.transform = '';
+        } else {
+            // Đóng tất cả dropdown khác
+            document.querySelectorAll('.ms-dropdown').forEach(d => {
+                if (d !== msDropdown) {
+                    d.style.display = 'none';
+                    const t = d._triggerEl;
+                    if (t) { t.style.borderBottomLeftRadius = ''; t.style.borderBottomRightRadius = ''; t.querySelector('svg').style.transform = ''; }
+                }
+            });
+            // Tính vị trí fixed dựa theo msTrigger
+            const triggerRect = msTrigger.getBoundingClientRect();
+            msDropdown.style.top = triggerRect.bottom + 'px';
+            msDropdown.style.left = triggerRect.left + 'px';
+            msDropdown.style.width = triggerRect.width + 'px';
+            msDropdown.style.display = 'block';
+            msTrigger.style.borderBottomLeftRadius = '0';
+            msTrigger.style.borderBottomRightRadius = '0';
+            msTrigger.querySelector('svg').style.transform = 'rotate(180deg)';
+            setTimeout(() => msSearch.focus(), 50);
+        }
+    };
+    
+    msWrap.appendChild(msTrigger);
+    // msDropdown đã được append vào body ở trên
+    
+    // Insert trước rowsContainer (cùng parent)
+    rowsContainer.parentElement.insertBefore(msWrap, rowsContainer);
+    rowsContainer._msWrap = msWrap;
+    rowsContainer._msDropdown = msDropdown; // reference trực tiếp vì msDropdown ở body
+    
+    // Restore saved rows
+    if (savedRows && savedRows.length > 0) {
+        savedRows.forEach(r => {
+            addProjectRow(rowsContainer, r);
+            // Tick checkbox tương ứng
+            if (r.project) {
+                const cb = msDropdown.querySelector(`input[value="${r.project}"]`);
+                if (cb) {
+                    cb.checked = true;
+                    cb.closest('.ms-item').style.background = '#fff5f5';
+                }
+            }
+        });
+        updateMsTriggerLabel(msTrigger, msDropdown);
+    }
+    // Không tạo row trống mặc định — user tick project để thêm row
+}
+
+function updateMsTriggerLabel(msTrigger, msDropdown) {
+    const checked = msDropdown.querySelectorAll('input:checked');
+    const label = msTrigger.querySelector('.ms-trigger-label');
+    if (checked.length === 0) {
+        label.textContent = '-- Project --';
+        label.style.color = '#6b7280';
+    } else {
+        label.textContent = Array.from(checked).map(cb => cb.dataset.projectName).join(', ');
+        label.style.color = '#111827';
+    }
+}
+
+// Đóng multi-select khi click ra ngoài
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.ms-wrap') && !e.target.closest('.ms-dropdown')) {
+        document.querySelectorAll('.ms-dropdown').forEach(d => {
+            if (d.style.display === 'block') {
+                d.style.display = 'none';
+                const t = d._triggerEl;
+                if (t) { t.style.borderBottomLeftRadius = ''; t.style.borderBottomRightRadius = ''; t.querySelector('svg').style.transform = ''; }
+            }
+        });
+    }
+});
+
+// Thêm 1 dòng project row (được gọi từ initProjectBlock hoặc nút "+ Thêm dự án")
 function addProjectRow(rowsContainer, savedData) {
     const row = document.createElement('div');
     row.className = 'bulk-project-row';
+    if (savedData?.project) row.dataset.projectId = savedData.project;
     
-    // Customer
-    const customerOpts = Array.from(new Set(window.projectsData.map(p => p.NameCustomer).filter(Boolean)))
-    .map(name => `<option value="${name}"${savedData?.customer === name ? ' selected' : ''}>${name}</option>`).join('');
-    const customerSelect = document.createElement('select');
-    customerSelect.className = 'bulk-select bulk-customer';
-    customerSelect.innerHTML = `<option value="">-- Customer --</option>${customerOpts}`;
-    customerSelect.onchange = function() { onBulkCustomerChange(this); };
-    
-    // Project
-    const projectSelect = document.createElement('select');
-    projectSelect.className = 'bulk-select bulk-project select-disabled';
-    projectSelect.disabled = true;
-    projectSelect.innerHTML = '<option value="">-- Customer trước --</option>';
-    if (savedData?.customer) {
-        const filtered = window.projectsData.filter(p => p.NameCustomer === savedData.customer);
-        projectSelect.innerHTML = '<option value="">-- Project --</option>' +
-        filtered.map(p => `<option value="${p.IdProject}"${String(p.IdProject) === String(savedData.project) ? ' selected' : ''}>${p.NameProject}</option>`).join('');
-        projectSelect.disabled = false;
-        projectSelect.classList.remove('select-disabled');
+    // Project label (readonly text, thay vì select — vì đã chọn qua multi-select)
+    const projectLabel = document.createElement('div');
+    projectLabel.className = 'bulk-select bulk-project-label';
+    projectLabel.style.cssText = 'display:flex; align-items:center; padding:0 12px; background:#f9fafb; border-radius:0.75rem; border:2px solid #e5e7eb; font-size:0.875rem; color:#111827; min-height:44px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+    // Lưu projectId vào hidden input để saveBulkCurrentData đọc được
+    const hiddenProject = document.createElement('input');
+    hiddenProject.type = 'hidden';
+    hiddenProject.className = 'bulk-project';
+    hiddenProject.value = savedData?.project || '';
+    if (savedData?.project) {
+        const found = window.projectsData.find(p => String(p.IdProject) === String(savedData.project));
+        projectLabel.textContent = found ? found.NameProject : savedData.projectName || '';
+    } else {
+        projectLabel.textContent = '-- Project --';
+        projectLabel.style.color = '#9ca3af';
     }
+    projectLabel.appendChild(hiddenProject);
+    
+    // Customer (auto fill, disabled)
+    const customerSelect = document.createElement('select');
+    customerSelect.className = 'bulk-select bulk-customer select-disabled';
+    customerSelect.disabled = true;
+    customerSelect.style.cssText = 'background:#f3f4f6; color:#6b7280; cursor:not-allowed; opacity:0.85;';
+    const customerNames = Array.from(new Set(window.projectsData.map(p => p.NameCustomer).filter(Boolean)));
+    customerSelect.innerHTML = `<option value="">-- Customer --</option>` +
+    customerNames.map(name => `<option value="${name}">${name}</option>`).join('');
+    // Auto set customer
+    const customerName = savedData?.customer ||
+    (savedData?.project ? window.projectsData.find(p => String(p.IdProject) === String(savedData.project))?.NameCustomer : '');
+    if (customerName) customerSelect.value = customerName;
     
     // Project Phase
     const ppOpts = (window.projectPhasesData || [])
@@ -833,38 +1004,38 @@ function addProjectRow(rowsContainer, savedData) {
     deleteBtn.className = 'bulk-delete-btn';
     deleteBtn.innerHTML = '✕';
     deleteBtn.onclick = function() {
-        if (rowsContainer.querySelectorAll('.bulk-project-row').length <= 1) {
-            showErrorModal('Mỗi ngày phải có ít nhất 1 dự án'); return;
+        // Bỏ tick checkbox tương ứng trong multi-select
+        const pid = row.dataset.projectId;
+        const msDropdownRef = rowsContainer._msDropdown;
+        if (pid && msDropdownRef) {
+            const cb = msDropdownRef.querySelector(`input[value="${pid}"]`);
+            if (cb) {
+                cb.checked = false;
+                cb.closest('.ms-item').style.background = '';
+                updateMsTriggerLabel(
+                    rowsContainer._msWrap.querySelector('.ms-trigger'),
+                    msDropdownRef
+                );
+            }
         }
         row.remove();
     };
     
+    row.appendChild(projectLabel);
     row.appendChild(customerSelect);
-    row.appendChild(projectSelect);
     row.appendChild(ppSelect);
     row.appendChild(hoursInput);
     row.appendChild(deleteBtn);
     rowsContainer.appendChild(row);
 }
 
-// Khi đổi customer trong 1 dòng → filter project tương ứng
-function onBulkCustomerChange(customerSelect) {
-    const row = customerSelect.closest('.bulk-project-row');
-    const projectSelect = row.querySelector('.bulk-project');
-    const customerName = customerSelect.value;
-    
-    if (!customerName) {
-        projectSelect.innerHTML = '<option value="">-- Chọn customer trước --</option>';
-        projectSelect.disabled = true;
-        projectSelect.classList.add('select-disabled');
-        return;
-    }
-    
-    const filtered = window.projectsData.filter(p => p.NameCustomer === customerName);
-    projectSelect.innerHTML = '<option value="">-- Chọn dự án --</option>' +
-    filtered.map(p => `<option value="${p.IdProject}">${p.NameProject}</option>`).join('');
-    projectSelect.disabled = false;
-    projectSelect.classList.remove('select-disabled');
+// Khi chọn project → tự động set customer tương ứng (display only) — kept for compat
+function onBulkProjectChange(projectSelect) {
+    const row = projectSelect.closest('.bulk-project-row');
+    const customerSelect = row.querySelector('.bulk-customer');
+    const selectedOption = projectSelect.options[projectSelect.selectedIndex];
+    const customerName = selectedOption?.dataset?.customer || '';
+    customerSelect.value = customerName || '';
 }
 
 // Close bulk input popup
@@ -942,7 +1113,7 @@ function handleSubmitMode1() {
                 WorkDate:   day,
                 Projects:   projectRows
             };
-            fetch('/Heatmap/SaveStaffDetailMulti', {
+            fetch(`${pathBase}/Heatmap/SaveStaffDetailMulti`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1015,7 +1186,7 @@ function handleSubmitMode2() {
                 EmployeeId: parseInt(employee),
                 Days:       days
             };
-            fetch('/Heatmap/SaveMultipleDaysMulti', {
+            fetch(`${pathBase}/Heatmap/SaveMultipleDaysMulti`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1097,7 +1268,7 @@ function handleSubmitMode3() {
     
     showConfirmModal(`Bạn sắp tạo ${records.length} bản ghi. Xác nhận lưu?`, async function() {
         try {
-            const response = await fetch('/Heatmap/BulkImportMultiProject', {
+            const response = await fetch(`${pathBase}/Heatmap/BulkImportMultiProject`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(records)
