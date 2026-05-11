@@ -179,27 +179,28 @@
 
 <div id="adminPage" class="min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30 py-6 md:py-12 px-4">
 
-    <!-- Header -->
+   <!-- Header -->
     <div class="max-w-7xl mx-auto mb-8 md:mb-12">
         <div class="page-header">
             <div>
                 <h1 class="page-title text-3xl md:text-4xl lg:text-5xl font-black mb-2 text-gray-900">
-                    Quản lý <span class="text-red-600">hệ thống</span>
+                    <span data-i18n="admin.title">Quản lý hệ thống</span>
                 </h1>
-                <p class="text-base md:text-lg text-gray-500 font-medium">Người dùng và lịch sử hoạt động</p>
+                <p class="text-base md:text-lg text-gray-500 font-medium" data-i18n="admin.subtitle">Người dùng và lịch sử hoạt động</p>
             </div>
             <div class="stats-container">
                 <div class="stats-card bg-white px-4 md:px-6 py-3 rounded-2xl shadow-lg">
-                    <p class="text-sm text-gray-500">Tổng tài khoản</p>
+                    <p class="text-sm text-gray-500" data-i18n="admin.stat.accounts">Tổng tài khoản</p>
                     <p class="text-2xl md:text-3xl font-black text-red-600">@Model.Count</p>
                 </div>
                 <div class="stats-card bg-white px-4 md:px-6 py-3 rounded-2xl shadow-lg">
-                    <p class="text-sm text-gray-500">Tổng logs</p>
+                    <p class="text-sm text-gray-500" data-i18n="admin.stat.logs">Tổng logs</p>
                     <p class="text-2xl md:text-3xl font-black text-blue-600">@ViewBag.TotalLogs</p>
                 </div>
             </div>
         </div>
     </div>
+
 
     <div class="max-w-7xl mx-auto">
 
@@ -231,44 +232,44 @@
             </div>
         }
 
-        <!-- Tab Navigation -->
+       <!-- Tab Navigation -->
         <div class="tab-navigation mb-6 md:mb-8">
             <button onclick="switchTab('users')" id="usersTab"
                     class="tab-button active px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span class="hidden sm:inline">Danh sách Users</span>
-                <span class="sm:hidden">Users</span>
+                <span class="hidden sm:inline" data-i18n="admin.tab.users">Danh sách Users</span>
+                <span class="sm:hidden" data-i18n="admin.tab.users.short">Users</span>
             </button>
             <button onclick="switchTab('logs')" id="logsTab"
                     class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span class="hidden sm:inline">Lịch sử Log</span>
-                <span class="sm:hidden">Logs</span>
+                <span class="hidden sm:inline" data-i18n="admin.tab.logs">Lịch sử Log</span>
+                <span class="sm:hidden" data-i18n="admin.tab.logs.short">Logs</span>
             </button>
             <a href="/Heatmap/Home"
-               class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all inline-flex items-center"
-               style="text-decoration: none; color: inherit;">
+            class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all inline-flex items-center"
+            style="text-decoration: none; color: inherit;">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                <span class="hidden sm:inline">Home Heatmap</span>
-                <span class="sm:hidden">Home</span>
+                <span class="hidden sm:inline" data-i18n="admin.tab.home">Home Heatmap</span>
+                <span class="sm:hidden" data-i18n="admin.tab.home.short">Home</span>
             </a>
         </div>
 
-        <!-- Users Tab Content -->
+            <!-- Users Tab Content -->
         <div id="usersContent" class="tab-content">
-            
+
             <!-- DESKTOP: Table View -->
             <div class="users-table bg-white rounded-2xl md:rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
                 <div class="table-container overflow-x-auto">
@@ -276,22 +277,22 @@
                         <thead class="bg-gray-50 border-b border-gray-100">
                             <tr>
                                 <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
-                                    Mã SVN
+                                    <span data-i18n="admin.col.svn">Mã SVN</span>
                                 </th>
                                 <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500">
-                                    Quyền
+                                    <span data-i18n="admin.col.role">Quyền</span>
                                 </th>
                                 <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500 hide-on-mobile">
-                                    Ngày tạo
+                                    <span data-i18n="admin.col.created">Ngày tạo</span>
                                 </th>
                                 <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500 hide-on-mobile">
-                                    Đăng nhập cuối
+                                    <span data-i18n="admin.col.last_login">Đăng nhập cuối</span>
                                 </th>
                                 <th class="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-black uppercase tracking-widest text-gray-500 desktop-only">
-                                    Mật khẩu
+                                    <span data-i18n="admin.col.password">Mật khẩu</span>
                                 </th>
                                 <th class="px-3 md:px-6 py-3 md:py-4 text-center text-xs font-black uppercase tracking-widest text-gray-500">
-                                    Thao tác
+                                    <span data-i18n="admin.col.action">Thao tác</span>
                                 </th>
                             </tr>
                         </thead>
@@ -310,40 +311,36 @@
                                             }
                                         </div>
                                     </td>
-                                   <td class="px-3 md:px-6 py-3 md:py-4">
+                                    <td class="px-3 md:px-6 py-3 md:py-4">
                                         @if (user.IsAdmin)
                                         {
-                                            <span class="permission-badge inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
-                                                Full Access
-                                            </span>
+                                            <span class="permission-badge inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800"
+                                                data-i18n="admin.perm.full">Full Access</span>
                                         }
                                         else if (user.Permission == "Update")
                                         {
-                                            <span class="permission-badge inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
-                                                ✏️ Update
-                                            </span>
+                                            <span class="permission-badge inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800"
+                                                data-i18n="admin.perm.update">✏️ Update</span>
                                         }
                                         else if (user.Permission == "Read")
                                         {
-                                            <span class="permission-badge inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
-                                                👁️ Read
-                                            </span>
+                                            <span class="permission-badge inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800"
+                                                data-i18n="admin.perm.read">👁️ Read</span>
                                         }
                                         else
                                         {
-                                            <span class="permission-badge inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
-                                                🚫 No Access
-                                            </span>
+                                            <span class="permission-badge inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800"
+                                                data-i18n="admin.perm.none">🚫 No Access</span>
                                         }
                                     </td>
-
                                     <td class="px-3 md:px-6 py-3 md:py-4 hide-on-mobile">
                                         <p class="text-xs md:text-sm text-gray-600">
                                             @(user.CreateDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")
                                         </p>
                                     </td>
                                     <td class="px-3 md:px-6 py-3 md:py-4 hide-on-mobile">
-                                        <p class="text-xs md:text-sm text-gray-600">
+                                        <p class="text-xs md:text-sm text-gray-600"
+                                        data-lastlogin="@(user.LastLogin?.ToString("dd/MM/yyyy HH:mm") ?? "")">
                                             @(user.LastLogin?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")
                                         </p>
                                     </td>
@@ -357,25 +354,29 @@
                                             @if (!user.IsAdmin)
                                             {
                                                 <button onclick="openResetModal('@user.SVNCode')"
-                                                        class="px-3 md:px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all text-xs md:text-sm font-bold whitespace-nowrap">
+                                                        class="px-3 md:px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all text-xs md:text-sm font-bold whitespace-nowrap"
+                                                        data-i18n="admin.btn.reset_pw">
                                                     🔑 Reset PW
                                                 </button>
                                                 <button onclick="openPermissionModal('@user.SVNCode', '@user.Permission')"
-                                                        class="px-3 md:px-4 py-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all text-xs md:text-sm font-bold whitespace-nowrap">
+                                                        class="px-3 md:px-4 py-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all text-xs md:text-sm font-bold whitespace-nowrap"
+                                                        data-i18n="admin.btn.permission">
                                                     🔐 Phân quyền
                                                 </button>
                                                 <form method="post" action="/Admin/DeleteUser" style="display:inline;"
-                                                      onsubmit="return confirm('⚠️ Bạn có chắc muốn xóa tài khoản [@user.SVNCode]?')">
+                                                    onsubmit="return confirm('⚠️ ' + t('admin.confirm.delete') + ' [@user.SVNCode]?')">
                                                     <input type="hidden" name="SVNCode" value="@user.SVNCode" />
                                                     <button type="submit"
-                                                            class="px-3 md:px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-xs md:text-sm font-bold whitespace-nowrap w-full md:w-auto">
+                                                            class="px-3 md:px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-xs md:text-sm font-bold whitespace-nowrap w-full md:w-auto"
+                                                            data-i18n="admin.btn.delete">
                                                         🗑️ Xóa
                                                     </button>
                                                 </form>
                                             }
                                             else
                                             {
-                                                <span class="text-xs md:text-sm text-gray-400 italic">Không thể chỉnh sửa Admin</span>
+                                                <span class="text-xs md:text-sm text-gray-400 italic"
+                                                    data-i18n="admin.perm.no_edit">Không thể chỉnh sửa Admin</span>
                                             }
                                         </div>
                                     </td>
@@ -386,7 +387,8 @@
                 </div>
             </div>
 
-            <!-- MOBILE: Card View -->
+
+           <!-- MOBILE: Card View -->
             <div class="users-cards space-y-4">
                 @foreach (var user in Model)
                 {
@@ -406,27 +408,23 @@
                                 <div>
                                     @if (user.IsAdmin)
                                     {
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
-                                            Full Access
-                                        </span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800"
+                                            data-i18n="admin.perm.full">Full Access</span>
                                     }
                                     else if (user.Permission == "Update")
                                     {
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
-                                            ✏️ Update
-                                        </span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800"
+                                            data-i18n="admin.perm.update">✏️ Update</span>
                                     }
                                     else if (user.Permission == "Read")
                                     {
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
-                                            👁️ Read
-                                        </span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800"
+                                            data-i18n="admin.perm.read">👁️ Read</span>
                                     }
                                     else
                                     {
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
-                                            🚫 No Access
-                                        </span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800"
+                                            data-i18n="admin.perm.none">🚫 No Access</span>
                                     }
                                 </div>
                             </div>
@@ -437,18 +435,21 @@
                         {
                             <div class="space-y-2">
                                 <button onclick="openResetModal('@user.SVNCode')"
-                                        class="w-full px-4 py-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all text-sm font-bold">
+                                        class="w-full px-4 py-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all text-sm font-bold"
+                                        data-i18n="admin.btn.reset_pw_long">
                                     🔑 Reset mật khẩu
                                 </button>
                                 <button onclick="openPermissionModal('@user.SVNCode', '@user.Permission')"
-                                        class="w-full px-4 py-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all text-sm font-bold">
+                                        class="w-full px-4 py-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all text-sm font-bold"
+                                        data-i18n="admin.btn.permission">
                                     🔐 Phân quyền
                                 </button>
                                 <form method="post" action="/Admin/DeleteUser"
-                                      onsubmit="return confirm('⚠️ Bạn có chắc muốn xóa tài khoản [@user.SVNCode]?')">
+                                    onsubmit="return confirm('⚠️ ' + t('admin.confirm.delete') + ' [@user.SVNCode]?')">
                                     <input type="hidden" name="SVNCode" value="@user.SVNCode" />
                                     <button type="submit"
-                                            class="w-full px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-sm font-bold">
+                                            class="w-full px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all text-sm font-bold"
+                                            data-i18n="admin.btn.delete_long">
                                         🗑️ Xóa tài khoản
                                     </button>
                                 </form>
@@ -456,31 +457,37 @@
                         }
                         else
                         {
-                            <p class="text-sm text-gray-400 italic text-center py-2">Không thể chỉnh sửa Admin</p>
+                            <p class="text-sm text-gray-400 italic text-center py-2"
+                            data-i18n="admin.perm.no_edit">Không thể chỉnh sửa Admin</p>
                         }
                     </div>
                 }
             </div>
-        </div>
+
+            </div>
 
         <!-- Logs Tab Content -->
         <div id="logsContent" class="tab-content hidden">
             <!-- Filter Section -->
             <div class="filter-section bg-white rounded-2xl md:rounded-3xl shadow-xl p-4 md:p-6 mb-6">
-                <h3 class="text-lg md:text-xl font-black mb-4 text-gray-900">🔍 Bộ lọc</h3>
+                <h3 class="text-lg md:text-xl font-black mb-4 text-gray-900"
+                    data-i18n="admin.log.filter.title">🔍 Bộ lọc</h3>
                 <form method="get" action="/Admin/Users">
                     <div class="filter-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-2">Mã SVN</label>
+                            <label class="block text-xs font-bold text-gray-500 mb-2"
+                                data-i18n="admin.log.filter.svn">Mã SVN</label>
                             <input type="text" name="svnCodeFilter" value="@ViewBag.SvnCodeFilter"
-                                   placeholder="Nhập mã SVN..."
-                                   class="w-full px-4 py-2 md:py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base" />
+                                data-i18n-placeholder="admin.log.filter.svn.ph"
+                                placeholder="Nhập mã SVN..."
+                                class="w-full px-4 py-2 md:py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base" />
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-2">Loại hành động</label>
+                            <label class="block text-xs font-bold text-gray-500 mb-2"
+                                data-i18n="admin.log.filter.action">Loại hành động</label>
                             <select name="actionTypeFilter"
                                     class="w-full px-4 py-2 md:py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base">
-                                <option value="">-- Tất cả --</option>
+                                <option value="" data-i18n="admin.log.filter.all">-- Tất cả --</option>
                                 @foreach (var actionType in ViewBag.ActionTypes)
                                 {
                                     @if (ViewBag.ActionTypeFilter == actionType)
@@ -495,33 +502,38 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-2">Từ ngày</label>
+                            <label class="block text-xs font-bold text-gray-500 mb-2"
+                                data-i18n="admin.log.filter.from">Từ ngày</label>
                             <input type="date" name="fromDate" value="@ViewBag.FromDate"
-                                   class="w-full px-4 py-2 md:py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base" />
+                                class="w-full px-4 py-2 md:py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base" />
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-2">Đến ngày</label>
+                            <label class="block text-xs font-bold text-gray-500 mb-2"
+                                data-i18n="admin.log.filter.to">Đến ngày</label>
                             <input type="date" name="toDate" value="@ViewBag.ToDate"
-                                   class="w-full px-4 py-2 md:py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base" />
+                                class="w-full px-4 py-2 md:py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base" />
                         </div>
                     </div>
                     <div class="filter-actions flex flex-col sm:flex-row gap-3">
                         <button type="submit"
-                                class="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all">
+                                class="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
+                                data-i18n="admin.log.filter.search">
                             🔍 Tìm kiếm
                         </button>
                         <a href="/Admin/Users"
-                           class="flex-1 sm:flex-none px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-center hover:bg-gray-200 transition-all">
+                        class="flex-1 sm:flex-none px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-center hover:bg-gray-200 transition-all"
+                        data-i18n="admin.log.filter.reset">
                             🔄 Reset
                         </a>
                     </div>
                 </form>
             </div>
 
-            <!-- Logs List -->
+        <!-- Logs List -->
             <div class="bg-white rounded-2xl md:rounded-3xl shadow-xl p-4 md:p-6">
                 <h3 class="text-lg md:text-xl font-black mb-4 text-gray-900">
-                    📋 Danh sách Logs (@ViewBag.TotalLogs bản ghi)
+                    📋 <span data-i18n="admin.log.title">Danh sách Logs</span>
+                    (@ViewBag.TotalLogs <span data-i18n="admin.log.records">bản ghi</span>)
                 </h3>
                 <div class="space-y-3">
                     @foreach (var log in ViewBag.Logs)
@@ -547,238 +559,276 @@
                     }
                 </div>
 
-                <!-- Pagination -->
-                @if (ViewBag.TotalPages > 1)
-                {
-                    <div class="pagination-container mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                        <p class="text-sm text-gray-600">
-                            Trang @ViewBag.CurrentPage / @ViewBag.TotalPages
-                        </p>
-                        <div class="pagination-buttons flex gap-2">
-                            @if (ViewBag.CurrentPage > 1)
-                            {
-                                <a href="?page=@(ViewBag.CurrentPage - 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
-                                   class="pagination-button px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all">
-                                    ← Trước
-                                </a>
-                            }
-                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-                            {
-                                <a href="?page=@(ViewBag.CurrentPage + 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
-                                   class="pagination-button px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg">
-                                    Sau →
-                                </a>
-                            }
+
+            <!-- Pagination -->
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="pagination-container mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <p class="text-sm text-gray-600">
+                        <span data-i18n="admin.log.page">Trang</span>
+                        @ViewBag.CurrentPage
+                        <span data-i18n="admin.log.page.of">/</span>
+                        @ViewBag.TotalPages
+                    </p>
+                    <div class="pagination-buttons flex gap-2">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <a href="?page=@(ViewBag.CurrentPage - 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                            class="pagination-button px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all"
+                            data-i18n="admin.log.page.prev">
+                                ← Trước
+                            </a>
+                        }
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <a href="?page=@(ViewBag.CurrentPage + 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                            class="pagination-button px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg"
+                            data-i18n="admin.log.page.next">
+                                Sau →
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
                         </div>
                     </div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Reset Password Modal -->
-<div id="resetPasswordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden"
-     style="display: none;">
-    <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
-        <div class="modal-header flex items-center mb-6">
-            <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 text-blue-600" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                </svg>
-            </div>
-            <div>
-                <h3 class="text-xl md:text-2xl font-black mb-1 text-gray-900">Reset mật khẩu</h3>
-                <p class="text-sm md:text-base text-gray-500">Tạo mật khẩu mới cho tài khoản</p>
-            </div>
-        </div>
-
-        <form id="resetForm" method="post" action="/Admin/ResetPassword">
-            <input type="hidden" id="resetSVNCode" name="SVNCode" />
-
-            <div class="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl md:rounded-2xl">
-                <p class="text-xs md:text-sm text-gray-500 mb-1">Tài khoản:</p>
-                <p id="displaySVNCode" class="text-base md:text-lg font-bold text-gray-900"></p>
-            </div>
-
-            <div class="mb-4 md:mb-6">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
-                    Mật khẩu mới (tối thiểu 8 ký tự)
-                </label>
-                <input type="text" name="NewPassword" required minlength="8"
-                       placeholder="Nhập mật khẩu mới..."
-                       class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base text-gray-700" />
-            </div>
-
-            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl md:rounded-2xl p-3 md:p-4 mb-4 md:mb-6">
-                <div class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2 flex-shrink-0" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <p class="text-xs md:text-sm text-yellow-800">
-                        <strong>Lưu ý:</strong> User sẽ bị đăng xuất khỏi TẤT CẢ thiết bị sau khi reset!
-                    </p>
                 </div>
             </div>
-
-            <div class="modal-buttons flex flex-col sm:flex-row gap-3 md:gap-4">
-                <button type="button" onclick="closeResetModal()"
-                        class="flex-1 py-3 md:py-4 border-2 border-gray-200 text-gray-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all">
-                    Hủy
-                </button>
-                <button type="submit"
-                        class="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">
-                    Xác nhận Reset
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Permission Modal -->
-<div id="permissionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden"
-     style="display: none;">
-    <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
-        <div class="modal-header flex items-center mb-6">
-            <div class="w-12 h-12 md:w-14 md:h-14 bg-green-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 text-green-600" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-            </div>
-            <div>
-                <h3 class="text-xl md:text-2xl font-black mb-1 text-gray-900">Phân quyền</h3>
-                <p class="text-sm md:text-base text-gray-500">Cấp quyền truy cập cho người dùng</p>
-            </div>
         </div>
+        </div>
+                
 
-        <form id="permissionForm" method="post" action="/Admin/SetPermission">
-            <input type="hidden" id="permissionSVNCode" name="SVNCode" />
-
-            <div class="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl md:rounded-2xl">
-                <p class="text-xs md:text-sm text-gray-500 mb-1">Tài khoản:</p>
-                <p id="displayPermissionSVNCode" class="text-base md:text-lg font-bold text-gray-900"></p>
-            </div>
-
-            <div class="mb-4 md:mb-6">
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
-                    Chọn quyền
-                </label>
-                <select name="Permission" id="permissionSelect" required
-                        class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base text-gray-700">
-                    <option value="None">🚫 None - Không có quyền (chỉ xem Home)</option>
-                    <option value="Read">👁️ Read - Chỉ xem dữ liệu</option>
-                    <option value="Update">✏️ Update - Full quyền (xem, sửa, xóa)</option>
-                </select>
-            </div>
-
-            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl md:rounded-2xl p-3 md:p-4 mb-4 md:mb-6">
-                <div class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0"
-                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+        <!-- Reset Password Modal -->
+        <div id="resetPasswordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden"
+            style="display: none;">
+            <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
+                <div class="modal-header flex items-center mb-6">
+                    <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 text-blue-600" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                    </div>
                     <div>
-                        <p class="text-xs md:text-sm font-bold text-blue-800 mb-1">Giải thích quyền:</p>
-                        <p class="text-xs text-blue-700">
-                            <strong>None:</strong> Chỉ xem trang Home, không thao tác gì<br />
-                            <strong>Read:</strong> Xem được dữ liệu, KHÔNG sửa/xóa<br />
-                            <strong>Update:</strong> Full quyền (xem, tạo, sửa, xóa)
-                        </p>
+                        <h3 class="text-xl md:text-2xl font-black mb-1 text-gray-900"
+                            data-i18n="admin.modal.reset.title">Reset mật khẩu</h3>
+                        <p class="text-sm md:text-base text-gray-500"
+                        data-i18n="admin.modal.reset.sub">Tạo mật khẩu mới cho tài khoản</p>
                     </div>
                 </div>
+
+                <form id="resetForm" method="post" action="/Admin/ResetPassword">
+                    <input type="hidden" id="resetSVNCode" name="SVNCode" />
+
+                    <div class="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl md:rounded-2xl">
+                        <p class="text-xs md:text-sm text-gray-500 mb-1"
+                        data-i18n="admin.modal.reset.account">Tài khoản:</p>
+                        <p id="displaySVNCode" class="text-base md:text-lg font-bold text-gray-900"></p>
+                    </div>
+
+                    <div class="mb-4 md:mb-6">
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2"
+                            data-i18n="admin.modal.reset.newpw">
+                            Mật khẩu mới (tối thiểu 8 ký tự)
+                        </label>
+                        <input type="text" name="NewPassword" required minlength="8"
+                            data-i18n-placeholder="admin.modal.reset.newpw.ph"
+                            placeholder="Nhập mật khẩu mới..."
+                            class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base text-gray-700" />
+                    </div>
+
+                    <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl md:rounded-2xl p-3 md:p-4 mb-4 md:mb-6">
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2 flex-shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="text-xs md:text-sm text-yellow-800">
+                                <strong data-i18n="common.notice">Lưu ý:</strong>
+                                <span data-i18n="admin.modal.reset.warn">User sẽ bị đăng xuất khỏi TẤT CẢ thiết bị sau khi reset!</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons flex flex-col sm:flex-row gap-3 md:gap-4">
+                        <button type="button" onclick="closeResetModal()"
+                                class="flex-1 py-3 md:py-4 border-2 border-gray-200 text-gray-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all"
+                                data-i18n="admin.modal.reset.cancel">
+                            Hủy
+                        </button>
+                        <button type="submit"
+                                class="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all"
+                                data-i18n="admin.modal.reset.confirm">
+                            Xác nhận Reset
+                        </button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <div class="modal-buttons flex flex-col sm:flex-row gap-3 md:gap-4">
-                <button type="button" onclick="closePermissionModal()"
-                        class="flex-1 py-3 md:py-4 border-2 border-gray-200 text-gray-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all">
-                    Hủy
-                </button>
-                <button type="submit"
-                        class="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">
-                    Xác nhận
-                </button>
+        <!-- Permission Modal -->
+        <div id="permissionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden"
+            style="display: none;">
+            <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
+                <div class="modal-header flex items-center mb-6">
+                    <div class="w-12 h-12 md:w-14 md:h-14 bg-green-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 text-green-600" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-black mb-1 text-gray-900"
+                            data-i18n="admin.modal.perm.title">Phân quyền</h3>
+                        <p class="text-sm md:text-base text-gray-500"
+                        data-i18n="admin.modal.perm.sub">Cấp quyền truy cập cho người dùng</p>
+                    </div>
+                </div>
+
+                <form id="permissionForm" method="post" action="/Admin/SetPermission">
+                    <input type="hidden" id="permissionSVNCode" name="SVNCode" />
+
+                    <div class="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl md:rounded-2xl">
+                        <p class="text-xs md:text-sm text-gray-500 mb-1"
+                        data-i18n="admin.modal.perm.account">Tài khoản:</p>
+                        <p id="displayPermissionSVNCode" class="text-base md:text-lg font-bold text-gray-900"></p>
+                    </div>
+
+                    <div class="mb-4 md:mb-6">
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2"
+                            data-i18n="admin.modal.perm.select">
+                            Chọn quyền
+                        </label>
+                        <select name="Permission" id="permissionSelect" required
+                                class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base text-gray-700">
+                            <option value="None" data-i18n="admin.modal.perm.none">🚫 None - Không có quyền (chỉ xem Home)</option>
+                            <option value="Read" data-i18n="admin.modal.perm.read">👁️ Read - Chỉ xem dữ liệu</option>
+                            <option value="Update" data-i18n="admin.modal.perm.update">✏️ Update - Full quyền (xem, sửa, xóa)</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl md:rounded-2xl p-3 md:p-4 mb-4 md:mb-6">
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p class="text-xs md:text-sm font-bold text-blue-800 mb-1"
+                                data-i18n="admin.modal.perm.info">Giải thích quyền:</p>
+                                <p class="text-xs text-blue-700">
+                                    <strong>None:</strong> <span data-i18n="admin.modal.perm.none.desc">Chỉ xem trang Home, không thao tác gì</span><br />
+                                    <strong>Read:</strong> <span data-i18n="admin.modal.perm.read.desc">Xem được dữ liệu, KHÔNG sửa/xóa</span><br />
+                                    <strong>Update:</strong> <span data-i18n="admin.modal.perm.upd.desc">Full quyền (xem, tạo, sửa, xóa)</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons flex flex-col sm:flex-row gap-3 md:gap-4">
+                        <button type="button" onclick="closePermissionModal()"
+                                class="flex-1 py-3 md:py-4 border-2 border-gray-200 text-gray-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all"
+                                data-i18n="admin.modal.perm.cancel">
+                            Hủy
+                        </button>
+                        <button type="submit"
+                                class="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all"
+                                data-i18n="admin.modal.perm.confirm">
+                            Xác nhận
+                        </button>
+                    </div>
+                </form>
             </div>
-        </form>
-    </div>
-</div>
+        </div>
 
-<script>
-    function switchTab(tab) {
-        document.getElementById('usersTab').classList.remove('active');
-        document.getElementById('logsTab').classList.remove('active');
-        document.getElementById('usersContent').classList.add('hidden');
-        document.getElementById('logsContent').classList.add('hidden');
+        <script src="~/js/i18n.js"></script>
+        <script>
+            
+            function switchTab(tab) {
+                document.getElementById('usersTab').classList.remove('active');
+                document.getElementById('logsTab').classList.remove('active');
+                document.getElementById('usersContent').classList.add('hidden');
+                document.getElementById('logsContent').classList.add('hidden');
 
-        if (tab === 'users') {
-            document.getElementById('usersTab').classList.add('active');
-            document.getElementById('usersContent').classList.remove('hidden');
-        } else if (tab === 'logs') {
-            document.getElementById('logsTab').classList.add('active');
-            document.getElementById('logsContent').classList.remove('hidden');
-        }
-    }
+                if (tab === 'users') {
+                    document.getElementById('usersTab').classList.add('active');
+                    document.getElementById('usersContent').classList.remove('hidden');
+                } else if (tab === 'logs') {
+                    document.getElementById('logsTab').classList.add('active');
+                    document.getElementById('logsContent').classList.remove('hidden');
+                }
+            }
 
-    function openResetModal(svnCode) {
-        document.getElementById('resetSVNCode').value = svnCode;
-        document.getElementById('displaySVNCode').textContent = svnCode;
-        document.getElementById('resetPasswordModal').classList.remove('hidden');
-        document.getElementById('resetPasswordModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+            function openResetModal(svnCode) {
+                document.getElementById('resetSVNCode').value = svnCode;
+                document.getElementById('displaySVNCode').textContent = svnCode;
+                document.getElementById('resetPasswordModal').classList.remove('hidden');
+                document.getElementById('resetPasswordModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
 
-    function closeResetModal() {
-        document.getElementById('resetPasswordModal').classList.add('hidden');
-        document.getElementById('resetPasswordModal').style.display = 'none';
-        document.getElementById('resetForm').reset();
-        document.body.style.overflow = 'auto';
-    }
+            function closeResetModal() {
+                document.getElementById('resetPasswordModal').classList.add('hidden');
+                document.getElementById('resetPasswordModal').style.display = 'none';
+                document.getElementById('resetForm').reset();
+                document.body.style.overflow = 'auto';
+            }
 
-    function openPermissionModal(svnCode, currentPermission) {
-        document.getElementById('permissionSVNCode').value = svnCode;
-        document.getElementById('displayPermissionSVNCode').textContent = svnCode;
-        document.getElementById('permissionSelect').value = currentPermission;
-        document.getElementById('permissionModal').classList.remove('hidden');
-        document.getElementById('permissionModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+            function openPermissionModal(svnCode, currentPermission) {
+                document.getElementById('permissionSVNCode').value = svnCode;
+                document.getElementById('displayPermissionSVNCode').textContent = svnCode;
+                document.getElementById('permissionSelect').value = currentPermission;
+                document.getElementById('permissionModal').classList.remove('hidden');
+                document.getElementById('permissionModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
 
-    function closePermissionModal() {
-        document.getElementById('permissionModal').classList.add('hidden');
-        document.getElementById('permissionModal').style.display = 'none';
-        document.getElementById('permissionForm').reset();
-        document.body.style.overflow = 'auto';
-    }
+            function closePermissionModal() {
+                document.getElementById('permissionModal').classList.add('hidden');
+                document.getElementById('permissionModal').style.display = 'none';
+                document.getElementById('permissionForm').reset();
+                document.body.style.overflow = 'auto';
+            }
 
-    // Close modals when clicking outside
-    document.getElementById('resetPasswordModal')?.addEventListener('click', function (e) {
-        if (e.target === this) closeResetModal();
-    });
+            // Close modals when clicking outside
+            document.getElementById('resetPasswordModal')?.addEventListener('click', function (e) {
+                if (e.target === this) closeResetModal();
+            });
 
-    document.getElementById('permissionModal')?.addEventListener('click', function (e) {
-        if (e.target === this) closePermissionModal();
-    });
+            document.getElementById('permissionModal')?.addEventListener('click', function (e) {
+                if (e.target === this) closePermissionModal();
+            });
 
-    // Close modal on ESC key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeResetModal();
-            closePermissionModal();
-        }
-    });
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeResetModal();
+                    closePermissionModal();
+                }
+            });
 
-    // Auto switch to logs tab if filter params present
-    window.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('svnCodeFilter') || urlParams.has('actionTypeFilter') || 
-            urlParams.has('fromDate') || urlParams.has('toDate') || urlParams.has('page')) {
-            switchTab('logs');
-        }
-    });
-</script>
+            // Auto switch to logs tab if filter params present
+            window.addEventListener('DOMContentLoaded', function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('svnCodeFilter') || urlParams.has('actionTypeFilter') ||
+                    urlParams.has('fromDate') || urlParams.has('toDate') || urlParams.has('page')) {
+                    switchTab('logs');
+                }
+
+                // Render last login với i18n
+                document.querySelectorAll('[data-lastlogin]').forEach(el => {
+                    el.textContent = el.dataset.lastlogin || t('admin.not_logged_in');
+                });
+            });
+
+            // Re-apply last login text khi đổi ngôn ngữ
+            document.addEventListener('i18n:applied', function() {
+                document.querySelectorAll('[data-lastlogin]').forEach(el => {
+                    el.textContent = el.dataset.lastlogin || t('admin.not_logged_in');
+                });
+            });
+        </script>

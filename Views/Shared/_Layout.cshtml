@@ -28,16 +28,9 @@
         animation: fadeIn 0.8s ease-out forwards;
         }
 
-        @@keyframes   fadeIn {
-        from {
-        opacity: 0;
-        transform: translateY(15px);
-        }
-
-        to {
-        opacity: 1;
-        transform: translateY(0);
-        }
+        @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to   { opacity: 1; transform: translateY(0); }
         }
 
         /* Breadcrumb animation */
@@ -45,84 +38,39 @@
         animation: slideInUp 0.6s ease-out;
         }
 
-        @@keyframes   slideInUp {
-        from {
-        opacity: 0;
-        transform: translateY(10px);
-        }
-
-        to {
-        opacity: 1;
-        transform: translateY(0);
-        }
+        @@keyframes slideInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
         }
 
         /* HEATMAP title styling */
-        .heatmap-title {
-        letter-spacing: 0.8em;
-        }
-
-        .breadcrumb-wrapper {
-        letter-spacing: 0.15em;
-        }
+        .heatmap-title { letter-spacing: 0.8em; }
+        .breadcrumb-wrapper { letter-spacing: 0.15em; }
 
         /* Navigation button styling */
-        .nav-btn {
-        transition: all 0.2s ease;
-        }
-
-        .nav-btn:hover {
-        transform: scale(1.1);
-        color: #dc2626;
-        }
-
-        .nav-btn:active {
-        transform: scale(0.95);
-        }
-
-        .nav-btn:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-        }
-
-        .nav-btn:disabled:hover {
-        transform: scale(1);
-        color: inherit;
-        }
+        .nav-btn { transition: all 0.2s ease; }
+        .nav-btn:hover  { transform: scale(1.1); color: #dc2626; }
+        .nav-btn:active { transform: scale(0.95); }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .nav-btn:disabled:hover { transform: scale(1); color: inherit; }
 
         /* MOBILE RESPONSIVE HEADER */
-        @@media   (max-width: 768px) {
-        .heatmap-title {
-        letter-spacing: 0.3em;
-        font-size: 1.25rem !important;
+        @@media (max-width: 768px) {
+            .heatmap-title { letter-spacing: 0.3em; font-size: 1.25rem !important; }
+            .breadcrumb-wrapper { letter-spacing: 0.05em; }
         }
-
-        .breadcrumb-wrapper {
-        letter-spacing: 0.05em;
+        @@media (max-width: 480px) {
+            .breadcrumb-container { display: none !important; }
         }
-
-        /* Hide breadcrumb on very small screens */
-        @@media     (max-width: 480px) {
-        .breadcrumb-container {
-        display: none !important;
-        }
-        }
-        }
-
-        /* Tablet and mobile adjustments */
-        @@media    (max-width: 1024px) {
-        header {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        }
+        @@media (max-width: 1024px) {
+            header { padding-left: 1rem !important; padding-right: 1rem !important; }
         }
     </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
 
-    <header
-        class="bg-white/95 backdrop-blur-md border-b border-gray-100 py-3 px-4 md:px-8 lg:px-12 sticky top-0 z-50 shadow-sm">
+    <header class="bg-white/95 backdrop-blur-md border-b border-gray-100 py-3 px-4 md:px-8 lg:px-12 sticky top-0 z-50 shadow-sm">
         <div class="relative flex items-center justify-between">
 
             <!-- Logo -->
@@ -134,29 +82,22 @@
                 </a>
             </div>
 
-            <!-- Breadcrumb với nút Back và Forward - Hidden on very small screens -->
+            <!-- Breadcrumb với nút Back và Forward -->
             <div class="breadcrumb-container absolute left-1/2 transform -translate-x-1/2 hidden sm:block">
                 <div class="flex items-center gap-2 md:gap-3 breadcrumb-item">
-                    <!-- Nút Back -->
                     <button onclick="goBack()"
                             class="nav-btn text-gray-600 hover:text-red-600 font-bold text-base md:text-lg transition-all"
-                            title="Quay lại">
-                        &lt;
-                    </button>
+                            title="Quay lại">&lt;</button>
 
-                    <!-- Breadcrumb -->
                     <div class="text-gray-500 text-xs md:text-sm font-semibold breadcrumb-wrapper whitespace-nowrap">
                         <span class="text-red-600 font-bold">Heatmap</span>
                         <span class="mx-1 md:mx-2 text-gray-300">/</span>
                         <span id="currentPage" class="text-gray-700">@ViewData["PageName"]</span>
                     </div>
 
-                    <!-- Nút Forward -->
                     <button onclick="goForward()"
                             class="nav-btn text-gray-600 hover:text-red-600 font-bold text-base md:text-lg transition-all"
-                            title="Tiến tới">
-                        &gt;
-                    </button>
+                            title="Tiến tới">&gt;</button>
                 </div>
             </div>
 
@@ -168,22 +109,20 @@
             </div>
         </div>
 
-        <!-- Mobile breadcrumb - shown below header on small screens -->
+        <!-- Mobile breadcrumb -->
         <div class="sm:hidden mt-2 pt-2 border-t border-gray-100">
             <div class="flex items-center justify-center gap-2">
                 <button onclick="goBack()"
-                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-sm transition-all" title="Quay lại">
-                    &lt;
-                </button>
+                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-sm transition-all"
+                        title="Quay lại">&lt;</button>
                 <div class="text-gray-500 text-xs font-semibold breadcrumb-wrapper">
                     <span class="text-red-600 font-bold">Heatmap</span>
                     <span class="mx-1 text-gray-300">/</span>
                     <span class="text-gray-700">@ViewData["PageName"]</span>
                 </div>
                 <button onclick="goForward()"
-                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-sm transition-all" title="Tiến tới">
-                    &gt;
-                </button>
+                        class="nav-btn text-gray-600 hover:text-red-600 font-bold text-sm transition-all"
+                        title="Tiến tới">&gt;</button>
             </div>
         </div>
     </header>
@@ -192,24 +131,25 @@
         @RenderBody()
     </main>
 
-    <footer
-        class="py-8 md:py-12 text-center text-gray-400 text-[10px] md:text-xs uppercase tracking-[0.3em] md:tracking-[0.4em] font-black">
-        <span>&copy; @DateTime.Now.Year HEATMAP SIGMA </span>
+    <footer class="py-8 md:py-12 text-center text-gray-400 text-[10px] md:text-xs uppercase tracking-[0.3em] md:tracking-[0.4em] font-black">
+        <span>&copy; @DateTime.Now.Year Heatmap Sigma developed by Coldzy</span>
     </footer>
 
-    <!-- Language Switcher — fixed right side, vertically centered -->
+    <!-- ═══════════════════════════════════════════════
+         LANGUAGE SWITCHER — fixed right side
+    ═══════════════════════════════════════════════ -->
     <div id="langSwitcher"
          class="fixed right-5 top-1/2 -translate-y-1/2 z-[300] flex flex-col gap-2">
 
-        <!-- VI button -->
-        <button id="footerLangVI" onclick="footerSwitchLang('vi')"
-            title="Tiếng Việt"
+        <!-- CN button -->
+        <button id="footerLangCN" onclick="footerSwitchLang('cn')"
+            title="中文"
             class="lang-pill group flex items-center gap-0 overflow-hidden rounded-2xl border-2 transition-all duration-300 shadow-sm hover:shadow-md bg-white">
             <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                <img src="/images/vn.png" alt="VI" class="w-6 h-6 object-contain" />
+                <img src="/images/cn.png" alt="CN" class="w-6 h-6 object-contain" />
             </div>
             <span class="lang-pill-label max-w-0 group-hover:max-w-[60px] overflow-hidden whitespace-nowrap transition-all duration-300 text-xs font-black uppercase tracking-wider pr-0 group-hover:pr-3 text-gray-700">
-                Tiếng Việt
+                中文
             </span>
         </button>
 
@@ -224,76 +164,68 @@
                 English
             </span>
         </button>
+
+        <!-- VI button (BUG FIX: was missing entirely) -->
+        <button id="footerLangVI" onclick="footerSwitchLang('vi')"
+            title="Tiếng Việt"
+            class="lang-pill group flex items-center gap-0 overflow-hidden rounded-2xl border-2 transition-all duration-300 shadow-sm hover:shadow-md bg-white">
+            <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                <img src="/images/vn.png" alt="VI" class="w-6 h-6 object-contain" />
+            </div>
+            <span class="lang-pill-label max-w-0 group-hover:max-w-[60px] overflow-hidden whitespace-nowrap transition-all duration-300 text-xs font-black uppercase tracking-wider pr-0 group-hover:pr-3 text-gray-700">
+                Tiếng Việt
+            </span>
+        </button>
     </div>
 
     <style>
-        .lang-pill         { border-color: #e5e7eb; }
-        .lang-pill.active  { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
+        .lang-pill        { border-color: #e5e7eb; }
+        .lang-pill.active { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
 
-        /* Thu nhỏ nút ngôn ngữ trên mobile */
         @@media (max-width: 640px) {
-            #langSwitcher {
-                right: 8px;
-                gap: 6px;
-            }
-            #langSwitcher .lang-pill {
-                border-radius: 12px;
-                border-width: 1.5px;
-            }
-            #langSwitcher .lang-pill > div {
-                width: 28px !important;
-                height: 28px !important;
-            }
-            #langSwitcher .lang-pill img {
-                width: 16px !important;
-                height: 16px !important;
-            }
-            #langSwitcher .lang-pill-label {
-                display: none !important;
-            }
+            #langSwitcher { right: 8px; gap: 6px; }
+            #langSwitcher .lang-pill { border-radius: 12px; border-width: 1.5px; }
+            #langSwitcher .lang-pill > div { width: 28px !important; height: 28px !important; }
+            #langSwitcher .lang-pill img { width: 16px !important; height: 16px !important; }
+            #langSwitcher .lang-pill-label { display: none !important; }
         }
     </style>
+
     <script>
         function footerSwitchLang(lang) {
             if (typeof setLang === 'function') setLang(lang);
             updateFooterLang(lang);
         }
+
+        // BUG FIX: was ['en','vi'] — missing 'cn', so CN button never got .active
         function updateFooterLang(lang) {
-            ['en', 'vi'].forEach(l => {
+            ['en', 'vi', 'cn'].forEach(l => {
                 document.getElementById('footerLang' + l.toUpperCase())
                     ?.classList.toggle('active', l === lang);
             });
         }
+
         document.addEventListener('DOMContentLoaded', function () {
             updateFooterLang(localStorage.getItem('heatmap_lang') || 'vi');
         });
-        document.addEventListener('i18n:applied', function () {
-            updateFooterLang(localStorage.getItem('heatmap_lang') || 'vi');
+        document.addEventListener('i18n:applied', function (e) {
+            updateFooterLang((e.detail && e.detail.lang) || localStorage.getItem('heatmap_lang') || 'vi');
         });
     </script>
 
     <!-- JavaScript cho chức năng Back/Forward -->
     <script>
-        // Hàm quay lại trang trước
         function goBack() {
-        if (window.history.length > 1) {
-        window.history.back();
-        } else {
-        // Nếu không có lịch sử, về trang chủ
-        window.location.href = '/';
+            if (window.history.length > 1) window.history.back();
+            else window.location.href = '/';
         }
-        }
-
-        // Hàm tiến tới trang sau
         function goForward() {
-        window.history.forward();
+            window.history.forward();
         }
+    </script>
 
-        // Cập nhật trạng thái nút dựa trên history
-        window.addEventListener('DOMContentLoaded', function () {
-        // Có thể thêm logic để disable/enable buttons dựa trên history state
-        // Ví dụ: kiểm tra xem có thể back/forward không
-        });
+    <script>
+        window.pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
     </script>
 
     @RenderSection("Scripts", required: false)
@@ -355,43 +287,26 @@
     <style>
         /* ── Bubble button ── */
         #chatbotBubble {
-            position: fixed;
-            left: 20px;
-            bottom: 30px;
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed; left: 20px; bottom: 30px;
+            width: 58px; height: 58px; border-radius: 50%;
+            background: transparent; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 20px rgba(220,38,38,0.3);
-            z-index: 400;
-            transition: transform 0.2s, box-shadow 0.2s;
-            padding: 0;
+            z-index: 400; transition: transform 0.2s, box-shadow 0.2s; padding: 0;
         }
-        #chatbotBubble:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(220,38,38,0.45); }
+        #chatbotBubble:hover  { transform: scale(1.1); box-shadow: 0 6px 28px rgba(220,38,38,0.45); }
         #chatbotBubble:active { transform: scale(0.96); }
-        #chatbotBubble img { width: 58px; height: 58px; object-fit: contain; border-radius: 50%; }
-        #chatbotBubble svg { width: 24px; height: 24px; }
+        #chatbotBubble img    { width: 58px; height: 58px; object-fit: contain; border-radius: 50%; }
+        #chatbotBubble svg    { width: 24px; height: 24px; }
 
         /* ── Chat window ── */
         #chatbotWindow {
-            position: fixed;
-            left: 20px;
-            bottom: 92px;
-            width: 340px;
-            max-height: 520px;
-            background: #fff;
-            border-radius: 20px;
+            position: fixed; left: 20px; bottom: 92px;
+            width: 340px; max-height: 520px;
+            background: #fff; border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-            z-index: 399;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            animation: chatbotSlideUp 0.25s ease;
+            z-index: 399; display: flex; flex-direction: column;
+            overflow: hidden; animation: chatbotSlideUp 0.25s ease;
             border: 1px solid #f1f5f9;
         }
         @@keyframes chatbotSlideUp {
@@ -402,125 +317,80 @@
         /* ── Header ── */
         #chatbotHeader {
             background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-            color: white;
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
+            color: white; padding: 14px 16px;
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
         #chatbotAvatar {
             width: 36px; height: 36px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            background: rgba(255,255,255,0.2); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         #chatbotAvatar svg { width: 20px; height: 20px; }
 
         /* ── Messages ── */
         #chatbotMessages {
-            flex: 1;
-            overflow-y: auto;
+            flex: 1; overflow-y: auto;
             padding: 14px 14px 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            display: flex; flex-direction: column; gap: 10px;
             scroll-behavior: smooth;
         }
-        #chatbotMessages::-webkit-scrollbar { width: 4px; }
+        #chatbotMessages::-webkit-scrollbar       { width: 4px; }
         #chatbotMessages::-webkit-scrollbar-track { background: transparent; }
         #chatbotMessages::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
 
         .cb-msg-bot, .cb-msg-user {
-            max-width: 88%;
-            padding: 9px 13px;
-            border-radius: 14px;
-            font-size: 13px;
-            line-height: 1.5;
-            word-break: break-word;
+            max-width: 88%; padding: 9px 13px; border-radius: 14px;
+            font-size: 13px; line-height: 1.5; word-break: break-word;
         }
         .cb-msg-bot {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            color: #1e293b;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
+            background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b;
+            align-self: flex-start; border-bottom-left-radius: 4px;
         }
         .cb-msg-user {
             background: linear-gradient(135deg, #dc2626, #991b1b);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
+            color: white; align-self: flex-end; border-bottom-right-radius: 4px;
         }
         .cb-msg-bot b { color: #dc2626; }
 
         /* ── Suggestions ── */
         #chatbotSuggestions {
             padding: 6px 14px 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            flex-shrink: 0;
+            display: flex; flex-direction: column; gap: 5px; flex-shrink: 0;
         }
         .cb-suggestion {
-            background: #fff;
-            border: 1.5px solid #fecaca;
-            color: #dc2626;
-            border-radius: 10px;
-            padding: 7px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: left;
+            background: #fff; border: 1.5px solid #fecaca; color: #dc2626;
+            border-radius: 10px; padding: 7px 12px; font-size: 12px;
+            font-weight: 600; cursor: pointer; text-align: left;
             transition: background 0.15s, border-color 0.15s;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .cb-suggestion:hover { background: #fff1f2; border-color: #dc2626; }
 
         /* ── Input ── */
         #chatbotInputArea {
-            padding: 10px 12px;
-            border-top: 1px solid #f1f5f9;
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-            background: #fff;
+            padding: 10px 12px; border-top: 1px solid #f1f5f9;
+            display: flex; gap: 8px; flex-shrink: 0; background: #fff;
         }
         #chatbotInput {
-            flex: 1;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 8px 12px;
-            font-size: 13px;
-            outline: none;
-            font-family: inherit;
-            transition: border-color 0.2s;
-            background: #f8fafc;
+            flex: 1; border: 1.5px solid #e2e8f0; border-radius: 10px;
+            padding: 8px 12px; font-size: 13px; outline: none;
+            font-family: inherit; transition: border-color 0.2s; background: #f8fafc;
         }
         #chatbotInput:focus { border-color: #dc2626; background: #fff; }
         #chatbotSendBtn {
             width: 36px; height: 36px;
             background: linear-gradient(135deg, #dc2626, #991b1b);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
+            border: none; border-radius: 10px; color: white; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            transition: opacity 0.15s;
+            flex-shrink: 0; transition: opacity 0.15s;
         }
         #chatbotSendBtn:hover { opacity: 0.85; }
 
         /* ── Loading dots ── */
         .cb-typing { display: flex; gap: 4px; padding: 4px 2px; }
         .cb-typing span {
-            width: 7px; height: 7px;
-            background: #cbd5e1;
-            border-radius: 50%;
-            animation: cbDot 1.2s infinite;
+            width: 7px; height: 7px; background: #cbd5e1;
+            border-radius: 50%; animation: cbDot 1.2s infinite;
         }
         .cb-typing span:nth-child(2) { animation-delay: 0.2s; }
         .cb-typing span:nth-child(3) { animation-delay: 0.4s; }
@@ -528,12 +398,7 @@
 
         /* ── Mobile ── */
         @@media (max-width: 640px) {
-            #chatbotWindow {
-                left: 10px; right: 10px;
-                width: auto;
-                bottom: 84px;
-                max-height: 70vh;
-            }
+            #chatbotWindow { left: 10px; right: 10px; width: auto; bottom: 84px; max-height: 70vh; }
             #chatbotBubble { left: 16px; bottom: 24px; width: 50px; height: 50px; }
             #chatbotBubble img { width: 50px; height: 50px; }
             #chatbotBubble svg { width: 20px; height: 20px; }
@@ -546,13 +411,13 @@
         let isOpen  = false;
         let currentLang = localStorage.getItem('heatmap_lang') || 'vi';
 
-        // ── Text strings theo ngôn ngữ ─────────────────────────
+        // ── BUG FIX: CB_TEXT.vi had Chinese strings, CB_TEXT.cn was missing ──
         const CB_TEXT = {
             vi: {
-                greeting:    '👋 Xin chào! Tôi có thể giúp gì cho bạn?<br>Chọn câu hỏi gợi ý hoặc gõ câu hỏi của bạn bên dưới.',
-                noAnswer:    'Xin lỗi, tôi chưa có câu trả lời cho câu hỏi này. 😅<br>Vui lòng liên hệ <b>Admin</b> hoặc phòng IT để được hỗ trợ.',
-                found:       count => 'Tôi tìm thấy ' + count + ' câu hỏi liên quan. Bạn muốn hỏi về:',
-                error:       'Có lỗi xảy ra. Vui lòng thử lại sau.',
+                greeting:    '👋 Xin chào! Tôi có thể giúp gì cho bạn?<br>Chọn câu hỏi gợi ý hoặc nhập câu hỏi bên dưới.',
+                noAnswer:    'Xin lỗi, tôi chưa có câu trả lời cho câu hỏi này. 😅<br>Vui lòng liên hệ <b>Quản trị viên</b> hoặc bộ phận IT để được hỗ trợ.',
+                found:       count => 'Tôi tìm thấy ' + count + ' câu hỏi liên quan. Bạn muốn hỏi:',
+                error:       'Đã có lỗi xảy ra, vui lòng thử lại sau.',
                 placeholder: 'Nhập câu hỏi của bạn...',
                 title:       'Trợ lý Heatmap',
                 subtitle:    'Hỏi bất cứ điều gì!',
@@ -565,10 +430,20 @@
                 placeholder: 'Type your question...',
                 title:       'Heatmap Assistant',
                 subtitle:    'Ask me anything!',
-            }
+            },
+            cn: {
+                greeting:    '👋 你好！我能帮你什么？<br>选择建议的问题或在下方输入你的问题。',
+                noAnswer:    '抱歉，我暂时没有这个问题的答案。😅<br>请联系 <b>管理员</b> 或 IT 部门获取支持。',
+                found:       count => '我找到了 ' + count + ' 个相关问题。你想问的是：',
+                error:       '发生错误，请稍后再试。',
+                placeholder: '输入你的问题...',
+                title:       'Heatmap 助手',
+                subtitle:    '随便问！',
+            },
         };
 
-        function t() { return CB_TEXT[currentLang] || CB_TEXT['vi']; }
+        // Fallback: cn → en → vi (never returns broken text)
+        function t() { return CB_TEXT[currentLang] || CB_TEXT['en'] || CB_TEXT['vi']; }
 
         // ── Cập nhật UI text theo lang ─────────────────────────
         function applyLang(lang) {
@@ -587,7 +462,6 @@
             const newLang = e.detail && e.detail.lang;
             if (!newLang || newLang === currentLang) return;
 
-            // Reload FAQ theo ngôn ngữ mới, reset chat
             currentLang = newLang;
             faqData = [];
             document.getElementById('chatbotMessages').innerHTML = '';
@@ -600,7 +474,7 @@
         async function loadFAQ() {
             try {
                 const lang = localStorage.getItem('heatmap_lang') || 'vi';
-                const res  = await fetch('/Chatbot/GetFAQ?lang=' + lang);
+                const res  = await fetch(`${window.pathBase}/Chatbot/GetFAQ?lang=` + lang);
                 faqData    = await res.json();
                 renderSuggestions(faqData.slice(0, 4));
             } catch (e) {
@@ -610,12 +484,12 @@
 
         window.chatbotToggle = function () {
             isOpen = !isOpen;
-            const win      = document.getElementById('chatbotWindow');
-            const iconOpen = document.getElementById('chatbotIconOpen');
-            const iconClose= document.getElementById('chatbotIconClose');
+            const win       = document.getElementById('chatbotWindow');
+            const iconOpen  = document.getElementById('chatbotIconOpen');
+            const iconClose = document.getElementById('chatbotIconClose');
 
             if (isOpen) {
-                win.style.display  = 'flex';
+                win.style.display       = 'flex';
                 iconOpen.style.display  = 'none';
                 iconClose.style.display = 'block';
                 if (faqData.length === 0) loadFAQ();
@@ -624,7 +498,7 @@
                 }
                 setTimeout(() => document.getElementById('chatbotInput').focus(), 100);
             } else {
-                win.style.display  = 'none';
+                win.style.display       = 'none';
                 iconOpen.style.display  = 'block';
                 iconClose.style.display = 'none';
             }
@@ -643,7 +517,7 @@
 
             try {
                 const lang = localStorage.getItem('heatmap_lang') || 'vi';
-                const res  = await fetch('/Chatbot/Search', {
+                const res  = await fetch(`${window.pathBase}/Chatbot/Search`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query, lang })
