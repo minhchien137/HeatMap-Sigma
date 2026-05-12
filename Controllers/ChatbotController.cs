@@ -22,7 +22,7 @@ namespace HeatmapSystem.Controllers
         {
             try
             {
-                var language = (lang == "en") ? "en" : "vi";
+                var language = (lang == "en") ? "en" : (lang == "cn") ? "cn" : "vi";
 
                 var faqs = await _context.SVN_ChatbotFAQ
                     .Where(f => f.IsActive && f.Language == language)
@@ -56,7 +56,7 @@ namespace HeatmapSystem.Controllers
                     return Json(new List<object>());
 
                 var query    = request.Query.Trim().ToLower();
-                var language = (request.Lang == "en") ? "en" : "vi";
+                var language = (request.Lang == "en") ? "en" : (request.Lang == "cn") ? "cn" : "vi";
 
                 var faqs = await _context.SVN_ChatbotFAQ
                     .Where(f => f.IsActive && f.Language == language)
@@ -84,7 +84,7 @@ namespace HeatmapSystem.Controllers
         public class SearchRequest
         {
             public string Query { get; set; }
-            public string Lang  { get; set; } = "vi";
+            public string Lang  { get; set; } = "cn";
         }
     }
 }

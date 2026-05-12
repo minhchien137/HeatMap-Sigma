@@ -254,7 +254,7 @@ namespace HeatmapSystem.Controllers
                     SVNCode = TaiKhoan,
                     TimeAccess = DateTime.Now,
                     ActionType = "Login",
-                    Description = $"Đăng nhập thành công{(isRememberMe ? " (Remember Me)" : "")} (IP: {ipAddress})"
+                    Description = $"登录成功{(isRememberMe ? " (Remember Me)" : "")} (IP: {ipAddress})"
                 };
                 _context.SVN_Logs.Add(successLog);
                 await _context.SaveChangesAsync();
@@ -273,7 +273,7 @@ namespace HeatmapSystem.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi đăng nhập");
+                _logger.LogError(ex, "登录错误");
                 TempData["Error"] = "Có lỗi xảy ra, vui lòng thử lại!";
                 ViewBag.TaiKhoan = TaiKhoan;
                 return View();
@@ -301,7 +301,7 @@ namespace HeatmapSystem.Controllers
                     string.IsNullOrWhiteSpace(Password) || 
                     string.IsNullOrWhiteSpace(ConfirmPassword))
                 {
-                    TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
+                    TempData["Error"] = "请填写完整信息！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -309,14 +309,14 @@ namespace HeatmapSystem.Controllers
                 // Kiểm tra CAPTCHA
                 if (string.IsNullOrWhiteSpace(CaptchaInput) || string.IsNullOrWhiteSpace(CaptchaCode))
                 {
-                    TempData["Error"] = "Vui lòng nhập mã xác nhận!";
+                    TempData["Error"] = "请填写验证码！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
 
                 if (CaptchaInput.ToUpper() != CaptchaCode.ToUpper())
                 {
-                    TempData["Error"] = "Mã xác nhận không đúng!";
+                    TempData["Error"] = "验证码不正确！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -327,7 +327,7 @@ namespace HeatmapSystem.Controllers
 
                 if (existingUser != null)
                 {
-                    TempData["Error"] = "Tài khoản đã tồn tại!";
+                    TempData["Error"] = "账户已存在！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -335,7 +335,7 @@ namespace HeatmapSystem.Controllers
                 // Validate độ dài mật khẩu
                 if (Password.Length < 6)
                 {
-                    TempData["Error"] = "Mật khẩu phải có ít nhất 6 ký tự!";
+                    TempData["Error"] = "密码至少需要6个字符！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -343,7 +343,7 @@ namespace HeatmapSystem.Controllers
                 // Validate mật khẩu chứa chữ và số
                 if (!Regex.IsMatch(Password, "[a-zA-Z]") || !Regex.IsMatch(Password, "[0-9]"))
                 {
-                    TempData["Error"] = "Mật khẩu phải bao gồm cả chữ và số!";
+                    TempData["Error"] = "密码必须包含字母和数字！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -351,7 +351,7 @@ namespace HeatmapSystem.Controllers
                 // Validate mật khẩu có ký tự đặc biệt
                 if (!Regex.IsMatch(Password, @"[^\w\s]"))
                 {
-                    TempData["Error"] = "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+                    TempData["Error"] = "密码必须包含至少1个特殊字符！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -359,7 +359,7 @@ namespace HeatmapSystem.Controllers
                 // Kiểm tra confirm password
                 if (Password != ConfirmPassword)
                 {
-                    TempData["Error"] = "Mật khẩu xác nhận không khớp!";
+                    TempData["Error"] = "密码确认不匹配！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -386,12 +386,12 @@ namespace HeatmapSystem.Controllers
                     SVNCode = TaiKhoan,
                     TimeAccess = DateTime.Now,
                     ActionType = "Register",
-                    Description = $"Đăng ký tài khoản mới (IP: {ipAddress})"
+                    Description = $"注册新账户 (IP: {ipAddress})"
                 };
                 _context.SVN_Logs.Add(registerLog);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
+                TempData["Success"] = "注册成功！您可以立即登录。";
                 return RedirectToAction("DangNhap");
             }
             catch (Exception ex)
@@ -453,31 +453,31 @@ namespace HeatmapSystem.Controllers
                     string.IsNullOrWhiteSpace(NewPassword) || 
                     string.IsNullOrWhiteSpace(ConfirmNewPassword))
                 {
-                    TempData["Error"] = "Vui lòng điền đầy đủ thông tin!";
+                    TempData["Error"] = "请填写完整信息！";
                     return RedirectToAction("Account");
                 }
 
                 if (NewPassword != ConfirmNewPassword)
                 {
-                    TempData["Error"] = "Mật khẩu xác nhận không khớp!";
+                    TempData["Error"] = "密码确认不匹配！";
                     return RedirectToAction("Account");
                 }
 
                 if (NewPassword.Length < 6)
                 {
-                    TempData["Error"] = "Mật khẩu mới phải lớn hơn 6 ký tự!";
+                    TempData["Error"] = "密码必须在6个字符以上！";
                     return RedirectToAction("Account");
                 }
 
                 if (!Regex.IsMatch(NewPassword, "[a-zA-Z]") || !Regex.IsMatch(NewPassword, "[0-9]"))
                 {
-                    TempData["Error"] = "Mật khẩu phải bao gồm cả chữ và số!";
+                    TempData["Error"] = "密码必须包含字母和数字！";
                     return RedirectToAction("Account");
                 }
 
                 if (!Regex.IsMatch(NewPassword, @"[^\w\s]"))
                 {
-                    TempData["Error"] = "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!";
+                    TempData["Error"] = "密码必须包含至少1个特殊字符！";
                     return RedirectToAction("Account");
                 }
 
@@ -492,14 +492,14 @@ namespace HeatmapSystem.Controllers
                 // ✅ Verify current password với BCrypt
                 if (!_authService.VerifyPassword(CurrentPassword, user.Password))
                 {
-                    TempData["Error"] = "Mật khẩu hiện tại không chính xác!";
+                    TempData["Error"] = "当前密码不正确！";
                     
                     var failLog = new SVN_Logs
                     {
                         SVNCode = svnCode,
                         TimeAccess = DateTime.Now,
                         ActionType = "ChangePassword",
-                        Description = "Đổi mật khẩu thất bại - Sai mật khẩu hiện tại"
+                        Description = "修改密码失败 - 当前密码错误"
                     };
                     _context.SVN_Logs.Add(failLog);
                     await _context.SaveChangesAsync();
@@ -521,18 +521,18 @@ namespace HeatmapSystem.Controllers
                     SVNCode = svnCode,
                     TimeAccess = DateTime.Now,
                     ActionType = "ChangePassword",
-                    Description = "Đổi mật khẩu thành công - Tất cả token đã bị thu hồi"
+                    Description = "修改密码成功 - 所有token已被收回"
                 };
                 _context.SVN_Logs.Add(successLog);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Đổi mật khẩu thành công! Tất cả phiên đăng nhập khác đã bị đăng xuất.";
+                TempData["Success"] = "修改密码成功！所有其他登录会话已被注销。";
                 return RedirectToAction("Account");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi đổi mật khẩu");
-                TempData["Error"] = "Có lỗi xảy ra, vui lòng thử lại!";
+                _logger.LogError(ex, "修改密码时发生错误");
+                TempData["Error"] = "发生错误，请重试！";
                 return RedirectToAction("Account");
             }
         }
@@ -550,7 +550,7 @@ namespace HeatmapSystem.Controllers
                     SVNCode = svnCode,
                     TimeAccess = DateTime.Now,
                     ActionType = "Logout",
-                    Description = $"Đăng xuất khỏi hệ thống (IP: {ipAddress})"
+                    Description = $"注销系统 (IP: {ipAddress})"
                 };
                 _context.SVN_Logs.Add(logoutLog);
                 await _context.SaveChangesAsync();
