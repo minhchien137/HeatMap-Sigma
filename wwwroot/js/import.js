@@ -173,39 +173,168 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Generate weeks for all modes
+// function generateWeeks() {
+//     const weekSelects = ['week1', 'week2', 'week3'];
+//     weekSelects.forEach(selectId => {
+    //         const weekSelect = document.getElementById(selectId);
+//         if (!weekSelect) return;
+
+//         const currentYear = new Date().getFullYear();
+//         const currentWeek = getWeekNumber(new Date());
+
+//         while (weekSelect.options.length > 1) {
+//             weekSelect.remove(1);
+//         }
+
+//         for (let week = 1; week <= 52; week++) {
+//             const jan1 = new Date(currentYear, 0, 1);
+//             const daysOffset = (week - 1) * 7;
+//             const weekDate = new Date(jan1.setDate(jan1.getDate() + daysOffset));
+//             const monday = getMonday(weekDate);
+//             const sunday = new Date(monday);
+//             sunday.setDate(monday.getDate() + 6);
+
+//             const weekText = `Tuần ${week} (${formatDate(monday)} - ${formatDate(sunday)})`;
+//             const weekValue = `${week}|${formatDate(monday)}|${formatDate(sunday)}`;
+
+//             const option = document.createElement('option');
+//             option.value = weekValue;
+//             option.textContent = weekText;
+//             if (week === currentWeek) option.selected = true;
+
+//             weekSelect.appendChild(option);
+//         }
+//     });
+// }
+
+// Tên tháng theo ngôn ngữ
+const MONTH_NAMES = {
+    vi: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6', 'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
+    en: ['Jan','Feb','Mar','Apr','May','Jun', 'Jul','Aug','Sep','Oct','Nov','Dec'],
+    cn: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+};
+
+const DAY_NAMES = {
+    vi: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'],
+    en: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    cn: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+};
+
+function getDayName(index) {
+    const lang = localStorage.getItem('heatmap_lang') || 'vi';
+    return (DAY_NAMES[lang] || DAY_NAMES['vi'])[index];
+}
+
+// Format ngày trong checkbox theo ngôn ngữ
+// vi: "Thứ 2 - 11/05/2026"
+// en: "Monday - 2026 11 May"
+// cn: "周一 - 2026年5月11日"
+function formatDayLabel(index, dateObj) {
+    const dayName = getDayName(index);
+    const lang    = localStorage.getItem('heatmap_lang') || 'vi';
+    const d       = dateObj.getDate();
+    const m       = dateObj.getMonth();
+    const y       = dateObj.getFullYear();
+    const dd      = String(d).padStart(2, '0');
+    const mm      = String(m + 1).padStart(2, '0');
+    const mon     = MONTH_NAMES[lang]?.[m] || MONTH_NAMES['en'][m]; // dùng MONTH_NAMES từ patch tuần
+    
+    let dateStr;
+    if (lang === 'en') dateStr = `${y} ${dd} ${mon}`;
+    else if (lang === 'cn') dateStr = `${y}年${mon}${dd}日`;
+    else dateStr = `${dd}/${mm}/${y}`;
+    
+    return { dayName, dateStr, label: `${dayName} - ${dateStr}` };
+}
+
+
+// Label "Tuần" / "Week" / "第X周" theo ngôn ngữ
+function getWeekLabel(weekNum) {
+    const lang = localStorage.getItem('heatmap_lang') || 'vi';
+    if (lang === 'en') return `Week ${weekNum}`;
+    if (lang === 'cn') return `第 ${weekNum} 周`;
+    return `Tuần ${weekNum}`;
+}
+
+// Format 1 ngày thành chuỗi theo ngôn ngữ
+// vi: "11/05/2026"  |  en: "11 May 2026"  |  cn: "2026年5月11日"
+function formatDateLocale(date) {
+    const lang = localStorage.getItem('heatmap_lang') || 'vi';
+    const d   = date.getDate();
+    const m   = date.getMonth();      // 0-based
+    const y   = date.getFullYear();
+    const dd  = String(d).padStart(2, '0');
+    const mm  = String(m + 1).padStart(2, '0');
+    const mon = MONTH_NAMES[lang]?.[m] || MONTH_NAMES['en'][m];
+    
+    if (lang === 'en') return `${y} ${dd} ${mon} `;
+    if (lang === 'cn') return `${y}年${mon}${dd}日`;
+    return `${dd}/${mm}/${y}`;          // vi — giữ dd/mm/yyyy để parse ngược lại dễ
+}
+
+// Generate weeks cho tất cả select — gọi lại khi đổi ngôn ngữ
 function generateWeeks() {
     const weekSelects = ['week1', 'week2', 'week3'];
     weekSelects.forEach(selectId => {
         const weekSelect = document.getElementById(selectId);
         if (!weekSelect) return;
         
+        // Nhớ giá trị đang chọn (để restore sau khi rebuild)
+        const previousValue = weekSelect.value;
+        
         const currentYear = new Date().getFullYear();
         const currentWeek = getWeekNumber(new Date());
         
-        while (weekSelect.options.length > 1) {
-            weekSelect.remove(1);
-        }
+        // Xóa hết option (trừ option đầu trống)
+        while (weekSelect.options.length > 1) weekSelect.remove(1);
         
         for (let week = 1; week <= 52; week++) {
-            const jan1 = new Date(currentYear, 0, 1);
+            const jan1       = new Date(currentYear, 0, 1);
             const daysOffset = (week - 1) * 7;
-            const weekDate = new Date(jan1.setDate(jan1.getDate() + daysOffset));
-            const monday = getMonday(weekDate);
-            const sunday = new Date(monday);
+            const weekDate   = new Date(jan1.setDate(jan1.getDate() + daysOffset));
+            const monday     = getMonday(weekDate);
+            const sunday     = new Date(monday);
             sunday.setDate(monday.getDate() + 6);
             
-            const weekText = `Tuần ${week} (${formatDate(monday)} - ${formatDate(sunday)})`;
+            // Text hiển thị theo ngôn ngữ
+            const weekLabel = getWeekLabel(week);
+            const startStr  = formatDateLocale(monday);
+            const endStr    = formatDateLocale(sunday);
+            const weekText  = `${weekLabel} (${startStr} - ${endStr})`;
+            
+            // Value vẫn giữ định dạng cố định "week|dd/mm/yyyy|dd/mm/yyyy"
+            // để các hàm parse (generateDayCheckboxes, submit) không cần đổi
             const weekValue = `${week}|${formatDate(monday)}|${formatDate(sunday)}`;
             
-            const option = document.createElement('option');
-            option.value = weekValue;
+            const option       = document.createElement('option');
+            option.value       = weekText.startsWith('Tuần') || weekText.startsWith('Week') || weekText.startsWith('第')
+            ? weekValue   // đúng rồi — value = chuỗi parse được
+            : weekValue;
+            option.value       = weekValue;
             option.textContent = weekText;
             if (week === currentWeek) option.selected = true;
-            
             weekSelect.appendChild(option);
+        }
+        
+        // Restore previous selection nếu vẫn còn trong list
+        if (previousValue) {
+            // value format: "20|11/05/2026|17/05/2026" — weekNum là phần đầu
+            const prevWeekNum = previousValue.split('|')[0];
+            for (let opt of weekSelect.options) {
+                if (opt.value.startsWith(prevWeekNum + '|')) {
+                    weekSelect.value = opt.value;
+                    break;
+                }
+            }
         }
     });
 }
+
+// ── Lắng nghe sự kiện đổi ngôn ngữ từ i18n.js → rebuild weeks ──
+document.addEventListener('i18n:applied', function () {
+    generateWeeks();
+});
+
 
 // Generate hours and minutes for Mode 1 only
 function generateHoursAndMinutes() {
@@ -463,37 +592,45 @@ function generateDayCheckboxes(weekValue, containerId) {
     container.innerHTML = '';
     
     if (!weekValue) {
-        container.innerHTML = '<p class="text-gray-400 text-center py-4">Vui lòng chọn tuần</p>';
+        const lang = localStorage.getItem('heatmap_lang') || 'vi';
+        const msg = lang === 'en' ? 'Please select a week'
+        : lang === 'cn' ? '请先选择周'
+        : 'Vui lòng chọn tuần';
+        container.innerHTML = `<p class="text-gray-400 text-center py-4">${msg}</p>`;
         return;
     }
     
-    const [weekNum, startDateStr, endDateStr] = weekValue.split('|');
+    const [weekNum, startDateStr] = weekValue.split('|');
+    // startDateStr là dd/mm/yyyy (luôn cố định, không phụ thuộc ngôn ngữ)
     const startDate = new Date(startDateStr.split('/').reverse().join('-'));
-    const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
     
     for (let i = 0; i < 7; i++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(startDate.getDate() + i);
         
-        const dateStr = formatDate(currentDate);
-        const dayName = daysOfWeek[i];
+        const { dayName, dateStr, label } = formatDayLabel(i, currentDate);
+        // value luôn là dd/mm/yyyy để submit không bị ảnh hưởng
+        const valueStr = formatDate(currentDate); // hàm formatDate gốc dd/mm/yyyy
         
         const div = document.createElement('div');
         div.className = 'day-checkbox';
         div.innerHTML = `
-            <input type="checkbox" 
-                   id="day${containerId}_${i}" 
-                   value="${dateStr}" 
+            <input type="checkbox"
+                   id="day${containerId}_${i}"
+                   value="${valueStr}"
                    data-day="${dayName}"
-                   data-label="${dayName}, ${dateStr}"
+                   data-label="${label}"
                    onchange="handleDayCheckboxChange(this, '${containerId}')">
             <label for="day${containerId}_${i}" class="cursor-pointer select-none flex-1">
-                ${dayName} - ${dateStr}
+                ${label}
             </label>
         `;
         container.appendChild(div);
     }
 }
+
+
+
 
 // Handle day checkbox change
 function handleDayCheckboxChange(checkbox, containerId) {
@@ -509,6 +646,9 @@ function handleDayCheckboxChange(checkbox, containerId) {
         updateDayHoursList();
     }
 }
+
+
+
 
 // ============================================================
 // MODE 1 - Multi project rows
@@ -593,7 +733,7 @@ function renderDayHoursList() {
         // Column labels
         const labels = document.createElement('div');
         labels.className = 'bulk-row-label';
-        labels.innerHTML = `<span>Project</span><span>Customer</span><span>Proj. Phase</span><span>Số giờ</span><span></span>`;
+        labels.innerHTML = `<span>${t('import.col.project')}</span><span>${t('import.col.customer')}</span><span>${t('import.col.projphase')}</span><span>${t('import.label.hours')}</span><span></span>`;
         block.appendChild(labels);
         
         // Rows container
@@ -771,7 +911,7 @@ function createBulkBlock(empId, empName, date, dateLabel, savedRows) {
     
     const labels = document.createElement('div');
     labels.className = 'bulk-row-label';
-    labels.innerHTML = `<span>Project</span><span>Customer</span><span>Proj.Phase</span><span>Số giờ</span><span></span>`;
+    labels.innerHTML = `<span>${t('import.col.project')}</span><span>${t('import.col.customer')}</span><span>${t('import.col.projphase')}</span><span>${t('import.label.hours')}</span><span></span>`;
     block.appendChild(labels);
     
     const rowsContainer = document.createElement('div');
@@ -1368,6 +1508,18 @@ function copyFirstDayToAllMode3() {
     renderBulkBlocks(empId);
     showSuccessModal(`✓ Đã copy ${firstRows.length} dự án từ ngày đầu cho ${dates.length - 1} ngày còn lại!`);
 }
+
+// Re-generate day checkboxes khi đổi ngôn ngữ (nếu đã có tuần được chọn)
+document.addEventListener('i18n:applied', function () {
+    ['week2', 'week3'].forEach(weekId => {
+        const weekSelect = document.getElementById(weekId);
+        if (weekSelect?.value) {
+            const containerId = weekId === 'week2' ? 'dayCheckboxes2' : 'dayCheckboxes3';
+            generateDayCheckboxes(weekSelect.value, containerId);
+        }
+    });
+});
+
 
 // Copy first day data to all other days
 function copyFirstDayDataToAll() {

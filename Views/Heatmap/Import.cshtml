@@ -90,7 +90,10 @@
                             </div>
                             <!-- Column labels -->
                             <div class="bulk-row-label" style="border-radius:0.75rem 0.75rem 0 0; border:2px solid #e5e7eb; border-bottom:1px solid #f3f4f6;">
-                                <span>Project</span><span>Customer</span><span>Proj.Phase</span><span data-i18n="import.label.hours">Số giờ</span><span></span>
+                               <span data-i18n="import.col.project">Project</span>
+                               <span data-i18n="import.col.customer">Customer</span>
+                               <span data-i18n="import.col.projphase">Proj.Phase</span>
+                               <span data-i18n="import.label.hours">Số giờ</span>
                             </div>
                             <!-- Rows container -->
                             <div id="projectRows1" style="border:2px solid #e5e7eb; border-top:none; border-bottom:none;"></div>
@@ -108,12 +111,53 @@
                             </select>
                         </div>
 
-                        <!-- Ngày -->
-                        <div class="group">
-                            <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="import.label.date">Ngày</label>
-                            <input type="date" id="day1" class="input-field" />
+                       <!-- Ngày -->
+                    <div class="group">
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-2" data-i18n="import.label.date">Ngày</label>
+                        <div id="dp-wrap" style="position:relative;">
+                            <div id="dp-trigger" onclick="dpToggle()"
+                                style="display:flex;align-items:center;justify-content:space-between;
+                                        padding:1rem 1.5rem;border:2px solid #e5e7eb;border-radius:1rem;
+                                        cursor:pointer;background:white;font-size:1rem;color:#6b7280;
+                                        transition:border-color 0.3s;user-select:none;">
+                                <span id="dp-display">dd/mm/yyyy</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" style="color:#9ca3af;flex-shrink:0;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div id="dp-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;width:320px;background:white;border:2px solid #dc2626;border-radius:1rem;overflow:hidden;z-index:9999;box-shadow:0 10px 40px rgba(0,0,0,0.12);">
+                                <div style="display:flex;align-items:center;justify-content:space-between;
+                                            padding:10px 14px;border-bottom:1px solid #f3f4f6;">
+                                    <button type="button" onclick="dpPrevMonth()"
+                                            style="background:none;border:none;cursor:pointer;font-size:16px;
+                                                color:#374151;padding:2px 8px;border-radius:6px;line-height:1;"
+                                            onmouseover="this.style.background='#fef2f2'"
+                                            onmouseout="this.style.background='none'">‹</button>
+                                    <span id="dp-month-year" style="font-size:13px;font-weight:700;color:#111827;"></span>
+                                    <button type="button" onclick="dpNextMonth()"
+                                            style="background:none;border:none;cursor:pointer;font-size:16px;
+                                                color:#374151;padding:2px 8px;border-radius:6px;line-height:1;"
+                                            onmouseover="this.style.background='#fef2f2'"
+                                            onmouseout="this.style.background='none'">›</button>
+                                </div>
+                                <div style="padding:8px 10px;">
+                                    <div id="dp-dow" style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px;gap:1px;"></div>
+                                    <div id="dp-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;"></div>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;
+                                            padding:6px 14px 10px;border-top:1px solid #f3f4f6;">
+                                    <button type="button" onclick="dpClear()" id="dp-clear-btn"
+                                            style="font-size:12px;color:#dc2626;background:none;border:none;cursor:pointer;font-weight:600;"></button>
+                                    <button type="button" onclick="dpToday()" id="dp-today-btn"
+                                            style="font-size:12px;color:#dc2626;background:none;border:none;cursor:pointer;font-weight:600;"></button>
+                                </div>
+                            </div>
+                            <input type="hidden" id="day1" />
                         </div>
+                    </div>
+
                     </div>
 
                     <!-- Right Column - Image -->
@@ -957,6 +1001,48 @@
                                                         padding-right: 0.5rem;
                                                     }
                                                 }
+                                            
+                                            /* Fix calendar bị cắt bởi overflow-hidden của card */
+                                                .bg-white.rounded-\[3rem\] {
+                                                    overflow: visible !important;
+                                                }
+
+                                                @@media (max-width: 640px) {
+                                                    #dp-panel {
+                                                        width: 100% !important;
+                                                        left: 0 !important;
+                                                        right: 0 !important;
+                                                    }
+
+                                                    #dp-panel > div:first-child {
+                                                        padding: 7px 10px !important;
+                                                    }
+
+                                                    #dp-panel > div:nth-child(2) {
+                                                        padding: 5px 6px !important;
+                                                    }
+
+                                                    #dp-panel > div:last-child {
+                                                        padding: 4px 10px 7px !important;
+                                                    }
+
+                                                    #dp-days > div,
+                                                    #dp-dow > div {
+                                                        font-size: 10px !important;
+                                                        padding: 4px 1px !important;
+                                                    }
+
+                                                    #dp-month-year {
+                                                        font-size: 12px !important;
+                                                    }
+
+                                                    #dp-trigger {
+                                                        padding: 0.75rem 1rem !important;
+                                                        font-size: 0.9rem !important;
+                                                    }
+                                                }
+
+
                                             </style>
 
 
@@ -976,6 +1062,109 @@
                                                     }
                                                 ];
                                             </script>
+                                            <script>
+const DP = {
+    lang: localStorage.getItem('heatmap_lang') || 'vi',
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
+    selected: null,
+    MONTHS: {
+        vi: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
+        en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+        cn: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    },
+    DOW: {
+        vi: ['T2','T3','T4','T5','T6','T7','CN'],
+        en: ['Mo','Tu','We','Th','Fr','Sa','Su'],
+        cn: ['一','二','三','四','五','六','日'],
+    },
+    LABELS: {
+        vi: { clear:'Xóa', today:'Hôm nay', placeholder:'dd/mm/yyyy' },
+        en: { clear:'Clear', today:'Today', placeholder:'dd/mm/yyyy' },
+        cn: { clear:'清除', today:'今天', placeholder:'dd/mm/yyyy' },
+    },
+    fmt(d) {
+        if (!d) return '';
+        const dd  = String(d.getDate()).padStart(2,'0');
+        const mm  = String(d.getMonth()+1).padStart(2,'0');
+        const y   = d.getFullYear();
+        const mon = this.MONTHS[this.lang][d.getMonth()];
+        if (this.lang === 'en') return `${y} ${dd} ${mon}`;
+        if (this.lang === 'cn') return `${y}年${mon}${dd}日`;
+        return `${dd}/${mm}/${y}`;
+    },
+    fmtSubmit(d) {
+        if (!d) return '';
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    },
+    render() {
+        const L = this.LABELS[this.lang];
+        document.getElementById('dp-clear-btn').textContent = L.clear;
+        document.getElementById('dp-today-btn').textContent = L.today;
+        const disp = document.getElementById('dp-display');
+        if (this.selected) { disp.textContent = this.fmt(this.selected); disp.style.color = '#1f2937'; }
+        else               { disp.textContent = L.placeholder;           disp.style.color = '#6b7280'; }
+        document.getElementById('dp-month-year').textContent =
+            this.MONTHS[this.lang][this.month] + ' ' + this.year;
+        document.getElementById('dp-dow').innerHTML =
+            this.DOW[this.lang].map(d =>
+               `<div style="text-align:center;font-size:10px;font-weight:700;color:#9ca3af;padding:3px 0;">${d}</div>`
+            ).join('');
+        const first  = new Date(this.year, this.month, 1);
+        let startDow = first.getDay(); startDow = startDow === 0 ? 6 : startDow - 1;
+        const dim    = new Date(this.year, this.month+1, 0).getDate();
+        const today  = new Date();
+        const isTod  = d => d===today.getDate() && this.month===today.getMonth() && this.year===today.getFullYear();
+        const isSel  = d => this.selected && d===this.selected.getDate() &&
+                            this.month===this.selected.getMonth() && this.year===this.selected.getFullYear();
+        let html = '<div></div>'.repeat(startDow);
+        for (let d = 1; d <= dim; d++) {
+            const sel = isSel(d), tod = isTod(d) && !sel;
+            html += `<div onclick="dpSelect(${d})"
+                style="text-align:center;padding:5px 1px;font-size:12px;cursor:pointer;border-radius:6px;
+                       font-weight:${sel||tod?'700':'400'};
+                       background:${sel?'#dc2626':'transparent'};
+                       color:${sel?'#fff':tod?'#dc2626':'#374151'};
+                       border:${tod?'1.5px solid #dc2626':'1.5px solid transparent'};"
+                onmouseover="if(!${sel})this.style.background='#fef2f2'"
+                onmouseout="this.style.background='${sel?'#dc2626':'transparent'}'">${d}</div>`;
+        }
+        document.getElementById('dp-days').innerHTML = html;
+        document.getElementById('day1').value = this.selected ? this.fmtSubmit(this.selected) : '';
+    }
+};
 
-                                            <script src="~/js/i18n.js"></script>
+function dpToggle() {
+    const panel = document.getElementById('dp-panel');
+    const open  = panel.style.display === 'block';
+    panel.style.display = open ? 'none' : 'block';
+    document.getElementById('dp-trigger').style.borderColor = open ? '#e5e7eb' : '#dc2626';
+    if (!open) DP.render();
+}
+function dpPrevMonth() { DP.month--; if(DP.month<0){DP.month=11;DP.year--;} DP.render(); }
+function dpNextMonth() { DP.month++; if(DP.month>11){DP.month=0;DP.year++;} DP.render(); }
+function dpSelect(d) {
+    DP.selected = new Date(DP.year, DP.month, d);
+    document.getElementById('dp-panel').style.display = 'none';
+    document.getElementById('dp-trigger').style.borderColor = '#e5e7eb';
+    DP.render();
+}
+function dpClear()  { DP.selected = null; DP.render(); }
+function dpToday()  { const t = new Date(); DP.year = t.getFullYear(); DP.month = t.getMonth(); dpSelect(t.getDate()); }
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('#dp-wrap')) {
+        document.getElementById('dp-panel').style.display = 'none';
+        document.getElementById('dp-trigger').style.borderColor = '#e5e7eb';
+    }
+});
+document.addEventListener('i18n:applied', e => {
+    DP.lang = e.detail?.lang || localStorage.getItem('heatmap_lang') || 'vi';
+    DP.render();
+});
+DP.render();
+</script>
+
+
+<script src="~/js/i18n.js"></script>
 <script src="~/js/import.js"></script> 

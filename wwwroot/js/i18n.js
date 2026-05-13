@@ -4,6 +4,7 @@
 * Engine auto-applies on DOMContentLoaded + whenever applyI18n() is called
 */
 
+
 const I18N = {
     vi: {
         // ── NAV / LAYOUT ──────────────────────────────
@@ -149,10 +150,10 @@ const I18N = {
         'import.bulk.copy':          '📋 Copy ngày đầu',
         'import.bulk.cancel':        'Hủy',
         'import.bulk.confirm':       'Xác nhận lưu',
-        'import.col.customer':       'CUSTOMER',
-        'import.col.project':        'PROJECT',
-        'import.col.projphase':      'PROJ.PHASE',
-        'import.col.hours':          'SỐ GIỜ',
+        'import.col.customer':       'Khách hàng',
+        'import.col.project':        'Dự án',
+        'import.col.projphase':      'Giai đoạn',
+        'import.col.hours':          'Số giờ',
         'import.search_emp':         'Tìm nhân viên...',
         'import.select_days':        'Chọn ngày',
         'import.no_days':            'Chưa chọn ngày nào',
