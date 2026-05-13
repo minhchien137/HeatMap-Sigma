@@ -1365,7 +1365,8 @@ public class DetailDataDto
             string project = "",
             string phase = "",
             string startDate = "",
-            string endDate = "")
+            string endDate    = "",
+            string lang       = "vi") 
         {
             try
             {
@@ -1376,14 +1377,15 @@ public class DetailDataDto
 
                 var filter = new ReportFilterDto
                 {
-                    TimeRange  = timeRange,
-                    Year       = year,
-                    Customer   = customer,
+                    TimeRange = timeRange,
+                    Year = year,
+                    Customer = customer,
                     Department = department,
-                    Project    = project,
-                    Phase      = phase,
-                    StartDate  = startDate,
-                    EndDate    = endDate
+                    Project = project,
+                    Phase = phase,
+                    StartDate = startDate,
+                    EndDate = endDate,  
+                    Lang = lang
                 };
 
                 var bytes = _reportService.ExportReportToCsv(filter);

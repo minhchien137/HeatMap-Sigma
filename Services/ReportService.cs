@@ -10,11 +10,59 @@ namespace HeatmapSystem.Services
         private readonly ApplicationDbContext _context;
         private readonly ILogger<ReportService> _logger;
 
+        // Cache workconfig để tránh truy vấn DB nhiều lần trong một request
+        private List<personnel_employee_workconfig>? _workConfigCache;
+
         public ReportService(ApplicationDbContext context, ILogger<ReportService> logger)
         {
             _context = context;
             _logger = logger;
         }
+
+        // ── Workconfig helpers ────────────────────────────────────────────────
+
+        /// <summary>Lấy toàn bộ workconfig (có cache trong request)</summary>
+        private List<personnel_employee_workconfig> GetWorkConfigs()
+        {
+            _workConfigCache ??= _context.personnel_employee_workconfig.ToList();
+            return _workConfigCache;
+        }
+
+        /// <summary>
+        /// Lấy số giờ làm việc/ngày của một nhân viên tại một ngày cụ thể.
+        /// Ưu tiên record có EffectiveFrom gần nhất. Fallback = 8.5h.
+        /// </summary>
+        private decimal GetDailyHours(string svnStaff, DateTime date)
+        {
+            var cfg = GetWorkConfigs()
+                .Where(c => c.SMStaff == svnStaff && c.IsEffectiveOn(date))
+                .OrderByDescending(c => c.EffectiveFrom)
+                .FirstOrDefault();
+            return cfg?.WorkHoursPerDay ?? 8.5m;
+        }
+
+        /// <summary>
+        /// Tính tổng available hours cho một nhóm nhân viên trong khoảng ngày.
+        /// Mỗi ngày làm việc (T2–T7) × giờ/ngày theo workconfig của nhân viên đó.
+        /// </summary>
+        private decimal GetAvailableHours(IEnumerable<string> svnStaffs, DateTime fromDate, DateTime toDate)
+        {
+            var staffList = svnStaffs.Distinct().ToList();
+            decimal total = 0m;
+            for (var d = fromDate.Date; d <= toDate.Date; d = d.AddDays(1))
+            {
+                if (d.DayOfWeek == DayOfWeek.Sunday) continue;
+                foreach (var staff in staffList)
+                    total += GetDailyHours(staff, d);
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// Tính available hours cho một nhân viên trong khoảng ngày (6 ngày/tuần).
+        /// </summary>
+        private decimal GetAvailableHoursForOne(string svnStaff, DateTime fromDate, DateTime toDate)
+            => GetAvailableHours(new[] { svnStaff }, fromDate, toDate);
 
         #region Public Methods
 
@@ -82,7 +130,7 @@ namespace HeatmapSystem.Services
                     heatmapData = CalculateHeatmapData(data),
                     detailData = CalculateDetailData(data),
                     phaseData = CalculatePhaseData(data),
-                    functionData = CalculateFunctionData(data, workingDays),
+                    functionData = CalculateFunctionData(data, workingDays, fromDate, toDate),
                     customerData = CalculateCustomerData(data),
                     detailPivotData = CalculateDetailPivotData(data, fromDate, toDate)
                 };
@@ -192,7 +240,7 @@ namespace HeatmapSystem.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting staff daily detail for svnStaff: {SVNStaff}, project: {Project}", svnStaff, project);
+                _logger.LogError(ex, "Error getting staff daily detail for smStaff: {SVNStaff}, project: {Project}", svnStaff, project);
                 throw;
             }
         }
@@ -209,35 +257,38 @@ namespace HeatmapSystem.Services
                 for (var d = fromDate.Date; d <= toDate.Date; d = d.AddDays(1))
                     if (d.DayOfWeek != DayOfWeek.Sunday) workingDays++;
 
-                var kpis        = CalculateKPIs(data, fromDate, toDate);
-                var functionData = CalculateFunctionData(data, workingDays);
-                var phaseData   = CalculatePhaseData(data);
+                var kpis = CalculateKPIs(data, fromDate, toDate);
+                var functionData = CalculateFunctionData(data, workingDays, fromDate, toDate);
+                var phaseData = CalculatePhaseData(data);
                 var customerData = CalculateCustomerData(data);
-                var trendData   = CalculateTrendData(data, "week");
-                var deptData    = CalculateDepartmentData(data);
-                var pivotData   = CalculateDetailPivotData(data, fromDate, toDate);
+                var trendData = CalculateTrendData(data, "week");
+                var deptData = CalculateDepartmentData(data);
+                var pivotData = CalculateDetailPivotData(data, fromDate, toDate);
 
-                // Filter description
+                // ── Hàm dịch – viết tắt gọn trong scope này ─────────────────────
+                string T(string key) => ExcelTranslations.Get(filter.Lang, key);
+
+                // ── Filter description ────────────────────────────────────────────
                 var filterDesc = new List<string>();
-                if (!string.IsNullOrEmpty(filter.TimeRange))  filterDesc.Add($"TG: {filter.TimeRange}");
-                if (!string.IsNullOrEmpty(filter.Customer))   filterDesc.Add($"Customer: {filter.Customer}");
-                if (!string.IsNullOrEmpty(filter.Department)) filterDesc.Add($"Bộ phận: {filter.Department}");
-                if (!string.IsNullOrEmpty(filter.Project))    filterDesc.Add($"Dự án: {filter.Project}");
-                if (!string.IsNullOrEmpty(filter.Phase))      filterDesc.Add($"Phase: {filter.Phase}");
-                string filterSummary = filterDesc.Count > 0 ? string.Join(" | ", filterDesc) : "Tất cả";
+                if (!string.IsNullOrEmpty(filter.TimeRange)) filterDesc.Add($"{T("filter_time")}: {filter.TimeRange}");
+                if (!string.IsNullOrEmpty(filter.Customer)) filterDesc.Add($"Customer: {filter.Customer}");
+                if (!string.IsNullOrEmpty(filter.Department)) filterDesc.Add($"{T("filter_dept")}: {filter.Department}");
+                if (!string.IsNullOrEmpty(filter.Project)) filterDesc.Add($"{T("filter_project")}: {filter.Project}");
+                if (!string.IsNullOrEmpty(filter.Phase)) filterDesc.Add($"Phase: {filter.Phase}");
+                string filterSummary = filterDesc.Count > 0 ? string.Join(" | ", filterDesc) : T("filter_all");
 
                 OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
                 using var package = new OfficeOpenXml.ExcelPackage();
 
-                // ── Palette ──────────────────────────────────────────────────
-                var darkBg     = System.Drawing.Color.FromArgb(30, 42, 58);
-                var redColor   = System.Drawing.Color.FromArgb(229, 62, 62);
-                var yellowBg   = System.Drawing.Color.FromArgb(255, 249, 219);
-                var lightGray  = System.Drawing.Color.FromArgb(248, 249, 250);
-                var borderClr  = System.Drawing.Color.FromArgb(220, 220, 220);
-                var white      = System.Drawing.Color.White;
+                // ── Palette ───────────────────────────────────────────────────────
+                var darkBg = System.Drawing.Color.FromArgb(30, 42, 58);
+                var redColor = System.Drawing.Color.FromArgb(229, 62, 62);
+                var yellowBg = System.Drawing.Color.FromArgb(255, 249, 219);
+                var lightGray = System.Drawing.Color.FromArgb(248, 249, 250);
+                var borderClr = System.Drawing.Color.FromArgb(220, 220, 220);
+                var white = System.Drawing.Color.White;
 
-                // ── Helpers ───────────────────────────────────────────────────
+                // ── Helpers ───────────────────────────────────────────────────────
                 void SetHeader(OfficeOpenXml.ExcelRange c, bool dark = true)
                 {
                     c.Style.Font.Bold = true;
@@ -245,7 +296,7 @@ namespace HeatmapSystem.Services
                     c.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                     c.Style.Fill.BackgroundColor.SetColor(dark ? darkBg : lightGray);
                     c.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-                    c.Style.VerticalAlignment   = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    c.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                     c.Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
                 }
                 void SetData(OfficeOpenXml.ExcelRange c, bool bold = false, bool center = true, System.Drawing.Color? fc = null)
@@ -265,34 +316,34 @@ namespace HeatmapSystem.Services
                 // ════════════════════════════════════════════════════════════
                 // SHEET 1 – Tổng quan (KPI)
                 // ════════════════════════════════════════════════════════════
-                var ws1 = package.Workbook.Worksheets.Add("1. Tổng quan");
+                var ws1 = package.Workbook.Worksheets.Add(T("sheet1"));
                 ws1.DefaultRowHeight = 18;
                 ws1.Cells[1, 1, 1, 8].Merge = true;
-                ws1.Cells[1, 1].Value = "BÁO CÁO NĂNG SUẤT NHÂN SỰ";
+                ws1.Cells[1, 1].Value = T("s1_title");
                 ws1.Cells[1, 1].Style.Font.Size = 18; ws1.Cells[1, 1].Style.Font.Bold = true;
                 ws1.Cells[1, 1].Style.Font.Color.SetColor(darkBg);
                 ws1.Cells[1, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 ws1.Row(1).Height = 32;
 
                 ws1.Cells[2, 1, 2, 8].Merge = true;
-                ws1.Cells[2, 1].Value = $"Thời gian: {fromDate:dd/MM/yyyy} – {toDate:dd/MM/yyyy}    |    {filterSummary}";
+                ws1.Cells[2, 1].Value = $"{T("s1_time_prefix")}: {fromDate:dd/MM/yyyy} – {toDate:dd/MM/yyyy}    |    {filterSummary}";
                 ws1.Cells[2, 1].Style.Font.Italic = true;
-                ws1.Cells[2, 1].Style.Font.Color.SetColor(System.Drawing.Color.FromArgb(100,100,100));
+                ws1.Cells[2, 1].Style.Font.Color.SetColor(System.Drawing.Color.FromArgb(100, 100, 100));
                 ws1.Cells[2, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 ws1.Row(3).Height = 8;
 
                 // KPI cards
-                var kpiLabels = new[] { "ACTUAL HOURS", "AVAILABLE CAPACITY", "HIỆU SUẤT (%)", "DỰ ÁN", "NHÂN SỰ" };
-                object[] kpiValues = { kpis.totalHours, kpis.availableCapacity, $"{Math.Round(kpis.avgUtilization,1)}%", kpis.activeProjects, kpis.staffCount };
+                var kpiLabels = new[] { T("s1_kpi_actual_hrs"),T("s1_kpi_avail_cap"),T("s1_kpi_efficiency"), T("s1_kpi_project"),T("s1_kpi_staff") };
+                object[] kpiValues = { kpis.totalHours, kpis.availableCapacity, $"{Math.Round(kpis.avgUtilization, 1)}%", kpis.activeProjects, kpis.staffCount };
                 int[] kpiStartCols = { 1, 2, 4, 6, 8 };
-                int[] kpiSpans     = { 1, 2, 2, 2, 1 };
+                int[] kpiSpans = { 1, 2, 2, 2, 1 };
                 for (int k = 0; k < kpiLabels.Length; k++)
                 {
                     int c = kpiStartCols[k], s = kpiSpans[k];
                     var lbl = ws1.Cells[4, c, 4, c + s - 1]; lbl.Merge = true;
                     lbl.Value = kpiLabels[k];
                     lbl.Style.Font.Bold = true; lbl.Style.Font.Size = 9;
-                    lbl.Style.Font.Color.SetColor(System.Drawing.Color.FromArgb(120,120,120));
+                    lbl.Style.Font.Color.SetColor(System.Drawing.Color.FromArgb(120, 120, 120));
                     lbl.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     SetFill(lbl, lightGray);
                     lbl.Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
@@ -302,7 +353,7 @@ namespace HeatmapSystem.Services
                     val.Style.Font.Bold = true; val.Style.Font.Size = 20;
                     val.Style.Font.Color.SetColor(darkBg);
                     val.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-                    val.Style.VerticalAlignment   = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    val.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                     SetFill(val, white);
                     val.Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Medium, borderClr);
                 }
@@ -312,18 +363,18 @@ namespace HeatmapSystem.Services
                 // ════════════════════════════════════════════════════════════
                 // SHEET 2 – Biểu đồ xu hướng
                 // ════════════════════════════════════════════════════════════
-                var ws2 = package.Workbook.Worksheets.Add("2. Xu hướng");
+                var ws2 = package.Workbook.Worksheets.Add(T("sheet2"));
                 ws2.DefaultRowHeight = 18;
                 ws2.Cells[1, 1, 1, 5].Merge = true;
-                ws2.Cells[1, 1].Value = "BIỂU ĐỒ XU HƯỚNG – TỔNG GIỜ & HIỆU SUẤT";
+                ws2.Cells[1, 1].Value = T("s2_title");
                 ws2.Cells[1, 1].Style.Font.Size = 14; ws2.Cells[1, 1].Style.Font.Bold = true;
                 ws2.Cells[1, 1].Style.Font.Color.SetColor(darkBg);
                 ws2.Cells[1, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 ws2.Row(1).Height = 26;
 
-                SetHeader(ws2.Cells[3, 1]); ws2.Cells[3, 1].Value = "Tuần";
-                SetHeader(ws2.Cells[3, 2]); ws2.Cells[3, 2].Value = "Tổng giờ làm việc";
-                SetHeader(ws2.Cells[3, 3]); ws2.Cells[3, 3].Value = "Hiệu suất (%)";
+                SetHeader(ws2.Cells[3, 1]); ws2.Cells[3, 1].Value = T("s2_col_week");
+                SetHeader(ws2.Cells[3, 2]); ws2.Cells[3, 2].Value = T("s2_col_total_hours");
+                SetHeader(ws2.Cells[3, 3]); ws2.Cells[3, 3].Value = T("s2_col_efficiency");
                 ws2.Column(1).Width = 16; ws2.Column(2).Width = 20; ws2.Column(3).Width = 18;
 
                 for (int i = 0; i < trendData.Count; i++)
@@ -342,30 +393,30 @@ namespace HeatmapSystem.Services
                     var chart = ws2.Drawings.AddChart("TrendChart", OfficeOpenXml.Drawing.Chart.eChartType.Line) as OfficeOpenXml.Drawing.Chart.ExcelLineChart;
                     if (chart != null)
                     {
-                        chart.Title.Text = "Xu hướng giờ làm & Hiệu suất";
+                        chart.Title.Text = T("s2_chart_title");
                         chart.SetPosition(2, 0, 4, 0); chart.SetSize(620, 340);
                         var s1 = chart.Series.Add(ws2.Cells[4, 2, 3 + trendData.Count, 2], ws2.Cells[4, 1, 3 + trendData.Count, 1]);
-                        s1.Header = "Tổng giờ làm việc";
+                        s1.Header = T("s2_series_hours");
                         var s2 = chart.Series.Add(ws2.Cells[4, 3, 3 + trendData.Count, 3], ws2.Cells[4, 1, 3 + trendData.Count, 1]);
-                        s2.Header = "Hiệu suất (%)";
+                        s2.Header = T("s2_series_efficiency");
                     }
                 }
 
                 // ════════════════════════════════════════════════════════════
                 // SHEET 3 – Phân bố theo bộ phận
                 // ════════════════════════════════════════════════════════════
-                var ws3 = package.Workbook.Worksheets.Add("3. Theo bộ phận");
+                var ws3 = package.Workbook.Worksheets.Add(T("sheet3"));
                 ws3.DefaultRowHeight = 18;
                 ws3.Cells[1, 1, 1, 4].Merge = true;
-                ws3.Cells[1, 1].Value = "PHÂN BỐ THEO BỘ PHẬN";
+                ws3.Cells[1, 1].Value = T("s3_title");
                 ws3.Cells[1, 1].Style.Font.Size = 14; ws3.Cells[1, 1].Style.Font.Bold = true;
                 ws3.Cells[1, 1].Style.Font.Color.SetColor(darkBg);
                 ws3.Cells[1, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 ws3.Row(1).Height = 26;
 
-                SetHeader(ws3.Cells[3, 1]); ws3.Cells[3, 1].Value = "Bộ phận";
-                SetHeader(ws3.Cells[3, 2]); ws3.Cells[3, 2].Value = "Giờ làm việc";
-                SetHeader(ws3.Cells[3, 3]); ws3.Cells[3, 3].Value = "Tỷ lệ %";
+                SetHeader(ws3.Cells[3, 1]); ws3.Cells[3, 1].Value = T("s3_col_dept");
+                SetHeader(ws3.Cells[3, 2]); ws3.Cells[3, 2].Value = T("s3_col_hours");
+                SetHeader(ws3.Cells[3, 3]); ws3.Cells[3, 3].Value = T("s3_col_ratio");
                 ws3.Column(1).Width = 20; ws3.Column(2).Width = 18; ws3.Column(3).Width = 12;
 
                 decimal totalDeptHrs = deptData.Sum(d => d.hours);
@@ -378,7 +429,7 @@ namespace HeatmapSystem.Services
                     ws3.Cells[row, 3].Value = $"{pct}%"; SetData(ws3.Cells[row, 3], fc: redColor);
                 }
                 int deptTotRow = 4 + deptData.Count;
-                ws3.Cells[deptTotRow, 1].Value = "TỔNG"; SetData(ws3.Cells[deptTotRow, 1], bold: true, center: false);
+                ws3.Cells[deptTotRow, 1].Value = T("s3_row_total"); SetData(ws3.Cells[deptTotRow, 1], bold: true, center: false);
                 ws3.Cells[deptTotRow, 2].Value = (double)totalDeptHrs; SetData(ws3.Cells[deptTotRow, 2], bold: true);
                 ws3.Cells[deptTotRow, 3].Value = "100%"; SetData(ws3.Cells[deptTotRow, 3], bold: true, fc: redColor);
 
@@ -387,28 +438,28 @@ namespace HeatmapSystem.Services
                     var dChart = ws3.Drawings.AddChart("DeptChart", OfficeOpenXml.Drawing.Chart.eChartType.ColumnClustered) as OfficeOpenXml.Drawing.Chart.ExcelBarChart;
                     if (dChart != null)
                     {
-                        dChart.Title.Text = "Phân bố giờ theo bộ phận";
+                        dChart.Title.Text = T("s3_chart_title");
                         dChart.SetPosition(2, 0, 4, 0); dChart.SetSize(500, 300);
                         var ds = dChart.Series.Add(ws3.Cells[4, 2, 3 + deptData.Count, 2], ws3.Cells[4, 1, 3 + deptData.Count, 1]);
-                        ds.Header = "Giờ làm việc";
+                        ds.Header = T("s3_series_hours");
                     }
                 }
 
                 // ════════════════════════════════════════════════════════════
                 // SHEET 4 – By Function
                 // ════════════════════════════════════════════════════════════
-                var ws4 = package.Workbook.Worksheets.Add("4. By Function");
+                var ws4 = package.Workbook.Worksheets.Add(T("sheet4"));
                 ws4.DefaultRowHeight = 18;
                 int fd = functionData.departments.Count;
                 ws4.Cells[1, 1, 1, fd + 2].Merge = true;
-                ws4.Cells[1, 1].Value = "CÔNG SUẤT THEO BỘ PHẬN (BY FUNCTION)";
+                ws4.Cells[1, 1].Value = T("s4_title");
                 ws4.Cells[1, 1].Style.Font.Size = 14; ws4.Cells[1, 1].Style.Font.Bold = true;
                 ws4.Cells[1, 1].Style.Font.Color.SetColor(darkBg);
                 ws4.Cells[1, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 ws4.Row(1).Height = 26;
-                ws4.Cells[2, 1].Value = $"Số ngày làm việc: {workingDays} ngày · 8.5h/ngày";
+                ws4.Cells[2, 1].Value = $"{T("s4_working_days")}: {workingDays} {T("s4_days_unit")} · 8.5h/{T("s4_days_unit")}";
                 ws4.Cells[2, 1].Style.Font.Italic = true;
-                ws4.Cells[2, 1].Style.Font.Color.SetColor(System.Drawing.Color.FromArgb(100,100,100));
+                ws4.Cells[2, 1].Style.Font.Color.SetColor(System.Drawing.Color.FromArgb(100, 100, 100));
 
                 SetHeader(ws4.Cells[4, 1]); ws4.Cells[4, 1].Value = "BY FUNCTION";
                 for (int i = 0; i < fd; i++) { SetHeader(ws4.Cells[4, i + 2]); ws4.Cells[4, i + 2].Value = functionData.departments[i]; }
@@ -433,7 +484,6 @@ namespace HeatmapSystem.Services
                 ws4.Column(1).Width = 20;
                 for (int i = 0; i < fd + 1; i++) ws4.Column(i + 2).Width = 14;
 
-                // Helper data for chart
                 if (fd > 0)
                 {
                     int cdr = 11;
@@ -447,7 +497,7 @@ namespace HeatmapSystem.Services
                     var fc = ws4.Drawings.AddChart("FuncChart", OfficeOpenXml.Drawing.Chart.eChartType.ColumnClustered) as OfficeOpenXml.Drawing.Chart.ExcelBarChart;
                     if (fc != null)
                     {
-                        fc.Title.Text = "Available hrs vs Utilize hour theo bộ phận";
+                        fc.Title.Text = T("s4_chart_title");
                         fc.SetPosition(cdr + fd + 1, 0, 0, 0); fc.SetSize(560, 300);
                         var sa = fc.Series.Add(ws4.Cells[cdr + 1, 2, cdr + fd, 2], ws4.Cells[cdr + 1, 1, cdr + fd, 1]); sa.Header = "Available hrs";
                         var su = fc.Series.Add(ws4.Cells[cdr + 1, 3, cdr + fd, 3], ws4.Cells[cdr + 1, 1, cdr + fd, 1]); su.Header = "Utilize hour";
@@ -457,13 +507,13 @@ namespace HeatmapSystem.Services
                 // ════════════════════════════════════════════════════════════
                 // SHEET 5 – By Phase
                 // ════════════════════════════════════════════════════════════
-                var ws5 = package.Workbook.Worksheets.Add("5. By Phase");
+                var ws5 = package.Workbook.Worksheets.Add(T("sheet5"));
                 ws5.DefaultRowHeight = 18;
                 var phaseDepts = phaseData.Select(p => p.department).Distinct().OrderBy(d => d).ToList();
-                var phases     = phaseData.Select(p => p.phase).Distinct().OrderBy(p => p).ToList();
+                var phases = phaseData.Select(p => p.phase).Distinct().OrderBy(p => p).ToList();
                 int pdCols = phaseDepts.Count + 3;
                 ws5.Cells[1, 1, 1, pdCols].Merge = true;
-                ws5.Cells[1, 1].Value = "PHÂN BỐ GIỜ THEO PHASE (BY PHASE)";
+                ws5.Cells[1, 1].Value = T("s5_title");
                 ws5.Cells[1, 1].Style.Font.Size = 14; ws5.Cells[1, 1].Style.Font.Bold = true;
                 ws5.Cells[1, 1].Style.Font.Color.SetColor(darkBg);
                 ws5.Cells[1, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
@@ -471,8 +521,8 @@ namespace HeatmapSystem.Services
 
                 SetHeader(ws5.Cells[3, 1]); ws5.Cells[3, 1].Value = "BY PHASE";
                 for (int i = 0; i < phaseDepts.Count; i++) { SetHeader(ws5.Cells[3, i + 2]); ws5.Cells[3, i + 2].Value = phaseDepts[i]; }
-                SetHeader(ws5.Cells[3, phaseDepts.Count + 2]); ws5.Cells[3, phaseDepts.Count + 2].Value = "SVN";
-                SetHeader(ws5.Cells[3, phaseDepts.Count + 3]); ws5.Cells[3, phaseDepts.Count + 3].Value = "SVN %";
+                SetHeader(ws5.Cells[3, phaseDepts.Count + 2]); ws5.Cells[3, phaseDepts.Count + 2].Value = "SM";
+                SetHeader(ws5.Cells[3, phaseDepts.Count + 3]); ws5.Cells[3, phaseDepts.Count + 3].Value = "SM %";
                 ws5.Cells[3, phaseDepts.Count + 3].Style.Font.Color.SetColor(redColor);
                 ws5.Column(1).Width = 16;
                 for (int i = 0; i < phaseDepts.Count + 2; i++) ws5.Column(i + 2).Width = 14;
@@ -495,7 +545,6 @@ namespace HeatmapSystem.Services
                     ws5.Cells[phRow, phaseDepts.Count + 3].Value = $"{phPct}%"; SetData(ws5.Cells[phRow, phaseDepts.Count + 3], fc: redColor);
                     phRow++;
                 }
-                // Phase total row
                 ws5.Cells[phRow, 1].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
                 for (int i = 0; i < phaseDepts.Count; i++)
                 {
@@ -506,11 +555,10 @@ namespace HeatmapSystem.Services
                 ws5.Cells[phRow, phaseDepts.Count + 2].Value = (double)totalPhaseHrs; SetData(ws5.Cells[phRow, phaseDepts.Count + 2], bold: true);
                 ws5.Cells[phRow, phaseDepts.Count + 3].Value = "100%"; SetData(ws5.Cells[phRow, phaseDepts.Count + 3], bold: true, fc: redColor);
 
-                // Pie chart by phase
                 if (phases.Count > 0)
                 {
                     int pcdr = phRow + 2;
-                    ws5.Cells[pcdr, 1].Value = "Phase"; ws5.Cells[pcdr, 2].Value = "Giờ";
+                    ws5.Cells[pcdr, 1].Value = "Phase"; ws5.Cells[pcdr, 2].Value = T("s5_col_hours");
                     for (int i = 0; i < phases.Count; i++)
                     {
                         ws5.Cells[pcdr + 1 + i, 1].Value = phases[i];
@@ -519,22 +567,22 @@ namespace HeatmapSystem.Services
                     var pc = ws5.Drawings.AddChart("PhaseChart", OfficeOpenXml.Drawing.Chart.eChartType.Pie) as OfficeOpenXml.Drawing.Chart.ExcelPieChart;
                     if (pc != null)
                     {
-                        pc.Title.Text = "Phân bố giờ theo Phase";
+                        pc.Title.Text = T("s5_chart_title");
                         pc.SetPosition(pcdr + phases.Count + 1, 0, 0, 0); pc.SetSize(480, 300);
                         var ps = pc.Series.Add(ws5.Cells[pcdr + 1, 2, pcdr + phases.Count, 2], ws5.Cells[pcdr + 1, 1, pcdr + phases.Count, 1]);
-                        ps.Header = "Giờ theo Phase";
+                        ps.Header = T("s5_series_hours");
                     }
                 }
 
                 // ════════════════════════════════════════════════════════════
                 // SHEET 6 – By Customer
                 // ════════════════════════════════════════════════════════════
-                var ws6 = package.Workbook.Worksheets.Add("6. By Customer");
+                var ws6 = package.Workbook.Worksheets.Add(T("sheet6"));
                 ws6.DefaultRowHeight = 18;
                 var custDepts = customerData.Select(c => c.department).Distinct().OrderBy(d => d).ToList();
                 int cdCols = custDepts.Count + 4;
                 ws6.Cells[1, 1, 1, cdCols].Merge = true;
-                ws6.Cells[1, 1].Value = "TỔNG GIỜ THEO KHÁCH HÀNG (BY CUSTOMER)";
+                ws6.Cells[1, 1].Value = T("s6_title");
                 ws6.Cells[1, 1].Style.Font.Size = 14; ws6.Cells[1, 1].Style.Font.Bold = true;
                 ws6.Cells[1, 1].Style.Font.Color.SetColor(darkBg);
                 ws6.Cells[1, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
@@ -543,8 +591,8 @@ namespace HeatmapSystem.Services
                 SetHeader(ws6.Cells[3, 1]); ws6.Cells[3, 1].Value = "CUSTOMER";
                 SetHeader(ws6.Cells[3, 2]); ws6.Cells[3, 2].Value = "PROJECT";
                 for (int i = 0; i < custDepts.Count; i++) { SetHeader(ws6.Cells[3, i + 3]); ws6.Cells[3, i + 3].Value = custDepts[i]; }
-                SetHeader(ws6.Cells[3, custDepts.Count + 3]); ws6.Cells[3, custDepts.Count + 3].Value = "SVN";
-                SetHeader(ws6.Cells[3, custDepts.Count + 4]); ws6.Cells[3, custDepts.Count + 4].Value = "SVN %";
+                SetHeader(ws6.Cells[3, custDepts.Count + 3]); ws6.Cells[3, custDepts.Count + 3].Value = "SM";
+                SetHeader(ws6.Cells[3, custDepts.Count + 4]); ws6.Cells[3, custDepts.Count + 4].Value = "SM %";
                 ws6.Cells[3, custDepts.Count + 4].Style.Font.Color.SetColor(redColor);
                 ws6.Column(1).Width = 18; ws6.Column(2).Width = 18;
                 for (int i = 0; i < custDepts.Count + 2; i++) ws6.Column(i + 3).Width = 14;
@@ -574,7 +622,7 @@ namespace HeatmapSystem.Services
                     custRow++;
                 }
                 ws6.Cells[custRow, 1, custRow, 2].Merge = true;
-                ws6.Cells[custRow, 1].Value = "TỔNG"; SetData(ws6.Cells[custRow, 1], bold: true);
+                ws6.Cells[custRow, 1].Value = T("s6_row_total"); SetData(ws6.Cells[custRow, 1], bold: true);
                 for (int i = 0; i < custDepts.Count; i++)
                 {
                     var ct = customerData.Where(c => c.department == custDepts[i]).Sum(c => c.totalHours);
@@ -584,41 +632,39 @@ namespace HeatmapSystem.Services
                 ws6.Cells[custRow, custDepts.Count + 3].Value = (double)grandSvn; SetData(ws6.Cells[custRow, custDepts.Count + 3], bold: true);
                 ws6.Cells[custRow, custDepts.Count + 4].Value = "100%"; SetData(ws6.Cells[custRow, custDepts.Count + 4], bold: true, fc: redColor);
 
-                // Bar chart by customer
                 if (custProjects.Count > 0)
                 {
                     int ccdr = custRow + 2;
-                    ws6.Cells[ccdr, 1].Value = "Customer"; ws6.Cells[ccdr, 2].Value = "SVN hrs";
+                    ws6.Cells[ccdr, 1].Value = "Customer"; ws6.Cells[ccdr, 2].Value = "SM hrs";
                     var cg = customerData.GroupBy(c => c.customer).Select(g => new { customer = g.Key, total = g.Sum(x => x.totalHours) }).OrderByDescending(x => x.total).ToList();
                     for (int i = 0; i < cg.Count; i++) { ws6.Cells[ccdr + 1 + i, 1].Value = cg[i].customer; ws6.Cells[ccdr + 1 + i, 2].Value = (double)cg[i].total; }
                     var cc = ws6.Drawings.AddChart("CustChart", OfficeOpenXml.Drawing.Chart.eChartType.ColumnClustered) as OfficeOpenXml.Drawing.Chart.ExcelBarChart;
                     if (cc != null)
                     {
-                        cc.Title.Text = "Tổng giờ theo khách hàng";
+                        cc.Title.Text = T("s6_chart_title");
                         cc.SetPosition(ccdr + cg.Count + 1, 0, 0, 0); cc.SetSize(500, 300);
-                        var cs = cc.Series.Add(ws6.Cells[ccdr + 1, 2, ccdr + cg.Count, 2], ws6.Cells[ccdr + 1, 1, ccdr + cg.Count, 1]); cs.Header = "SVN hrs";
+                        var cs = cc.Series.Add(ws6.Cells[ccdr + 1, 2, ccdr + cg.Count, 2], ws6.Cells[ccdr + 1, 1, ccdr + cg.Count, 1]); cs.Header = "SM hrs";
                     }
                 }
 
                 // ════════════════════════════════════════════════════════════
                 // SHEET 7 – Tóm tắt từng nhân viên (Detail Pivot)
                 // ════════════════════════════════════════════════════════════
-                var ws7 = package.Workbook.Worksheets.Add("7. Tóm tắt nhân viên");
+                var ws7 = package.Workbook.Worksheets.Add(T("sheet7"));
                 ws7.DefaultRowHeight = 18;
-                ws7.Cells[1, 1].Value = "TÓM TẮT TỪNG NHÂN VIÊN – PHÂN BỐ GIỜ THEO NGÀY";
+                ws7.Cells[1, 1].Value = T("s7_title");
                 ws7.Cells[1, 1].Style.Font.Size = 14; ws7.Cells[1, 1].Style.Font.Bold = true;
                 ws7.Cells[1, 1].Style.Font.Color.SetColor(darkBg);
 
                 if (pivotData?.rows?.Count > 0)
                 {
-                    var dates      = pivotData.dates;
+                    var dates = pivotData.dates;
                     var dateLabels = pivotData.dateLabels;
                     var weekLabels = pivotData.weekLabels;
-                    var pivotRows  = pivotData.rows;
+                    var pivotRows = pivotData.rows;
                     var totalByDate = pivotData.totalByDate;
-                    int fixedCols  = 5;
+                    int fixedCols = 5;
 
-                    // Build week groups (ordered as they appear)
                     var weekGroups = new List<(string week, List<int> idxs)>();
                     foreach (var wk in weekLabels)
                     {
@@ -626,7 +672,7 @@ namespace HeatmapSystem.Services
                             weekGroups.Add((wk, weekLabels.Select((w, i) => (w, i)).Where(x => x.w == wk).Select(x => x.i).ToList()));
                     }
 
-                    // ── Row 3: Week group headers ──────────────────────────
+                    // ── Row 3: Week group headers ─────────────────────────────────
                     ws7.Cells[3, 1, 3, fixedCols].Merge = true;
                     SetFill(ws7.Cells[3, 1, 3, fixedCols], lightGray);
                     ws7.Cells[3, 1, 3, fixedCols].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
@@ -641,13 +687,13 @@ namespace HeatmapSystem.Services
                         ws7.Cells[3, col].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                         ws7.Cells[3, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
 
-                        ws7.Cells[3, col + idxs.Count].Value = "AVAILABLE HRS:";
+                        ws7.Cells[3, col + idxs.Count].Value = T("s7_avail_hrs");
                         SetFill(ws7.Cells[3, col + idxs.Count], yellowBg);
                         ws7.Cells[3, col + idxs.Count].Style.Font.Bold = true;
                         ws7.Cells[3, col + idxs.Count].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                         ws7.Cells[3, col + idxs.Count].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
 
-                        ws7.Cells[3, col + idxs.Count + 1].Value = "% SPENT";
+                        ws7.Cells[3, col + idxs.Count + 1].Value = T("s7_pct_spent_header");
                         SetFill(ws7.Cells[3, col + idxs.Count + 1], redColor);
                         ws7.Cells[3, col + idxs.Count + 1].Style.Font.Bold = true;
                         ws7.Cells[3, col + idxs.Count + 1].Style.Font.Color.SetColor(white);
@@ -657,9 +703,9 @@ namespace HeatmapSystem.Services
                         col += idxs.Count + 2;
                     }
 
-                    // ── Row 4: TOTAL + available hrs per day ───────────────
+                    // ── Row 4: TOTAL + available hrs per day ──────────────────────
                     ws7.Cells[4, 1, 4, fixedCols].Merge = true;
-                    ws7.Cells[4, 1].Value = "TOTAL :"; ws7.Cells[4, 1].Style.Font.Bold = true;
+                    ws7.Cells[4, 1].Value = T("s7_total_row"); ws7.Cells[4, 1].Style.Font.Bold = true;
                     ws7.Cells[4, 1].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
 
                     col = fixedCols + 1;
@@ -691,8 +737,8 @@ namespace HeatmapSystem.Services
                         col++;
                     }
 
-                    // ── Row 5: Column labels ───────────────────────────────
-                    string[] fixedLabels = { "Customer", "Product/Project", "Project Phase", "Staff", "Dept" };
+                    // ── Row 5: Column labels ──────────────────────────────────────
+                    string[] fixedLabels = { T("s7_col_customer"), T("s7_col_project"), T("s7_col_phase"), T("s7_col_staff"), T("s7_col_dept") };
                     for (int i = 0; i < fixedLabels.Length; i++) { SetHeader(ws7.Cells[5, i + 1]); ws7.Cells[5, i + 1].Value = fixedLabels[i]; }
                     col = fixedCols + 1;
                     foreach (var (wk, idxs) in weekGroups)
@@ -706,12 +752,12 @@ namespace HeatmapSystem.Services
                             ws7.Cells[5, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
                             col++;
                         }
-                        ws7.Cells[5, col].Value = "Time Spent (hrs)"; SetHeader(ws7.Cells[5, col]); col++;
-                        ws7.Cells[5, col].Value = "% Spent"; SetHeader(ws7.Cells[5, col]);
+                        ws7.Cells[5, col].Value = T("s7_col_time_spent"); SetHeader(ws7.Cells[5, col]); col++;
+                        ws7.Cells[5, col].Value = T("s7_col_pct_spent"); SetHeader(ws7.Cells[5, col]);
                         ws7.Cells[5, col].Style.Fill.BackgroundColor.SetColor(redColor); col++;
                     }
 
-                    // ── Data rows ──────────────────────────────────────────
+                    // ── Data rows ─────────────────────────────────────────────────
                     int dataRow = 6;
                     foreach (var custGrp in pivotRows.GroupBy(r => r.customer))
                     {
@@ -737,7 +783,7 @@ namespace HeatmapSystem.Services
                                     {
                                         var v = row.dailyHours.ContainsKey(dates[idx]) ? row.dailyHours[dates[idx]] : 0;
                                         weekRowTot += v;
-                                        if (v > 0) { ws7.Cells[dataRow, col].Value = (double)v; SetFill(ws7.Cells[dataRow, col], System.Drawing.Color.FromArgb(255,253,235)); }
+                                        if (v > 0) { ws7.Cells[dataRow, col].Value = (double)v; SetFill(ws7.Cells[dataRow, col], System.Drawing.Color.FromArgb(255, 253, 235)); }
                                         ws7.Cells[dataRow, col].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                                         ws7.Cells[dataRow, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
                                         col++;
@@ -756,7 +802,6 @@ namespace HeatmapSystem.Services
                                 }
                                 dataRow++;
                             }
-                            // Merge project/phase cols if multiple staff
                             if (projGrp.Count() > 1)
                             {
                                 for (int mc = 2; mc <= 3; mc++)
@@ -766,12 +811,11 @@ namespace HeatmapSystem.Services
                                 }
                             }
                         }
-                        // Merge customer col
                         ws7.Cells[custStart, 1].Value = custGrp.Key; ws7.Cells[custStart, 1].Style.Font.Bold = true;
                         if (dataRow - custStart > 1) { ws7.Cells[custStart, 1, dataRow - 1, 1].Merge = true; ws7.Cells[custStart, 1].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center; }
                     }
 
-                    // ── Footer total row ───────────────────────────────────
+                    // ── Footer total row ──────────────────────────────────────────
                     ws7.Cells[dataRow, 1, dataRow, fixedCols].Merge = true;
                     SetFill(ws7.Cells[dataRow, 1, dataRow, fixedCols], darkBg);
                     ws7.Cells[dataRow, 1].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin, borderClr);
@@ -823,6 +867,7 @@ namespace HeatmapSystem.Services
                 throw;
             }
         }
+
 
         public List<CustomerListDto> GetCustomerList()
         {
@@ -974,8 +1019,9 @@ namespace HeatmapSystem.Services
                     workingDays++;
             }
 
-            // Tổng giờ có thể làm = số nhân viên × số ngày làm việc × 8.5h/ngày
-            var totalPossibleHours = staffCount * workingDays * 8.5m;
+            // Tổng giờ có thể làm = tổng giờ theo workconfig từng nhân viên từng ngày
+            var staffCodes = data.Select(s => s.SVNStaff).Distinct();
+            var totalPossibleHours = GetAvailableHours(staffCodes, fromDate, toDate);
             var avgUtilization = totalPossibleHours > 0 ? (totalHours / totalPossibleHours * 100) : 0;
             return new KpiDto
             {
@@ -998,9 +1044,11 @@ namespace HeatmapSystem.Services
                     .Select(g =>
                     {
                         var totalHours = g.Sum(s => s.WorkHours ?? 0);
-                        var staffCount = g.Select(s => s.SVNStaff).Distinct().Count();
-                        // 1 tuần có 6 ngày làm việc (T2-T7), mỗi ngày 8.5h
-                        var possibleHours = staffCount * 6 * 8.5m;
+                        var staffCodes = g.Select(s => s.SVNStaff).Distinct();
+                        // Xác định khoảng ngày của tuần này trong data
+                        var weekFrom = g.Min(s => s.WorkDate).Date;
+                        var weekTo   = g.Max(s => s.WorkDate).Date;
+                        var possibleHours = GetAvailableHours(staffCodes, weekFrom, weekTo);
                         var utilization = possibleHours > 0 ? (totalHours / possibleHours * 100) : 0;
 
                         return new TrendDataDto
@@ -1021,10 +1069,10 @@ namespace HeatmapSystem.Services
                     .Select(g =>
                     {
                         var totalHours = g.Sum(s => s.WorkHours ?? 0);
-                        var staffCount = g.Select(s => s.SVNStaff).Distinct().Count();
-                        var daysInMonth = DateTime.DaysInMonth(g.Key.Year, g.Key.Month);
-                        var workDays = daysInMonth * 6 / 7; // Rough estimate
-                        var possibleHours = staffCount * 8.5m * workDays;
+                        var staffCodes = g.Select(s => s.SVNStaff).Distinct();
+                        var monthFrom = g.Min(s => s.WorkDate).Date;
+                        var monthTo   = g.Max(s => s.WorkDate).Date;
+                        var possibleHours = GetAvailableHours(staffCodes, monthFrom, monthTo);
                         var utilization = possibleHours > 0 ? (totalHours / possibleHours * 100) : 0;
 
                         return new TrendDataDto
@@ -1124,7 +1172,7 @@ namespace HeatmapSystem.Services
                 .ToList();
         }
 
-        private FunctionUtilizationDto CalculateFunctionData(List<SVN_StaffDetail> data, int workingDays)
+        private FunctionUtilizationDto CalculateFunctionData(List<SVN_StaffDetail> data, int workingDays, DateTime fromDate, DateTime toDate)
         {
             // Group by department
             var deptGroups = data
@@ -1141,7 +1189,8 @@ namespace HeatmapSystem.Services
             foreach (var g in deptGroups)
             {
                 var hc = g.Select(s => s.SVNStaff).Distinct().Count();
-                var available = hc * workingDays * 8.5m;
+                // Dùng workconfig thay vì hard-code 8.5h
+                var available = GetAvailableHours(g.Select(s => s.SVNStaff), fromDate, toDate);
                 var utilize = g.Sum(s => s.WorkHours ?? 0);
                 var rate = available > 0 ? Math.Round(utilize / available * 100, 0) : 0;
 
@@ -1153,7 +1202,7 @@ namespace HeatmapSystem.Services
             }
 
             var totalHC = data.Select(s => s.SVNStaff).Distinct().Count();
-            var totalAvailable = totalHC * workingDays * 8.5m;
+            var totalAvailable = GetAvailableHours(data.Select(s => s.SVNStaff), fromDate, toDate);
             var totalUtilize = data.Sum(s => s.WorkHours ?? 0);
             var totalRate = totalAvailable > 0 ? Math.Round(totalUtilize / totalAvailable * 100, 0) : 0;
 
@@ -1198,18 +1247,18 @@ namespace HeatmapSystem.Services
                 return $"wk{weekNum}";
             }).ToList();
 
-            // Available hrs per date (8.5h/ngày mỗi nhân viên — sẽ tính ở frontend từ staffCount)
-            // Ở đây trả về số nhân viên unique per week để frontend tính
+            // Tính available hrs mỗi ngày = tổng giờ workconfig của từng nhân viên trong tuần đó
             var staffPerWeek = data
                 .GroupBy(s => s.WeekNo)
-                .ToDictionary(g => g.Key, g => g.Select(s => s.SVNStaff).Distinct().Count());
+                .ToDictionary(g => g.Key, g => g.Select(s => s.SVNStaff).Distinct().ToList());
 
-            // Tính available hrs mỗi ngày = staffCount của tuần đó × 8.5
             var availableHrsByDate = displayDates.Select(d =>
             {
                 var weekNum = System.Globalization.ISOWeek.GetWeekOfYear(d);
-                var staff = staffPerWeek.ContainsKey(weekNum) ? staffPerWeek[weekNum] : 0;
-                return (decimal)(staff * 8.5);
+                if (!staffPerWeek.TryGetValue(weekNum, out var staffList) || staffList.Count == 0)
+                    return 0m;
+                // Mỗi ngày: tổng giờ workconfig của từng nhân viên
+                return staffList.Sum(s => GetDailyHours(s, d));
             }).ToList();
 
             // Group data: Customer × Project × ProjectPhase × SVNStaff × WorkDate

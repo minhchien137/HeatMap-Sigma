@@ -26,6 +26,8 @@ namespace HeatmapSystem.Models
         public DbSet<AuthToken> AuthTokens { get; set; }
         public DbSet<LoginAttempt> LoginAttempts { get; set; }
 
+        public DbSet<personnel_employee_workconfig> personnel_employee_workconfig { get; set; }
+
 
     }
 }

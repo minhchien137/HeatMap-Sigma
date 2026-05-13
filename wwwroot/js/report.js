@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('customDateRange').classList.add('hidden');
         }
     });
+    
+    // Re-render week labels when language changes
+    document.addEventListener('i18n:applied', function () {
+        updateWeekLabels();
+    });
 });
 
 // Initialize filters
@@ -238,7 +243,7 @@ function updateWeekLabels() {
     const result = getDateRangeLabel();
     ['functionWeekLabel', 'phaseWeekLabel', 'customerWeekLabel'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.textContent = result ? `Week ${result.weekNum} (${result.dateRange})` : '';
+        if (el) el.textContent = result ? `${typeof t==="function"?t('common.week'):'Week'} ${result.weekNum} (${result.dateRange})` : '';
     });
 }
 
@@ -921,7 +926,7 @@ function showDepartmentDetail(project, department) {
                     <thead class="bg-gray-50 border-b-2 border-gray-200">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">Nhân viên</th>
-                            <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">SVN</th>
+                            <th class="px-4 py-3 text-left text-xs font-black text-gray-700 uppercase">SM</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số giờ</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">Số ngày</th>
                             <th class="px-4 py-3 text-center text-xs font-black text-gray-700 uppercase">% Bộ phận</th>
@@ -1247,7 +1252,11 @@ function toggleTableSort() {
 // Export report
 function exportReport() {
     const filters = getFilters();
-    const queryString = new URLSearchParams(filters).toString();
+    
+    // i18n.js lưu tại localStorage key 'heatmap_lang', mặc định 'vi'
+    const lang = localStorage.getItem('heatmap_lang') || 'vi';
+    
+    const queryString = new URLSearchParams({ ...filters, lang }).toString();
     window.location.href = `/Heatmap/ExportReport?${queryString}`;
 }
 
@@ -1354,7 +1363,7 @@ function updatePhaseChart(phaseData) {
     
     // X-axis = Department + thêm cột SVN%
     const grandTotal = phaseData.reduce((s, d) => s + Number(d.totalHours), 0);
-    const labels = [...departments, 'SVN %'];
+    const labels = [...departments, 'SM %'];
     
     // Mỗi Phase là 1 dataset, X-axis là Department + SVN%
     // Giá trị = % giờ của phase đó / tổng giờ của dept (giống bảng By Phase %)
@@ -1409,9 +1418,9 @@ function updatePhaseChart(phaseData) {
                     stacked: true,
                     grid: { display: false },
                     ticks: {
-                        color: ctx => ctx.tick.label === 'SVN %' ? '#dc2626' : '#374151',
+                        color: ctx => ctx.tick.label === 'SM %' ? '#dc2626' : '#374151',
                         font: ctx => ({
-                            weight: ctx.tick.label === 'SVN %' ? 'bold' : 'normal',
+                            weight: ctx.tick.label === 'SM %' ? 'bold' : 'normal',
                             size: 12
                         })
                     }
@@ -1449,8 +1458,8 @@ function updatePhaseTable(phaseData, mode = 'hours') {
     let headHtml = '<tr>';
     headHtml += `<th class="th-phase">By Proj. Phase</th>`;
     departments.forEach(dept => { headHtml += `<th class="th-dept">${dept}</th>`; });
-    headHtml += `<th class="th-total">SVN</th>`;
-    headHtml += `<th class="th-pct">SVN %</th>`;
+    headHtml += `<th class="th-total">SM</th>`;
+    headHtml += `<th class="th-pct">SM %</th>`;
     headHtml += '</tr>';
     thead.innerHTML = headHtml;
     
@@ -1562,8 +1571,8 @@ function updateCustomerTable(customerData) {
     headHtml += `<th class="th-phase" style="min-width:110px">Customer</th>`;
     headHtml += `<th class="th-phase" style="min-width:140px">Project</th>`;
     departments.forEach(d => { headHtml += `<th class="th-dept">${d}</th>`; });
-    headHtml += `<th class="th-total">SVN</th>`;
-    headHtml += `<th class="th-pct">SVN %</th>`;
+    headHtml += `<th class="th-total">SM</th>`;
+    headHtml += `<th class="th-pct">SM %</th>`;
     headHtml += '</tr>';
     thead.innerHTML = headHtml;
     

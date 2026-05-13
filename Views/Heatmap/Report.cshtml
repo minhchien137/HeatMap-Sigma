@@ -134,7 +134,7 @@
                                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block">Actual Hours</span>
+                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block" data-i18n="report.kpi.actual_hrs_badge">Actual Hours</span>
                 </div>
                 <div class="text-2xl sm:text-4xl font-black text-gray-900 mb-1" id="kpi_totalHours">0</div>
                 <div class="text-sm font-medium text-gray-500" data-i18n="report.kpi.total_hours">Tổng giờ đã làm</div>
@@ -153,7 +153,7 @@
                                   d="M9 12l2 2 4-4" />
                         </svg>
                     </div>
-                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block">Available Capacity</span>
+                    <span class="text-[0.6rem] sm:text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block" data-i18n="report.kpi.avail_cap_badge">Available Capacity</span>
                 </div>
                 <div class="text-2xl sm:text-4xl font-black text-gray-900 mb-1" id="kpi_availableCapacity">0</div>
                 <div class="text-sm font-medium text-gray-500" data-i18n="report.kpi.avail_hours">Tổng giờ có thể làm</div>
@@ -255,11 +255,11 @@
                 <div class="flex gap-1 sm:gap-2 flex-wrap">
                     <button id="btnFunctionTable" onclick="switchFunctionView('table')"
                         class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white">
-                        By Table
+                        <span data-i18n="report.func.table">By Table</span>
                     </button>
                     <button id="btnFunctionChart" onclick="switchFunctionView('chart')"
                         class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600">
-                        By Chart
+                        <span data-i18n="report.func.chart">By Chart</span>
                     </button>
                 </div>
             </div>
@@ -290,15 +290,15 @@
                 <div class="flex gap-1 sm:gap-2 flex-wrap">
                     <button id="btnByPhase" onclick="switchPhaseView('hours')"
                         class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white">
-                        By Proj. Phase
+                        <span data-i18n="report.phase.hours">By Proj. Phase</span>
                     </button>
                     <button id="btnByPhasePct" onclick="switchPhaseView('pct')"
                         class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600">
-                        By Proj. Phase %
+                        <span data-i18n="report.phase.pct">By Proj. Phase %</span>
                     </button>
                     <button id="btnByPhaseChart" onclick="switchPhaseView('chart')"
                         class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600">
-                        By Chart
+                        <span data-i18n="report.phase.chart">By Chart</span>
                     </button>
                 </div>
             </div>
@@ -329,11 +329,11 @@
                 <div class="flex gap-1 sm:gap-2 flex-wrap">
                     <button id="btnCustomerTable" onclick="switchCustomerView('table')"
                         class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-red-600 bg-red-600 text-white">
-                        By Table
+                        <span data-i18n="report.cust.table">By Table</span>
                     </button>
                     <button id="btnCustomerChart" onclick="switchCustomerView('chart')"
                         class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 bg-white text-gray-500 hover:border-red-600 hover:text-red-600">
-                        By Chart
+                        <span data-i18n="report.cust.chart">By Chart</span>
                     </button>
                 </div>
             </div>

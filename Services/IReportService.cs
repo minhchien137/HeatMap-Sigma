@@ -84,6 +84,7 @@ namespace HeatmapSystem.Services
         public string Phase { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public string Lang { get; set; } = "vi";
     }
 
     public class ReportDataDto
