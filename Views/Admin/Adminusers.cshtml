@@ -1,7 +1,7 @@
 @model List<HeatmapSystem.Models.SVN_User>
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Quản lý người dùng";
+    ViewData["Title"] = "用户管理 / User Management ";
     ViewData["PageName"] = "AdminUsers";
 }
 
@@ -232,7 +232,7 @@
             </div>
         }
 
-       <!-- Tab Navigation -->
+        <!-- Tab Navigation -->
         <div class="tab-navigation mb-6 md:mb-8">
             <button onclick="switchTab('users')" id="usersTab"
                     class="tab-button active px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all">
@@ -254,9 +254,18 @@
                 <span class="hidden sm:inline" data-i18n="admin.tab.logs">Lịch sử Log</span>
                 <span class="sm:hidden" data-i18n="admin.tab.logs.short">Logs</span>
             </button>
+            <button onclick="switchTab('workconfig')" id="workconfigTab"
+                    class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="hidden sm:inline" data-i18n="admin.wc.tab">Cấu hình giờ làm</span>
+                <span class="sm:hidden" data-i18n="admin.wc.tab.short">Giờ làm</span>
+            </button>
             <a href="/Heatmap/Home"
-            class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all inline-flex items-center"
-            style="text-decoration: none; color: inherit;">
+               class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all inline-flex items-center"
+               style="text-decoration: none; color: inherit;">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -267,7 +276,7 @@
             </a>
         </div>
 
-            <!-- Users Tab Content -->
+        <!-- Users Tab Content -->
         <div id="usersContent" class="tab-content">
 
             <!-- DESKTOP: Table View -->
@@ -387,8 +396,7 @@
                 </div>
             </div>
 
-
-           <!-- MOBILE: Card View -->
+            <!-- MOBILE: Card View -->
             <div class="users-cards space-y-4">
                 @foreach (var user in Model)
                 {
@@ -464,7 +472,7 @@
                 }
             </div>
 
-            </div>
+        </div>
 
         <!-- Logs Tab Content -->
         <div id="logsContent" class="tab-content hidden">
@@ -518,18 +526,18 @@
                         <button type="submit"
                                 class="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
                                 data-i18n="admin.log.filter.search">
-                            🔍 Tìm kiếm
+                             Tìm kiếm
                         </button>
                         <a href="/Admin/Users"
-                        class="flex-1 sm:flex-none px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-center hover:bg-gray-200 transition-all"
-                        data-i18n="admin.log.filter.reset">
+                           class="flex-1 sm:flex-none px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-center hover:bg-gray-200 transition-all"
+                           data-i18n="admin.log.filter.reset">
                             🔄 Reset
                         </a>
                     </div>
                 </form>
             </div>
 
-        <!-- Logs List -->
+            <!-- Logs List -->
             <div class="bg-white rounded-2xl md:rounded-3xl shadow-xl p-4 md:p-6">
                 <h3 class="text-lg md:text-xl font-black mb-4 text-gray-900">
                     📋 <span data-i18n="admin.log.title">Danh sách Logs</span>
@@ -559,276 +567,678 @@
                     }
                 </div>
 
-
-            <!-- Pagination -->
-            @if (ViewBag.TotalPages > 1)
-            {
-                <div class="pagination-container mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <p class="text-sm text-gray-600">
-                        <span data-i18n="admin.log.page">Trang</span>
-                        @ViewBag.CurrentPage
-                        <span data-i18n="admin.log.page.of">/</span>
-                        @ViewBag.TotalPages
-                    </p>
-                    <div class="pagination-buttons flex gap-2">
-                        @if (ViewBag.CurrentPage > 1)
-                        {
-                            <a href="?page=@(ViewBag.CurrentPage - 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
-                            class="pagination-button px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all"
-                            data-i18n="admin.log.page.prev">
-                                ← Trước
-                            </a>
-                        }
-                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-                        {
-                            <a href="?page=@(ViewBag.CurrentPage + 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
-                            class="pagination-button px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg"
-                            data-i18n="admin.log.page.next">
-                                Sau →
-                            </a>
-                        }
-                    </div>
-                </div>
-            }
+                <!-- Pagination -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <div class="pagination-container mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <p class="text-sm text-gray-600">
+                            <span data-i18n="admin.log.page">Trang</span>
+                            @ViewBag.CurrentPage
+                            <span data-i18n="admin.log.page.of">/</span>
+                            @ViewBag.TotalPages
+                        </p>
+                        <div class="pagination-buttons flex gap-2">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <a href="?page=@(ViewBag.CurrentPage - 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                                   class="pagination-button px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all"
+                                   data-i18n="admin.log.page.prev">
+                                    ← Trước
+                                </a>
+                            }
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <a href="?page=@(ViewBag.CurrentPage + 1)&svnCodeFilter=@ViewBag.SvnCodeFilter&actionTypeFilter=@ViewBag.ActionTypeFilter&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                                   class="pagination-button px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg"
+                                   data-i18n="admin.log.page.next">
+                                    Sau →
+                                </a>
+                            }
                         </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- WorkConfig Tab Content -->
+        <div id="workconfigContent" class="tab-content hidden">
+
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-gray-900" data-i18n="admin.wc.title">Cấu hình giờ làm việc</h2>
+                    <p class="text-sm text-gray-500 mt-1" data-i18n="admin.wc.subtitle">Quản lý số giờ/ngày theo từng nhân viên</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportWorkConfigs()"
+                        class="px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl font-bold text-gray-700 hover:border-red-600 hover:text-red-600 transition-all text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <span data-i18n="admin.wc.btn.export">Xuất Excel</span>
+                    </button>
+                    <button onclick="openWCModal()"
+                        class="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-xl font-bold text-white hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm">
+                        <span data-i18n="admin.wc.btn.add">+ Thêm mới</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter -->
+            <div class="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-100 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.wc.col.staff">MÃ SM</label>
+                        <input id="wcFilterStaff" type="text"
+                            data-i18n-placeholder="admin.wc.filter.staff.ph"
+                            placeholder="Nhập mã SM..."
+                            class="w-full px-4 py-2.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm"
+                            onkeydown="if(event.key==='Enter') loadWorkConfigs(1)" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.wc.col.status">TRẠNG THÁI</label>
+                        <select id="wcFilterStatus"
+                            class="w-full px-4 py-2.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm">
+                            <option value="" data-i18n="admin.wc.filter.status.all">-- Tất cả --</option>
+                            <option value="active" data-i18n="admin.wc.filter.active">Còn hiệu lực</option>
+                            <option value="expired" data-i18n="admin.wc.filter.expired">Hết hiệu lực</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button onclick="loadWorkConfigs(1)"
+                            class="flex-1 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-xl font-bold text-white text-sm hover:shadow-lg transition-all">
+                             <span data-i18n="admin.log.filter.search">Tìm kiếm</span>
+                        </button>
+                        <button onclick="resetWCFilter()"
+                            class="px-4 py-2.5 bg-gray-100 rounded-xl font-bold text-gray-600 text-sm hover:bg-gray-200 transition-all">
+                            <span data-i18n="admin.log.filter.reset">Reset</span>
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-        </div>
-                
 
-        <!-- Reset Password Modal -->
-        <div id="resetPasswordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden"
-            style="display: none;">
-            <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
-                <div class="modal-header flex items-center mb-6">
-                    <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 text-blue-600" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-xl md:text-2xl font-black mb-1 text-gray-900"
-                            data-i18n="admin.modal.reset.title">Reset mật khẩu</h3>
-                        <p class="text-sm md:text-base text-gray-500"
-                        data-i18n="admin.modal.reset.sub">Tạo mật khẩu mới cho tài khoản</p>
+            <!-- Table -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <!-- Stats bar -->
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+                    <p class="text-sm text-gray-500">
+                        <span data-i18n="admin.wc.total">Tổng</span>
+                        <span id="wcTotalCount" class="font-black text-red-600 mx-1">0</span>
+                        <span data-i18n="admin.wc.records">bản ghi</span>
+                    </p>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-gray-500 font-medium" data-i18n="admin.wc.per_page">Bản ghi/trang</span>
+                        <select id="wcPageSize" onchange="loadWorkConfigs(1)"
+                            class="px-3 py-1.5 border-2 border-gray-200 rounded-lg text-sm font-medium focus:border-red-600 outline-none">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                        </select>
                     </div>
                 </div>
 
-                <form id="resetForm" method="post" action="/Admin/ResetPassword">
-                    <input type="hidden" id="resetSVNCode" name="SVNCode" />
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.wc.col.staff">MÃ SM</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.wc.col.hours">GIỜ/NGÀY</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.wc.col.from">HIỆU LỰC TỪ</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.wc.col.to">HIỆU LỰC ĐẾN</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.wc.col.status">TRẠNG THÁI</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.wc.col.updated_by">CẬP NHẬT BỞI</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.wc.col.updated_at">CẬP NHẬT LÚC</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.wc.col.action">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wcTableBody" class="divide-y divide-gray-100">
+                            <tr><td colspan="8" class="px-4 py-12 text-center text-gray-400 text-sm">
+                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mb-2"></div>
+                                <p data-i18n="common.loading">Đang tải...</p>
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                    <div class="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl md:rounded-2xl">
-                        <p class="text-xs md:text-sm text-gray-500 mb-1"
-                        data-i18n="admin.modal.reset.account">Tài khoản:</p>
-                        <p id="displaySVNCode" class="text-base md:text-lg font-bold text-gray-900"></p>
+                <!-- Pagination -->
+                <div id="wcPagination" class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 hidden">
+                    <p id="wcPaginationInfo" class="text-sm text-gray-500"></p>
+                    <div id="wcPaginationBtns" class="flex gap-2"></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- end max-w-7xl -->
+
+    <!-- ── WorkConfig Add/Edit Modal ──────────────────────────────────────── -->
+    <div id="wcModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden" style="display:none">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 id="wcModalTitle" class="text-xl font-black text-gray-900" data-i18n="admin.wc.modal.add.title">Thêm cấu hình giờ làm</h3>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <input type="hidden" id="wcEditId" value="" />
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.wc.modal.staff">Mã SM Staff</label>
+                    <input id="wcStaff" type="text"
+                        data-i18n-placeholder="admin.wc.modal.staff.ph"
+                        placeholder="VD: SVN0449"
+                        class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm font-medium uppercase" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.wc.modal.hours">Số giờ / ngày</label>
+                    <input id="wcHours" type="number" min="0.5" max="24" step="0.5" value="8.5"
+                        class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm font-medium" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.wc.modal.from">Hiệu lực từ ngày</label>
+                    <input id="wcFrom" type="date"
+                        class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm font-medium" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.wc.modal.to">Hiệu lực đến ngày (để trống = không giới hạn)</label>
+                    <div class="relative">
+                        <input id="wcTo" type="date"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm font-medium pr-24" />
+                        <button onclick="document.getElementById('wcTo').value=''"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-red-600 font-bold hover:text-red-800 transition-colors"
+                            data-i18n="admin.wc.modal.no_end">Xóa ngày</button>
                     </div>
+                </div>
+            </div>
 
-                    <div class="mb-4 md:mb-6">
-                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2"
-                            data-i18n="admin.modal.reset.newpw">
-                            Mật khẩu mới (tối thiểu 8 ký tự)
-                        </label>
-                        <input type="text" name="NewPassword" required minlength="8"
-                            data-i18n-placeholder="admin.modal.reset.newpw.ph"
-                            placeholder="Nhập mật khẩu mới..."
-                            class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base text-gray-700" />
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeWCModal()"
+                    class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                    data-i18n="admin.modal.perm.cancel">Hủy</button>
+                <button onclick="saveWorkConfig()"
+                    class="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-bold shadow-lg hover:shadow-red-600/30 transition-all"
+                    data-i18n="admin.modal.perm.confirm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── WorkConfig Delete Confirm Modal ───────────────────────────────── -->
+    <div id="wcDeleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden" style="display:none">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-sm mx-4 text-center">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-black text-gray-900 mb-2" data-i18n="common.confirm">Xác nhận?</h3>
+            <p id="wcDeleteMsg" class="text-sm text-gray-500 mb-6"></p>
+            <div class="flex gap-3">
+                <button onclick="closeWCDeleteModal()"
+                    class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                    data-i18n="common.no">Không</button>
+                <button onclick="confirmDeleteWC()"
+                    class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all"
+                    data-i18n="admin.btn.delete">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden"
+        style="display: none;">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
+            <div class="modal-header flex items-center mb-6">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 text-blue-600" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl md:text-2xl font-black mb-1 text-gray-900"
+                        data-i18n="admin.modal.reset.title">Reset mật khẩu</h3>
+                    <p class="text-sm md:text-base text-gray-500"
+                       data-i18n="admin.modal.reset.sub">Tạo mật khẩu mới cho tài khoản</p>
+                </div>
+            </div>
+
+            <form id="resetForm" method="post" action="/Admin/ResetPassword">
+                <input type="hidden" id="resetSVNCode" name="SVNCode" />
+
+                <div class="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl md:rounded-2xl">
+                    <p class="text-xs md:text-sm text-gray-500 mb-1"
+                       data-i18n="admin.modal.reset.account">Tài khoản:</p>
+                    <p id="displaySVNCode" class="text-base md:text-lg font-bold text-gray-900"></p>
+                </div>
+
+                <div class="mb-4 md:mb-6">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2"
+                        data-i18n="admin.modal.reset.newpw">
+                        Mật khẩu mới (tối thiểu 8 ký tự)
+                    </label>
+                    <input type="text" name="NewPassword" required minlength="8"
+                        data-i18n-placeholder="admin.modal.reset.newpw.ph"
+                        placeholder="Nhập mật khẩu mới..."
+                        class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base text-gray-700" />
+                </div>
+
+                <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl md:rounded-2xl p-3 md:p-4 mb-4 md:mb-6">
+                    <div class="flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2 flex-shrink-0" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="text-xs md:text-sm text-yellow-800">
+                            <strong data-i18n="common.notice">Lưu ý:</strong>
+                            <span data-i18n="admin.modal.reset.warn">User sẽ bị đăng xuất khỏi TẤT CẢ thiết bị sau khi reset!</span>
+                        </p>
                     </div>
+                </div>
 
-                    <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl md:rounded-2xl p-3 md:p-4 mb-4 md:mb-6">
-                        <div class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2 flex-shrink-0" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <p class="text-xs md:text-sm text-yellow-800">
-                                <strong data-i18n="common.notice">Lưu ý:</strong>
-                                <span data-i18n="admin.modal.reset.warn">User sẽ bị đăng xuất khỏi TẤT CẢ thiết bị sau khi reset!</span>
+                <div class="modal-buttons flex flex-col sm:flex-row gap-3 md:gap-4">
+                    <button type="button" onclick="closeResetModal()"
+                            class="flex-1 py-3 md:py-4 border-2 border-gray-200 text-gray-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all"
+                            data-i18n="admin.modal.reset.cancel">
+                        Hủy
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all"
+                            data-i18n="admin.modal.reset.confirm">
+                        Xác nhận Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Permission Modal -->
+    <div id="permissionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden"
+        style="display: none;">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
+            <div class="modal-header flex items-center mb-6">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-green-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 text-green-600" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl md:text-2xl font-black mb-1 text-gray-900"
+                        data-i18n="admin.modal.perm.title">Phân quyền</h3>
+                    <p class="text-sm md:text-base text-gray-500"
+                       data-i18n="admin.modal.perm.sub">Cấp quyền truy cập cho người dùng</p>
+                </div>
+            </div>
+
+            <form id="permissionForm" method="post" action="/Admin/SetPermission">
+                <input type="hidden" id="permissionSVNCode" name="SVNCode" />
+
+                <div class="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl md:rounded-2xl">
+                    <p class="text-xs md:text-sm text-gray-500 mb-1"
+                       data-i18n="admin.modal.perm.account">Tài khoản:</p>
+                    <p id="displayPermissionSVNCode" class="text-base md:text-lg font-bold text-gray-900"></p>
+                </div>
+
+                <div class="mb-4 md:mb-6">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2"
+                        data-i18n="admin.modal.perm.select">
+                        Chọn quyền
+                    </label>
+                    <select name="Permission" id="permissionSelect" required
+                            class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base text-gray-700">
+                        <option value="None" data-i18n="admin.modal.perm.none">🚫 None - Không có quyền (chỉ xem Home)</option>
+                        <option value="Read" data-i18n="admin.modal.perm.read">👁️ Read - Chỉ xem dữ liệu</option>
+                        <option value="Update" data-i18n="admin.modal.perm.update">✏️ Update - Full quyền (xem, sửa, xóa)</option>
+                    </select>
+                </div>
+
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-xl md:rounded-2xl p-3 md:p-4 mb-4 md:mb-6">
+                    <div class="flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                            <p class="text-xs md:text-sm font-bold text-blue-800 mb-1"
+                               data-i18n="admin.modal.perm.info">Giải thích quyền:</p>
+                            <p class="text-xs text-blue-700">
+                                <strong>None:</strong> <span data-i18n="admin.modal.perm.none.desc">Chỉ xem trang Home, không thao tác gì</span><br />
+                                <strong>Read:</strong> <span data-i18n="admin.modal.perm.read.desc">Xem được dữ liệu, KHÔNG sửa/xóa</span><br />
+                                <strong>Update:</strong> <span data-i18n="admin.modal.perm.upd.desc">Full quyền (xem, tạo, sửa, xóa)</span>
                             </p>
                         </div>
                     </div>
-
-                    <div class="modal-buttons flex flex-col sm:flex-row gap-3 md:gap-4">
-                        <button type="button" onclick="closeResetModal()"
-                                class="flex-1 py-3 md:py-4 border-2 border-gray-200 text-gray-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all"
-                                data-i18n="admin.modal.reset.cancel">
-                            Hủy
-                        </button>
-                        <button type="submit"
-                                class="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all"
-                                data-i18n="admin.modal.reset.confirm">
-                            Xác nhận Reset
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Permission Modal -->
-        <div id="permissionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden"
-            style="display: none;">
-            <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
-                <div class="modal-header flex items-center mb-6">
-                    <div class="w-12 h-12 md:w-14 md:h-14 bg-green-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 text-green-600" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-xl md:text-2xl font-black mb-1 text-gray-900"
-                            data-i18n="admin.modal.perm.title">Phân quyền</h3>
-                        <p class="text-sm md:text-base text-gray-500"
-                        data-i18n="admin.modal.perm.sub">Cấp quyền truy cập cho người dùng</p>
-                    </div>
                 </div>
 
-                <form id="permissionForm" method="post" action="/Admin/SetPermission">
-                    <input type="hidden" id="permissionSVNCode" name="SVNCode" />
-
-                    <div class="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl md:rounded-2xl">
-                        <p class="text-xs md:text-sm text-gray-500 mb-1"
-                        data-i18n="admin.modal.perm.account">Tài khoản:</p>
-                        <p id="displayPermissionSVNCode" class="text-base md:text-lg font-bold text-gray-900"></p>
-                    </div>
-
-                    <div class="mb-4 md:mb-6">
-                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2"
-                            data-i18n="admin.modal.perm.select">
-                            Chọn quyền
-                        </label>
-                        <select name="Permission" id="permissionSelect" required
-                                class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm md:text-base text-gray-700">
-                            <option value="None" data-i18n="admin.modal.perm.none">🚫 None - Không có quyền (chỉ xem Home)</option>
-                            <option value="Read" data-i18n="admin.modal.perm.read">👁️ Read - Chỉ xem dữ liệu</option>
-                            <option value="Update" data-i18n="admin.modal.perm.update">✏️ Update - Full quyền (xem, sửa, xóa)</option>
-                        </select>
-                    </div>
-
-                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl md:rounded-2xl p-3 md:p-4 mb-4 md:mb-6">
-                        <div class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <div>
-                                <p class="text-xs md:text-sm font-bold text-blue-800 mb-1"
-                                data-i18n="admin.modal.perm.info">Giải thích quyền:</p>
-                                <p class="text-xs text-blue-700">
-                                    <strong>None:</strong> <span data-i18n="admin.modal.perm.none.desc">Chỉ xem trang Home, không thao tác gì</span><br />
-                                    <strong>Read:</strong> <span data-i18n="admin.modal.perm.read.desc">Xem được dữ liệu, KHÔNG sửa/xóa</span><br />
-                                    <strong>Update:</strong> <span data-i18n="admin.modal.perm.upd.desc">Full quyền (xem, tạo, sửa, xóa)</span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-buttons flex flex-col sm:flex-row gap-3 md:gap-4">
-                        <button type="button" onclick="closePermissionModal()"
-                                class="flex-1 py-3 md:py-4 border-2 border-gray-200 text-gray-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all"
-                                data-i18n="admin.modal.perm.cancel">
-                            Hủy
-                        </button>
-                        <button type="submit"
-                                class="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all"
-                                data-i18n="admin.modal.perm.confirm">
-                            Xác nhận
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div class="modal-buttons flex flex-col sm:flex-row gap-3 md:gap-4">
+                    <button type="button" onclick="closePermissionModal()"
+                            class="flex-1 py-3 md:py-4 border-2 border-gray-200 text-gray-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all"
+                            data-i18n="admin.modal.perm.cancel">
+                        Hủy
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all"
+                            data-i18n="admin.modal.perm.confirm">
+                        Xác nhận
+                    </button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <script src="~/js/i18n.js"></script>
-        <script>
-            
-            function switchTab(tab) {
-                document.getElementById('usersTab').classList.remove('active');
-                document.getElementById('logsTab').classList.remove('active');
-                document.getElementById('usersContent').classList.add('hidden');
-                document.getElementById('logsContent').classList.add('hidden');
+</div><!-- end #adminPage -->
 
-                if (tab === 'users') {
-                    document.getElementById('usersTab').classList.add('active');
-                    document.getElementById('usersContent').classList.remove('hidden');
-                } else if (tab === 'logs') {
-                    document.getElementById('logsTab').classList.add('active');
-                    document.getElementById('logsContent').classList.remove('hidden');
-                }
-            }
+<script src="~/js/i18n.js"></script>
+<script>
 
-            function openResetModal(svnCode) {
-                document.getElementById('resetSVNCode').value = svnCode;
-                document.getElementById('displaySVNCode').textContent = svnCode;
-                document.getElementById('resetPasswordModal').classList.remove('hidden');
-                document.getElementById('resetPasswordModal').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
+    // ── Tab switching (supports users / logs / workconfig) ────────────────
+    function switchTab(tab) {
+        ['users', 'logs', 'workconfig'].forEach(id => {
+            document.getElementById(id + 'Tab')?.classList.remove('active');
+            document.getElementById(id + 'Content')?.classList.add('hidden');
+        });
+        document.getElementById(tab + 'Tab')?.classList.add('active');
+        document.getElementById(tab + 'Content')?.classList.remove('hidden');
+        if (tab === 'workconfig' && wcState.page === 0) loadWorkConfigs(1);
+    }
 
-            function closeResetModal() {
-                document.getElementById('resetPasswordModal').classList.add('hidden');
-                document.getElementById('resetPasswordModal').style.display = 'none';
-                document.getElementById('resetForm').reset();
-                document.body.style.overflow = 'auto';
-            }
+    // ── Reset / Permission modal helpers ─────────────────────────────────
+    function openResetModal(svnCode) {
+        document.getElementById('resetSVNCode').value = svnCode;
+        document.getElementById('displaySVNCode').textContent = svnCode;
+        document.getElementById('resetPasswordModal').classList.remove('hidden');
+        document.getElementById('resetPasswordModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 
-            function openPermissionModal(svnCode, currentPermission) {
-                document.getElementById('permissionSVNCode').value = svnCode;
-                document.getElementById('displayPermissionSVNCode').textContent = svnCode;
-                document.getElementById('permissionSelect').value = currentPermission;
-                document.getElementById('permissionModal').classList.remove('hidden');
-                document.getElementById('permissionModal').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
+    function closeResetModal() {
+        document.getElementById('resetPasswordModal').classList.add('hidden');
+        document.getElementById('resetPasswordModal').style.display = 'none';
+        document.getElementById('resetForm').reset();
+        document.body.style.overflow = 'auto';
+    }
 
-            function closePermissionModal() {
-                document.getElementById('permissionModal').classList.add('hidden');
-                document.getElementById('permissionModal').style.display = 'none';
-                document.getElementById('permissionForm').reset();
-                document.body.style.overflow = 'auto';
-            }
+    function openPermissionModal(svnCode, currentPermission) {
+        document.getElementById('permissionSVNCode').value = svnCode;
+        document.getElementById('displayPermissionSVNCode').textContent = svnCode;
+        document.getElementById('permissionSelect').value = currentPermission;
+        document.getElementById('permissionModal').classList.remove('hidden');
+        document.getElementById('permissionModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 
-            // Close modals when clicking outside
-            document.getElementById('resetPasswordModal')?.addEventListener('click', function (e) {
-                if (e.target === this) closeResetModal();
-            });
+    function closePermissionModal() {
+        document.getElementById('permissionModal').classList.add('hidden');
+        document.getElementById('permissionModal').style.display = 'none';
+        document.getElementById('permissionForm').reset();
+        document.body.style.overflow = 'auto';
+    }
 
-            document.getElementById('permissionModal')?.addEventListener('click', function (e) {
-                if (e.target === this) closePermissionModal();
-            });
+    // Close modals when clicking outside
+    document.getElementById('resetPasswordModal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeResetModal();
+    });
+    document.getElementById('permissionModal')?.addEventListener('click', function (e) {
+        if (e.target === this) closePermissionModal();
+    });
 
-            // Close modal on ESC key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeResetModal();
-                    closePermissionModal();
-                }
-            });
+    // Close modal on ESC key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeResetModal();
+            closePermissionModal();
+            closeWCModal();
+            closeWCDeleteModal();
+        }
+    });
 
-            // Auto switch to logs tab if filter params present
-            window.addEventListener('DOMContentLoaded', function() {
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.has('svnCodeFilter') || urlParams.has('actionTypeFilter') ||
-                    urlParams.has('fromDate') || urlParams.has('toDate') || urlParams.has('page')) {
-                    switchTab('logs');
-                }
+    // Auto switch to logs tab if filter params present
+    window.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('svnCodeFilter') || urlParams.has('actionTypeFilter') ||
+            urlParams.has('fromDate') || urlParams.has('toDate') || urlParams.has('page')) {
+            switchTab('logs');
+        }
 
-                // Render last login với i18n
-                document.querySelectorAll('[data-lastlogin]').forEach(el => {
-                    el.textContent = el.dataset.lastlogin || t('admin.not_logged_in');
-                });
-            });
+        // Render last login với i18n
+        document.querySelectorAll('[data-lastlogin]').forEach(el => {
+            el.textContent = el.dataset.lastlogin || t('admin.not_logged_in');
+        });
+    });
 
-            // Re-apply last login text khi đổi ngôn ngữ
-            document.addEventListener('i18n:applied', function() {
-                document.querySelectorAll('[data-lastlogin]').forEach(el => {
-                    el.textContent = el.dataset.lastlogin || t('admin.not_logged_in');
-                });
-            });
-        </script>
+    // Re-apply last login text khi đổi ngôn ngữ
+    document.addEventListener('i18n:applied', function () {
+        document.querySelectorAll('[data-lastlogin]').forEach(el => {
+            el.textContent = el.dataset.lastlogin || t('admin.not_logged_in');
+        });
+        // Re-translate status badges và text được render động trong bảng WorkConfig
+        document.querySelectorAll('#wcTableBody [data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (typeof t === 'function') el.textContent = t(key) || el.textContent;
+        });
+    });
+
+    // ═════════════════════════════════════════════════════════════════════
+    // WorkConfig
+    // ═════════════════════════════════════════════════════════════════════
+
+    // ── State ─────────────────────────────────────────────────────────────
+    const wcState    = { page: 0, totalPages: 1, deleteId: null };
+    const wcRowCache = {};   // id → row object, dùng cho nút sửa
+
+    // ── Load data ─────────────────────────────────────────────────────────
+    async function loadWorkConfigs(page) {
+        wcState.page = page;
+        const smStaff  = document.getElementById('wcFilterStaff').value.trim();
+        const status   = document.getElementById('wcFilterStatus').value;
+        const pageSize = document.getElementById('wcPageSize').value;
+
+        const tbody = document.getElementById('wcTableBody');
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center text-gray-400">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mb-2"></div>
+            <p>${typeof t === 'function' ? t('common.loading') : 'Đang tải...'}</p></td></tr>`;
+
+        const params = new URLSearchParams({ smStaff, status, page, pageSize });
+        const res    = await fetch(`/Admin/GetWorkConfigs?${params}`);
+        const json   = await res.json();
+
+        wcState.totalPages = json.totalPages;
+        document.getElementById('wcTotalCount').textContent = json.total;
+
+        if (!json.data || json.data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center text-gray-400 text-sm"
+                data-i18n="admin.wc.nodata">${typeof t === 'function' ? t('admin.wc.nodata') : 'Không tìm thấy dữ liệu'}</td></tr>`;
+            document.getElementById('wcPagination').classList.add('hidden');
+            return;
+        }
+
+        tbody.innerHTML = json.data.map(row => {
+            // Cache row để nút sửa dùng lại — tránh nhúng JSON vào onclick attribute
+            wcRowCache[row.id] = row;
+
+            const activeClass  = row.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            const activeI18nKey = row.isActive ? 'admin.wc.status.active' : 'admin.wc.status.expired';
+            const activeText   = typeof t === 'function' ? t(activeI18nKey) : (row.isActive ? 'Còn hiệu lực' : 'Hết hiệu lực');
+            const staff        = row.sMStaff || row.smStaff;
+            const toText       = row.effectiveTo
+                ? new Date(row.effectiveTo).toLocaleDateString('vi-VN')
+                : `<span class="text-gray-400 italic" data-i18n="admin.wc.no_limit">${typeof t === 'function' ? t('admin.wc.no_limit') : 'Không giới hạn'}</span>`;
+
+            return `<tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 font-black text-gray-900">${staff}</td>
+                <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-black bg-blue-50 text-blue-700">
+                        ${row.workHoursPerDay}h
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-center text-sm text-gray-700">
+                    ${new Date(row.effectiveFrom).toLocaleDateString('vi-VN')}
+                </td>
+                <td class="px-4 py-3 text-center text-sm">${toText}</td>
+                <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${activeClass}"
+                          data-i18n="${activeI18nKey}">
+                        ${activeText}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-center text-sm text-gray-600">${row.updatedBy || '—'}</td>
+                <td class="px-4 py-3 text-center text-xs text-gray-500">
+                    ${new Date(row.updatedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </td>
+                <td class="px-4 py-3 text-center">
+                    <div class="flex gap-1.5 justify-center">
+                        <button onclick="openWCModalById(${row.id})"
+                            class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-all">✏️</button>
+                        <button onclick="openWCDeleteModal(${row.id},'${staff}')"
+                            class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-all">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+
+        renderWCPagination(page, json.totalPages);
+    }
+
+    function renderWCPagination(page, totalPages) {
+        const pag  = document.getElementById('wcPagination');
+        const info = document.getElementById('wcPaginationInfo');
+        const btns = document.getElementById('wcPaginationBtns');
+        if (totalPages <= 1) { pag.classList.add('hidden'); return; }
+        pag.classList.remove('hidden');
+        info.textContent = `${typeof t === 'function' ? t('admin.log.page') : 'Trang'} ${page} / ${totalPages}`;
+
+        let html = '';
+        if (page > 1)
+            html += `<button onclick="loadWorkConfigs(${page - 1})"
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition-all">← ${typeof t === 'function' ? t('admin.log.page.prev') : 'Trước'}</button>`;
+        const start = Math.max(1, page - 2);
+        const end   = Math.min(totalPages, page + 2);
+        for (let p = start; p <= end; p++)
+            html += `<button onclick="loadWorkConfigs(${p})"
+                class="px-4 py-2 ${p === page ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded-xl font-bold text-sm transition-all">${p}</button>`;
+        if (page < totalPages)
+            html += `<button onclick="loadWorkConfigs(${page + 1})"
+                class="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-lg">${typeof t === 'function' ? t('admin.log.page.next') : 'Sau'} →</button>`;
+        btns.innerHTML = html;
+    }
+
+    // ── Modal Add/Edit ────────────────────────────────────────────────────
+    // Wrapper gọi từ nút sửa — lấy row từ cache thay vì truyền JSON qua onclick
+    function openWCModalById(id) {
+        openWCModal(wcRowCache[id]);
+    }
+
+    function openWCModal(row) {
+        const titleEl = document.getElementById('wcModalTitle');
+        if (row && row.id) {
+            titleEl.textContent = typeof t === 'function' ? t('admin.wc.modal.edit.title') : 'Chỉnh sửa cấu hình';
+            document.getElementById('wcEditId').value = row.id;
+            document.getElementById('wcStaff').value  = row.sMStaff || row.smStaff || '';
+            document.getElementById('wcHours').value  = row.workHoursPerDay;
+            document.getElementById('wcFrom').value   = row.effectiveFrom?.substring(0, 10) || '';
+            document.getElementById('wcTo').value     = row.effectiveTo?.substring(0, 10) || '';
+            document.getElementById('wcStaff').readOnly = true;
+            document.getElementById('wcStaff').classList.add('opacity-60');
+        } else {
+            titleEl.textContent = typeof t === 'function' ? t('admin.wc.modal.add.title') : 'Thêm cấu hình giờ làm';
+            document.getElementById('wcEditId').value = '';
+            document.getElementById('wcStaff').value  = '';
+            document.getElementById('wcHours').value  = '8.5';
+            document.getElementById('wcFrom').value   = new Date().toISOString().substring(0, 10);
+            document.getElementById('wcTo').value     = '';
+            document.getElementById('wcStaff').readOnly = false;
+            document.getElementById('wcStaff').classList.remove('opacity-60');
+        }
+        const modal = document.getElementById('wcModal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
+    function closeWCModal() {
+        const modal = document.getElementById('wcModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+
+    async function saveWorkConfig() {
+        const id    = document.getElementById('wcEditId').value;
+        const staff = document.getElementById('wcStaff').value.trim().toUpperCase();
+        const hours = parseFloat(document.getElementById('wcHours').value);
+        const from  = document.getElementById('wcFrom').value;
+        const to    = document.getElementById('wcTo').value;
+
+        if (!staff || !from || isNaN(hours)) {
+            alert('Vui lòng điền đầy đủ thông tin!'); return;
+        }
+
+        const body = { id: id ? parseInt(id) : null, SMStaff: staff, WorkHoursPerDay: hours, EffectiveFrom: from, EffectiveTo: to };
+        const res  = await fetch('/Admin/SaveWorkConfig', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const json = await res.json();
+        if (json.success) { closeWCModal(); loadWorkConfigs(wcState.page || 1); }
+        else alert(json.message || 'Có lỗi xảy ra!');
+    }
+
+    // ── Modal Delete ──────────────────────────────────────────────────────
+    function openWCDeleteModal(id, staff) {
+        wcState.deleteId = id;
+        const msg = `${typeof t === 'function' ? t('admin.wc.confirm.del') : 'Bạn có chắc muốn xóa cấu hình của'} [${staff}]?`;
+        document.getElementById('wcDeleteMsg').textContent = msg;
+        const modal = document.getElementById('wcDeleteModal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
+    function closeWCDeleteModal() {
+        const modal = document.getElementById('wcDeleteModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        wcState.deleteId = null;
+    }
+
+    async function confirmDeleteWC() {
+        if (!wcState.deleteId) return;
+        const res  = await fetch('/Admin/DeleteWorkConfig', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(wcState.deleteId)
+        });
+        const json = await res.json();
+        if (json.success) { closeWCDeleteModal(); loadWorkConfigs(wcState.page || 1); }
+        else alert(json.message || 'Có lỗi xảy ra!');
+    }
+
+    // ── Reset filter ──────────────────────────────────────────────────────
+    function resetWCFilter() {
+        document.getElementById('wcFilterStaff').value  = '';
+        document.getElementById('wcFilterStatus').value = '';
+        loadWorkConfigs(1);
+    }
+
+    // ── Export ────────────────────────────────────────────────────────────
+    function exportWorkConfigs() {
+        const smStaff = document.getElementById('wcFilterStaff').value.trim();
+        const status  = document.getElementById('wcFilterStatus').value;
+        window.location.href = `/Admin/ExportWorkConfigs?smStaff=${encodeURIComponent(smStaff)}&status=${status}`;
+    }
+
+    // ── Close WC modals on outside click ─────────────────────────────────
+    document.getElementById('wcModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeWCModal(); });
+    document.getElementById('wcDeleteModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeWCDeleteModal(); });
+
+</script>

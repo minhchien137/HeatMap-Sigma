@@ -332,5 +332,230 @@ namespace HeatmapSystem.Controllers
                 return RedirectToAction("Users");
             }
         }
+
+        // ── DTOs ─────────────────────────────────────────────────────────────────────
+
+        public class WorkConfigDto
+        {
+            public int Id { get; set; }
+            public string SMStaff { get; set; }
+            public decimal WorkHoursPerDay { get; set; }
+            public DateTime EffectiveFrom { get; set; }
+            public DateTime? EffectiveTo { get; set; }
+            public string UpdatedBy { get; set; }
+            public DateTime UpdatedAt { get; set; }
+            public bool IsActive { get; set; }
+        }
+
+        public class SaveWorkConfigRequest
+        {
+            public int? Id { get; set; }
+            public string SMStaff { get; set; }
+            public decimal WorkHoursPerDay { get; set; }
+            public string EffectiveFrom { get; set; }
+            public string EffectiveTo { get; set; }
+        }
+
+        // ── GET: list with filter + pagination ───────────────────────────────────────
+
+        [HttpGet("GetWorkConfigs")]
+        public async Task<IActionResult> GetWorkConfigs(
+            string smStaff = "",
+            string status  = "",
+            int page       = 1,
+            int pageSize   = 20)
+        {
+            var query = _context.personnel_employee_workconfig.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(smStaff))
+                query = query.Where(w => w.SMStaff.Contains(smStaff.Trim().ToUpper()));
+
+            var today = DateTime.Today;
+            if (status == "active")
+                query = query.Where(w => w.EffectiveTo == null || w.EffectiveTo.Value.Date >= today);
+            else if (status == "expired")
+                query = query.Where(w => w.EffectiveTo != null && w.EffectiveTo.Value.Date < today);
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(w => w.EffectiveFrom)
+                .ThenBy(w => w.SMStaff)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(w => new WorkConfigDto
+                {
+                    Id              = w.Id,
+                    SMStaff         = w.SMStaff,
+                    WorkHoursPerDay = w.WorkHoursPerDay,
+                    EffectiveFrom   = w.EffectiveFrom,
+                    EffectiveTo     = w.EffectiveTo,
+                    UpdatedBy       = w.UpdatedBy ?? "",
+                    UpdatedAt       = w.UpdatedAt,
+                    IsActive        = w.EffectiveTo == null || w.EffectiveTo.Value.Date >= today
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                data       = items,
+                total,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)total / pageSize)
+            });
+        }
+
+        // ── POST: create or update ────────────────────────────────────────────────────
+
+        [HttpPost("SaveWorkConfig")]
+        public async Task<IActionResult> SaveWorkConfig([FromBody] SaveWorkConfigRequest req)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(req.SMStaff))
+                    return Json(new { success = false, message = "SMStaff không được để trống" });
+
+                if (req.WorkHoursPerDay <= 0 || req.WorkHoursPerDay > 24)
+                    return Json(new { success = false, message = "Số giờ/ngày phải trong khoảng 0–24" });
+
+                if (!DateTime.TryParse(req.EffectiveFrom, out DateTime from))
+                    return Json(new { success = false, message = "Ngày hiệu lực không hợp lệ" });
+
+                DateTime? to = null;
+                if (!string.IsNullOrWhiteSpace(req.EffectiveTo)
+                    && DateTime.TryParse(req.EffectiveTo, out DateTime toDate))
+                    to = toDate;
+
+                if (to.HasValue && to.Value.Date < from.Date)
+                    return Json(new { success = false, message = "Ngày kết thúc phải sau ngày bắt đầu" });
+
+                var admin = HttpContext.Session.GetString("SVNCode") ?? "ADMIN";
+
+                if (req.Id.HasValue && req.Id.Value > 0)
+                {
+                    var existing = await _context.personnel_employee_workconfig.FindAsync(req.Id.Value);
+                    if (existing == null) return Json(new { success = false, message = "Không tìm thấy bản ghi" });
+
+                    existing.SMStaff         = req.SMStaff.Trim().ToUpper();
+                    existing.WorkHoursPerDay = req.WorkHoursPerDay;
+                    existing.EffectiveFrom   = from;
+                    existing.EffectiveTo     = to;
+                    existing.UpdatedBy       = admin;
+                    existing.UpdatedAt       = DateTime.Now;
+                }
+                else
+                {
+                    _context.personnel_employee_workconfig.Add(new HeatmapSystem.Models.personnel_employee_workconfig
+                    {
+                        SMStaff         = req.SMStaff.Trim().ToUpper(),
+                        WorkHoursPerDay = req.WorkHoursPerDay,
+                        EffectiveFrom   = from,
+                        EffectiveTo     = to,
+                        UpdatedBy       = admin,
+                        UpdatedAt       = DateTime.Now
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving work config");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // ── POST: delete ─────────────────────────────────────────────────────────────
+
+        [HttpPost("DeleteWorkConfig")]
+        public async Task<IActionResult> DeleteWorkConfig([FromBody] int id)
+        {
+            try
+            {
+                var item = await _context.personnel_employee_workconfig.FindAsync(id);
+                if (item == null) return Json(new { success = false, message = "Không tìm thấy bản ghi" });
+
+                _context.personnel_employee_workconfig.Remove(item);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting work config");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // ── GET: export Excel ─────────────────────────────────────────────────────────
+
+        [HttpGet("ExportWorkConfigs")]
+        public async Task<IActionResult> ExportWorkConfigs(string smStaff = "", string status = "")
+        {
+            try
+            {
+                var query = _context.personnel_employee_workconfig.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(smStaff))
+                    query = query.Where(w => w.SMStaff.Contains(smStaff.Trim().ToUpper()));
+                var today = DateTime.Today;
+                if (status == "active")
+                    query = query.Where(w => w.EffectiveTo == null || w.EffectiveTo.Value.Date >= today);
+                else if (status == "expired")
+                    query = query.Where(w => w.EffectiveTo != null && w.EffectiveTo.Value.Date < today);
+
+                var data = await query
+                    .OrderByDescending(w => w.EffectiveFrom)
+                    .ThenBy(w => w.SMStaff)
+                    .ToListAsync();
+
+                OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                using var package = new OfficeOpenXml.ExcelPackage();
+                var ws = package.Workbook.Worksheets.Add("WorkConfig");
+
+                // Header row
+                string[] headers = { "SM Staff", "Giờ/Ngày", "Hiệu lực từ", "Hiệu lực đến", "Trạng thái", "Cập nhật bởi", "Cập nhật lúc" };
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    ws.Cells[1, i + 1].Value = headers[i];
+                    ws.Cells[1, i + 1].Style.Font.Bold = true;
+                    ws.Cells[1, i + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    ws.Cells[1, i + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(30, 42, 58));
+                    ws.Cells[1, i + 1].Style.Font.Color.SetColor(System.Drawing.Color.White);
+                    ws.Cells[1, i + 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                }
+
+                // Data rows
+                for (int i = 0; i < data.Count; i++)
+                {
+                    int row = i + 2;
+                    var d = data[i];
+                    bool active = d.EffectiveTo == null || d.EffectiveTo.Value.Date >= today;
+                    ws.Cells[row, 1].Value = d.SMStaff;
+                    ws.Cells[row, 2].Value = (double)d.WorkHoursPerDay;
+                    ws.Cells[row, 3].Value = d.EffectiveFrom.ToString("dd/MM/yyyy");
+                    ws.Cells[row, 4].Value = d.EffectiveTo?.ToString("dd/MM/yyyy") ?? "Không giới hạn";
+                    ws.Cells[row, 5].Value = active ? "Còn hiệu lực" : "Hết hiệu lực";
+                    ws.Cells[row, 5].Style.Font.Color.SetColor(active
+                        ? System.Drawing.Color.FromArgb(22, 101, 52)
+                        : System.Drawing.Color.FromArgb(153, 27, 27));
+                    ws.Cells[row, 6].Value = d.UpdatedBy;
+                    ws.Cells[row, 7].Value = d.UpdatedAt.ToString("dd/MM/yyyy HH:mm");
+                }
+
+                for (int i = 1; i <= 7; i++) ws.Column(i).AutoFit();
+
+                using var ms = new System.IO.MemoryStream();
+                package.SaveAs(ms);
+                return File(ms.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"WorkConfig_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting work configs");
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
     }
 }
