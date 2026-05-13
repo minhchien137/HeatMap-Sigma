@@ -946,15 +946,14 @@ function initProjectBlock(rowsContainer, savedRows) {
     const msTrigger = document.createElement('div');
     msTrigger.className = 'bulk-select ms-trigger';
     msTrigger.style.cssText = 'display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; background:white;';
-    msTrigger.innerHTML = `<span class="ms-trigger-label" style="color:#6b7280;">-- Project --</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="flex-shrink:0;color:#9ca3af;transition:transform 0.2s;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>`;
-    
+    msTrigger.innerHTML = `<span class="ms-trigger-label" style="color:#6b7280;">${t('import.col.project')}</span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="flex-shrink:0;color:#9ca3af;transition:transform 0.2s;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>`;
     const msDropdown = document.createElement('div');
     msDropdown.className = 'ms-dropdown';
     msDropdown.style.cssText = `display:none; position:fixed; z-index:9999;
-        background:white; border:2px solid #dc2626; border-top:none;
-        border-bottom-left-radius:1rem; border-bottom-right-radius:1rem;
-        box-shadow:0 10px 40px rgba(0,0,0,0.12); max-height:220px; overflow-y:auto;`;
+    background:white; border:2px solid #dc2626; border-top:none;
+    border-bottom-left-radius:1rem; border-bottom-right-radius:1rem;
+    box-shadow:0 10px 40px rgba(0,0,0,0.12); max-height:220px; overflow-y:auto;`;
     // Append vào body để thoát khỏi overflow:hidden của popup
     document.body.appendChild(msDropdown);
     msDropdown._triggerEl = msTrigger; // reference để đóng từ ngoài
@@ -962,7 +961,7 @@ function initProjectBlock(rowsContainer, savedRows) {
     // Search box trong dropdown
     const msSearch = document.createElement('input');
     msSearch.type = 'text';
-    msSearch.placeholder = 'Tìm project...';
+    msSearch.placeholder = t('import.search_proj');
     msSearch.style.cssText = 'width:100%; padding:8px 12px; border:none; border-bottom:1px solid #f3f4f6; font-size:0.85rem; outline:none; box-sizing:border-box;';
     msSearch.oninput = function() {
         const kw = this.value.toLowerCase();
@@ -1065,7 +1064,7 @@ function updateMsTriggerLabel(msTrigger, msDropdown) {
     const checked = msDropdown.querySelectorAll('input:checked');
     const label = msTrigger.querySelector('.ms-trigger-label');
     if (checked.length === 0) {
-        label.textContent = '-- Project --';
+        label.textContent = t('import.col.project');
         label.style.color = '#6b7280';
     } else {
         label.textContent = Array.from(checked).map(cb => cb.dataset.projectName).join(', ');
@@ -1521,6 +1520,25 @@ document.addEventListener('i18n:applied', function () {
 });
 
 
+// Đặt ở cuối file, ngang hàng với các listener i18n:applied khác
+document.addEventListener('i18n:applied', function () {
+    // Cập nhật placeholder ô tìm kiếm project
+    document.querySelectorAll('.ms-dropdown input[type="text"]').forEach(input => {
+        input.placeholder = t('import.search_proj');
+    });
+    
+    // Cập nhật label trigger nếu chưa chọn project nào
+    document.querySelectorAll('.ms-trigger').forEach(trigger => {
+        const label = trigger.querySelector('.ms-trigger-label');
+        if (!label) return;
+        if (label.style.color === 'rgb(107, 114, 128)' || label.style.color === '#6b7280') {
+            label.textContent = t('import.col.project');
+        }
+    });
+});
+
+
+
 // Copy first day data to all other days
 function copyFirstDayDataToAll() {
     const firstBlock = document.querySelector('#dayHoursList2 .bulk-block');
@@ -1558,4 +1576,6 @@ function copyFirstDayDataToAll() {
     // Bước 3: Render lại KHÔNG gọi saveAllDayBlocks (dùng flag)
     renderDayHoursList();
     showSuccessModal(`✓ Đã copy ${firstRows.length} dự án từ ngày đầu cho ${selectedDays.length - 1} ngày còn lại!`);
+    
+    
 }
