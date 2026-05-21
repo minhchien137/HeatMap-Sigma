@@ -22,6 +22,7 @@ namespace HeatmapSystem.Models
 
         public DbSet<SVN_ChatbotFAQ> SVN_ChatbotFAQ { get; set; }
 
+        public DbSet<SM_HMHolidays> SM_HMHolidays { get; set; }
         // authencation
         public DbSet<AuthToken> AuthTokens { get; set; }
         public DbSet<LoginAttempt> LoginAttempts { get; set; }

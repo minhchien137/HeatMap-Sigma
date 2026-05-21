@@ -13,6 +13,9 @@ namespace HeatmapSystem.Services
         // Cache workconfig để tránh truy vấn DB nhiều lần trong một request
         private List<personnel_employee_workconfig>? _workConfigCache;
 
+        // Cache holiday để tránh truy vấn DB nhiều lần trong một request
+        private HashSet<DateTime>? _holidayCache;
+
         public ReportService(ApplicationDbContext context, ILogger<ReportService> logger)
         {
             _context = context;
@@ -51,7 +54,7 @@ namespace HeatmapSystem.Services
             decimal total = 0m;
             for (var d = fromDate.Date; d <= toDate.Date; d = d.AddDays(1))
             {
-                if (d.DayOfWeek == DayOfWeek.Sunday) continue;
+                if (!IsWorkingDay(d)) continue;
                 foreach (var staff in staffList)
                     total += GetDailyHours(staff, d);
             }
@@ -63,6 +66,50 @@ namespace HeatmapSystem.Services
         /// </summary>
         private decimal GetAvailableHoursForOne(string svnStaff, DateTime fromDate, DateTime toDate)
             => GetAvailableHours(new[] { svnStaff }, fromDate, toDate);
+
+        // ── Holiday helpers ───────────────────────────────────────────────────
+
+        /// <summary>
+        /// Lấy tập hợp tất cả ngày nghỉ lễ (có cache trong request).
+        /// Bao gồm ngày lễ cụ thể và ngày lễ lặp hàng năm (IsRecurring = true).
+        /// </summary>
+        private HashSet<DateTime> GetHolidays()
+        {
+            if (_holidayCache != null) return _holidayCache;
+
+            var today = DateTime.Today;
+
+            // Ngày lễ cụ thể (IsRecurring = false)
+            var result = _context.SM_HMHolidays
+                .Where(h => !h.IsRecurring)
+                .Select(h => h.HolidayDate.Date)
+                .ToHashSet();
+
+            // Ngày lễ lặp hàng năm (IsRecurring = true): map sang ±3 năm xung quanh hiện tại
+            var recurringDays = _context.SM_HMHolidays
+                .Where(h => h.IsRecurring)
+                .Select(h => new { h.HolidayDate.Month, h.HolidayDate.Day })
+                .ToList();
+
+            for (int y = today.Year - 3; y <= today.Year + 3; y++)
+            {
+                foreach (var r in recurringDays)
+                {
+                    try { result.Add(new DateTime(y, r.Month, r.Day)); }
+                    catch { /* bỏ qua ngày không hợp lệ (vd: 29/2 năm không nhuận) */ }
+                }
+            }
+
+            _holidayCache = result;
+            return _holidayCache;
+        }
+
+        /// <summary>
+        /// Kiểm tra một ngày có phải ngày làm việc không.
+        /// Ngày làm việc = không phải Chủ nhật VÀ không phải ngày lễ.
+        /// </summary>
+        private bool IsWorkingDay(DateTime date)
+            => date.DayOfWeek != DayOfWeek.Sunday && !GetHolidays().Contains(date.Date);
 
         #region Public Methods
 
@@ -119,7 +166,7 @@ namespace HeatmapSystem.Services
                 var (fromDate2, toDate2) = GetDateRange(filter);
                 int workingDays = 0;
                 for (var d = fromDate2.Date; d <= toDate2.Date; d = d.AddDays(1))
-                    if (d.DayOfWeek != DayOfWeek.Sunday) workingDays++;
+                    if (IsWorkingDay(d)) workingDays++;
 
                 return new ReportDataDto
                 {
@@ -255,7 +302,7 @@ namespace HeatmapSystem.Services
 
                 int workingDays = 0;
                 for (var d = fromDate.Date; d <= toDate.Date; d = d.AddDays(1))
-                    if (d.DayOfWeek != DayOfWeek.Sunday) workingDays++;
+                    if (IsWorkingDay(d)) workingDays++;
 
                 var kpis = CalculateKPIs(data, fromDate, toDate);
                 var functionData = CalculateFunctionData(data, workingDays, fromDate, toDate);
@@ -1011,11 +1058,11 @@ namespace HeatmapSystem.Services
             var staffCount = data.Select(s => s.SVNStaff).Distinct().Count();
             var projectCount = data.Select(s => s.Project).Distinct().Count();
 
-            // Đếm số ngày làm việc thực tế trong khoảng (Thứ 2 -> Thứ 7, bỏ Chủ nhật)
+            // Đếm số ngày làm việc thực tế trong khoảng (Thứ 2 -> Thứ 7, bỏ Chủ nhật và ngày lễ)
             int workingDays = 0;
             for (var date = fromDate.Date; date <= toDate.Date; date = date.AddDays(1))
             {
-                if (date.DayOfWeek != DayOfWeek.Sunday)
+                if (IsWorkingDay(date))
                     workingDays++;
             }
 
@@ -1223,11 +1270,11 @@ namespace HeatmapSystem.Services
 
         private DetailPivotDto CalculateDetailPivotData(List<SVN_StaffDetail> data, DateTime fromDate, DateTime toDate)
         {
-            // Lấy tất cả ngày làm việc (Thứ 2 - Thứ 7) trong khoảng
+            // Lấy tất cả ngày làm việc (Thứ 2 - Thứ 7, không phải ngày lễ) trong khoảng
             var workDates = new List<DateTime>();
             for (var d = fromDate.Date; d <= toDate.Date; d = d.AddDays(1))
             {
-                if (d.DayOfWeek != DayOfWeek.Sunday)
+                if (IsWorkingDay(d))
                     workDates.Add(d);
             }
 

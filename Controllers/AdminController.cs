@@ -487,6 +487,206 @@ namespace HeatmapSystem.Controllers
             }
         }
 
+        // ════════════════════════════════════════════════════════════════════════════
+        // HOLIDAY MANAGEMENT
+        // ════════════════════════════════════════════════════════════════════════════
+
+        public class HolidayDto
+        {
+            public int Id { get; set; }
+            public string HolidayDate { get; set; }   // "yyyy-MM-dd"
+            public string Name { get; set; }
+            public bool IsRecurring { get; set; }
+            public string CreatedAt { get; set; }
+        }
+
+        public class SaveHolidayRequest
+        {
+            public int? Id { get; set; }
+            public string HolidayDate { get; set; }
+            public string Name { get; set; }
+            public bool IsRecurring { get; set; }
+        }
+
+        /// <summary>GET: Lấy danh sách holiday, lọc theo năm + tên, có phân trang</summary>
+        [HttpGet("GetHolidays")]
+        public async Task<IActionResult> GetHolidays(
+            int    year     = 0,
+            string keyword  = "",
+            int    page     = 1,
+            int    pageSize = 20)
+        {
+            var query = _context.SM_HMHolidays.AsQueryable();
+
+            if (year > 0)
+                query = query.Where(h => h.HolidayDate.Year == year);
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+                query = query.Where(h => h.Name.Contains(keyword));
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderBy(h => h.HolidayDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(h => new HolidayDto
+                {
+                    Id          = h.Id,
+                    HolidayDate = h.HolidayDate.ToString("yyyy-MM-dd"),
+                    Name        = h.Name,
+                    IsRecurring = h.IsRecurring,
+                    CreatedAt   = h.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                data       = items,
+                total,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)total / pageSize)
+            });
+        }
+
+        /// <summary>POST: Thêm mới hoặc cập nhật holiday</summary>
+        [HttpPost("SaveHoliday")]
+        public async Task<IActionResult> SaveHoliday([FromBody] SaveHolidayRequest req)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(req.HolidayDate))
+                    return Json(new { success = false, message = "Ngày không được để trống" });
+
+                if (!DateTime.TryParse(req.HolidayDate, out DateTime date))
+                    return Json(new { success = false, message = "Ngày không hợp lệ" });
+
+                if (string.IsNullOrWhiteSpace(req.Name))
+                    return Json(new { success = false, message = "Tên ngày lễ không được để trống" });
+
+                if (req.Id.HasValue && req.Id.Value > 0)
+                {
+                    // Update
+                    var existing = await _context.SM_HMHolidays.FindAsync(req.Id.Value);
+                    if (existing == null)
+                        return Json(new { success = false, message = "Không tìm thấy bản ghi" });
+
+                    existing.HolidayDate = date;
+                    existing.Name        = req.Name.Trim();
+                    existing.IsRecurring = req.IsRecurring;
+                }
+                else
+                {
+                    // Check duplicate
+                    var exists = await _context.SM_HMHolidays
+                        .AnyAsync(h => h.HolidayDate.Date == date.Date);
+                    if (exists)
+                        return Json(new { success = false, message = $"Ngày {date:dd/MM/yyyy} đã tồn tại trong danh sách" });
+
+                    _context.SM_HMHolidays.Add(new HeatmapSystem.Models.SM_HMHolidays
+                    {
+                        HolidayDate = date,
+                        Name        = req.Name.Trim(),
+                        IsRecurring = req.IsRecurring,
+                        CreatedAt   = DateTime.Now
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving holiday");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>POST: Thêm nhiều ngày lễ theo khoảng từ ngày - đến ngày</summary>
+        [HttpPost("SaveHolidayRange")]
+        public async Task<IActionResult> SaveHolidayRange([FromBody] SaveHolidayRangeRequest req)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(req.DateFrom) || string.IsNullOrWhiteSpace(req.DateTo))
+                    return Json(new { success = false, message = "Vui lòng chọn đủ ngày bắt đầu và kết thúc" });
+
+                if (!DateTime.TryParse(req.DateFrom, out DateTime from) || !DateTime.TryParse(req.DateTo, out DateTime to))
+                    return Json(new { success = false, message = "Ngày không hợp lệ" });
+
+                if (to < from)
+                    return Json(new { success = false, message = "Ngày kết thúc phải sau ngày bắt đầu" });
+
+                if (string.IsNullOrWhiteSpace(req.Name))
+                    return Json(new { success = false, message = "Tên ngày lễ không được để trống" });
+
+                // Giới hạn max 60 ngày mỗi lần để tránh lạm dụng
+                if ((to - from).TotalDays > 60)
+                    return Json(new { success = false, message = "Khoảng ngày không được vượt quá 60 ngày" });
+
+                // Lấy danh sách ngày đã tồn tại trong range
+                var existingDates = await _context.SM_HMHolidays
+                    .Where(h => h.HolidayDate.Date >= from.Date && h.HolidayDate.Date <= to.Date)
+                    .Select(h => h.HolidayDate.Date)
+                    .ToHashSetAsync();
+
+                int created = 0;
+                for (var d = from.Date; d <= to.Date; d = d.AddDays(1))
+                {
+                    if (existingDates.Contains(d)) continue; // bỏ qua ngày đã có
+
+                    _context.SM_HMHolidays.Add(new HeatmapSystem.Models.SM_HMHolidays
+                    {
+                        HolidayDate = d,
+                        Name        = req.Name.Trim(),
+                        IsRecurring = req.IsRecurring,
+                        CreatedAt   = DateTime.Now
+                    });
+                    created++;
+                }
+
+                if (created == 0)
+                    return Json(new { success = false, message = "Tất cả ngày trong khoảng này đã tồn tại" });
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, created });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving holiday range");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public class SaveHolidayRangeRequest
+        {
+            public string DateFrom { get; set; }
+            public string DateTo { get; set; }
+            public string Name { get; set; }
+            public bool IsRecurring { get; set; }
+        }
+
+        /// <summary>POST: Xóa holiday theo Id</summary>
+        [HttpPost("DeleteHoliday")]
+        public async Task<IActionResult> DeleteHoliday([FromBody] int id)
+        {
+            try
+            {
+                var item = await _context.SM_HMHolidays.FindAsync(id);
+                if (item == null)
+                    return Json(new { success = false, message = "Không tìm thấy bản ghi" });
+
+                _context.SM_HMHolidays.Remove(item);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting holiday");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         // ── GET: export Excel ─────────────────────────────────────────────────────────
 
         [HttpGet("ExportWorkConfigs")]

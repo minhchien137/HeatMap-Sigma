@@ -263,10 +263,19 @@
                 <span class="hidden sm:inline" data-i18n="admin.wc.tab">Cấu hình giờ làm</span>
                 <span class="sm:hidden" data-i18n="admin.wc.tab.short">Giờ làm</span>
             </button>
+            <button onclick="switchTab('holiday')" id="holidayTab"
+                    class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="hidden sm:inline" data-i18n="admin.hl.tab">Ngày Nghỉ Lễ</span>
+                <span class="sm:hidden" data-i18n="admin.hl.tab.short">Lễ</span>
+            </button>
             <a href="/Heatmap/Home"
-               class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all inline-flex items-center"
+               class="tab-button px-6 md:px-8 py-3 md:py-4 bg-white rounded-xl md:rounded-2xl font-bold shadow-lg transition-all flex items-center justify-center gap-2"
                style="text-decoration: none; color: inherit;">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -604,21 +613,21 @@
         <div id="workconfigContent" class="tab-content hidden">
 
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div class="wc-header flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
                     <h2 class="text-xl md:text-2xl font-black text-gray-900" data-i18n="admin.wc.title">Cấu hình giờ làm việc</h2>
                     <p class="text-sm text-gray-500 mt-1" data-i18n="admin.wc.subtitle">Quản lý số giờ/ngày theo từng nhân viên</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex gap-2 w-full sm:w-auto">
                     <button onclick="exportWorkConfigs()"
-                        class="px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl font-bold text-gray-700 hover:border-red-600 hover:text-red-600 transition-all text-sm">
+                        class="flex-1 sm:flex-none px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl font-bold text-gray-700 hover:border-red-600 hover:text-red-600 transition-all text-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
                         <span data-i18n="admin.wc.btn.export">Xuất Excel</span>
                     </button>
                     <button onclick="openWCModal()"
-                        class="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-xl font-bold text-white hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm">
+                        class="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-xl font-bold text-white hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm">
                         <span data-i18n="admin.wc.btn.add">+ Thêm mới</span>
                     </button>
                 </div>
@@ -708,9 +717,216 @@
             </div>
         </div>
 
+        <!-- ════════════════════════════════════════════════════════
+             HOLIDAY TAB CONTENT
+        ════════════════════════════════════════════════════════ -->
+        <div id="holidayContent" class="tab-content hidden">
+
+            <!-- Header bar -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-gray-900" data-i18n="admin.hl.title">🗓️ Quản lý Ngày Nghỉ Lễ</h2>
+                    <p class="text-sm text-gray-500 mt-1" data-i18n="admin.hl.subtitle">Thêm / chỉnh sửa ngày lễ ảnh hưởng đến tính toán giờ làm</p>
+                </div>
+                <button onclick="openHolidayModal()"
+                    class="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-xl font-bold text-white hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm whitespace-nowrap"
+                    data-i18n="admin.hl.btn.add">
+                    + Thêm ngày lễ
+                </button>
+            </div>
+
+            <!-- Filter -->
+            <div class="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-100 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.hl.filter.year">NĂM</label>
+                        <select id="hlFilterYear"
+                            class="w-full px-4 py-2.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm">
+                            <option value="" data-i18n="admin.hl.filter.year.all">-- Tất cả --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.hl.filter.keyword">TÊN NGÀY LỄ</label>
+                        <input id="hlFilterKeyword" type="text"
+                            data-i18n-placeholder="admin.hl.filter.ph"
+                            placeholder="Tìm theo tên..."
+                            class="w-full px-4 py-2.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm"
+                            onkeydown="if(event.key==='Enter') loadHolidays(1)" />
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button onclick="loadHolidays(1)"
+                            class="flex-1 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-xl font-bold text-white text-sm hover:shadow-lg transition-all"
+                            data-i18n="admin.hl.filter.search">
+                            Tìm kiếm
+                        </button>
+                        <button onclick="resetHolidayFilter()"
+                            class="px-4 py-2.5 bg-gray-100 rounded-xl font-bold text-gray-600 text-sm hover:bg-gray-200 transition-all"
+                            data-i18n="admin.hl.filter.reset">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+                    <p class="text-sm text-gray-500">
+                        <span data-i18n="admin.hl.total">Tổng</span>
+                        <span id="hlTotalCount" class="font-black text-red-600 mx-1">0</span>
+                        <span data-i18n="admin.hl.records">ngày lễ</span>
+                    </p>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-gray-500 font-medium" data-i18n="admin.hl.per_page">Bản ghi/trang</span>
+                        <select id="hlPageSize" onchange="loadHolidays(1)"
+                            class="px-3 py-1.5 border-2 border-gray-200 rounded-lg text-sm font-medium focus:border-red-600 outline-none">
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.hl.col.date">NGÀY</th>
+                                <th class="px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.hl.col.name">TÊN NGÀY LỄ</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.hl.col.recurring">LẶP HÀNG NĂM</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500 hidden sm:table-cell" data-i18n="admin.hl.col.created">NGÀY TẠO</th>
+                                <th class="px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-gray-500" data-i18n="admin.hl.col.action">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hlTableBody" class="divide-y divide-gray-100">
+                            <tr><td colspan="5" class="px-4 py-12 text-center text-gray-400 text-sm">
+                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mb-2"></div>
+                                <p data-i18n="common.loading">Đang tải...</p>
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="hlPagination" class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 hidden">
+                    <p id="hlPaginationInfo" class="text-sm text-gray-500"></p>
+                    <div id="hlPaginationBtns" class="flex gap-2"></div>
+                </div>
+            </div>
+        </div>
+
     </div><!-- end max-w-7xl -->
 
-    <!-- ── WorkConfig Add/Edit Modal ──────────────────────────────────────── -->
+    <!-- ── Holiday Add/Edit Modal ─────────────────────────────────────────── -->
+    <div id="hlModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden" style="display:none">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h3 id="hlModalTitle" class="text-xl font-black text-gray-900" data-i18n="admin.hl.modal.add.title">Thêm ngày lễ</h3>
+            </div>
+
+            <input type="hidden" id="hlEditId" value="" />
+
+            <!-- Mode toggle (chỉ hiện khi thêm mới) -->
+            <div id="hlModeToggle" class="flex gap-2 mb-5 p-1 bg-gray-100 rounded-xl">
+                <button onclick="setHlMode('single')" id="hlModeSingle"
+                    class="flex-1 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow text-gray-900"
+                    data-i18n="admin.hl.mode.single">
+                    📅 Một ngày
+                </button>
+                <button onclick="setHlMode('range')" id="hlModeRange"
+                    class="flex-1 py-2 rounded-lg font-bold text-sm transition-all text-gray-400"
+                    data-i18n="admin.hl.mode.range">
+                    📆 Nhiều ngày (range)
+                </button>
+            </div>
+
+            <div class="space-y-4">
+
+                <!-- Single date mode -->
+                <div id="hlSingleDateWrap">
+                    <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.hl.modal.date">NGÀY LỄ</label>
+                    <input id="hlDate" type="date"
+                        class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm font-medium" />
+                </div>
+
+                <!-- Range mode -->
+                <div id="hlRangeDateWrap" class="hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.hl.modal.from">TỪ NGÀY</label>
+                            <input id="hlDateFrom" type="date"
+                                class="w-full px-3 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm font-medium"
+                                oninput="updateHlPreview()" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.hl.modal.to">ĐẾN NGÀY</label>
+                            <input id="hlDateTo" type="date"
+                                class="w-full px-3 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm font-medium"
+                                oninput="updateHlPreview()" />
+                        </div>
+                    </div>
+                    <!-- Preview -->
+                    <div id="hlRangePreview" class="mt-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700 font-medium hidden">
+                        📋 <span id="hlRangePreviewText"></span>
+                    </div>
+                </div>
+
+                <!-- Name -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2" data-i18n="admin.hl.modal.name">TÊN NGÀY LỄ</label>
+                    <input id="hlName" type="text"
+                        data-i18n-placeholder="admin.hl.modal.name.ph"
+                        placeholder="VD: 国庆节 - Quốc Khánh"
+                        class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-600 outline-none transition-all text-sm font-medium" />
+                </div>
+
+                <!-- Recurring -->
+                <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                    <input id="hlRecurring" type="checkbox"
+                        class="w-5 h-5 accent-red-600 rounded cursor-pointer flex-shrink-0" />
+                    <div>
+                        <label for="hlRecurring" class="text-sm font-bold text-gray-700 cursor-pointer" data-i18n="admin.hl.modal.recurring">Lặp lại hàng năm</label>
+                        <p class="text-xs text-gray-400 mt-0.5" data-i18n="admin.hl.modal.recurring.desc">Áp dụng cho các ngày lễ cố định như 1/1, 1/5, 1/10...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeHolidayModal()"
+                    class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                    data-i18n="common.cancel">Hủy</button>
+                <button onclick="saveHoliday()"
+                    class="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-bold shadow-lg hover:shadow-red-600/30 transition-all"
+                    data-i18n="common.yes_confirm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Holiday Delete Confirm Modal ──────────────────────────────────── -->
+    <div id="hlDeleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden" style="display:none">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-sm mx-4 text-center">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-black text-gray-900 mb-2" data-i18n="admin.hl.confirm.del.q">Xác nhận xóa?</h3>
+            <p id="hlDeleteMsg" class="text-sm text-gray-500 mb-6"></p>
+            <div class="flex gap-3">
+                <button onclick="closeHolidayDeleteModal()"
+                    class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                    data-i18n="common.no">Không</button>
+                <button onclick="confirmDeleteHoliday()"
+                    class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all"
+                    data-i18n="common.delete">Xóa</button>
+            </div>
+        </div>
+    </div>
     <div id="wcModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center hidden" style="display:none">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md mx-4">
             <div class="flex items-center mb-6">
@@ -945,13 +1161,14 @@
 
     // ── Tab switching (supports users / logs / workconfig) ────────────────
     function switchTab(tab) {
-        ['users', 'logs', 'workconfig'].forEach(id => {
+        ['users', 'logs', 'workconfig', 'holiday'].forEach(id => {
             document.getElementById(id + 'Tab')?.classList.remove('active');
             document.getElementById(id + 'Content')?.classList.add('hidden');
         });
         document.getElementById(tab + 'Tab')?.classList.add('active');
         document.getElementById(tab + 'Content')?.classList.remove('hidden');
         if (tab === 'workconfig' && wcState.page === 0) loadWorkConfigs(1);
+        if (tab === 'holiday') loadHolidays(hlState.page || 1);
     }
 
     // ── Reset / Permission modal helpers ─────────────────────────────────
@@ -1240,5 +1457,251 @@
     // ── Close WC modals on outside click ─────────────────────────────────
     document.getElementById('wcModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeWCModal(); });
     document.getElementById('wcDeleteModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeWCDeleteModal(); });
+
+    // ════════════════════════════════════════════════════════════════════════
+    // HOLIDAY TAB JS
+    // ════════════════════════════════════════════════════════════════════════
+
+    const hlState = { page: 1, deleteId: null };
+    const hlRowCache = {};
+
+    // ── Khởi tạo dropdown năm ────────────────────────────────────────────
+    (function initHolidayYearFilter() {
+        const sel = document.getElementById('hlFilterYear');
+        const cur = new Date().getFullYear();
+        for (let y = cur + 1; y >= cur - 3; y--) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            if (y === cur) opt.selected = true;
+            sel.appendChild(opt);
+        }
+    })();
+
+    // ── Load danh sách ────────────────────────────────────────────────────
+    async function loadHolidays(page) {
+        hlState.page = page || 1;
+        const year    = document.getElementById('hlFilterYear').value;
+        const keyword = document.getElementById('hlFilterKeyword').value.trim();
+        const size    = parseInt(document.getElementById('hlPageSize').value) || 20;
+
+        const params = new URLSearchParams({ page: hlState.page, pageSize: size });
+        if (year)    params.set('year',    year);
+        if (keyword) params.set('keyword', keyword);
+
+        document.getElementById('hlTableBody').innerHTML =
+            `<tr><td colspan="5" class="px-4 py-10 text-center text-gray-400 text-sm">
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-red-600 mr-2"></div>Đang tải...
+             </td></tr>`;
+
+        const res  = await fetch('/Admin/GetHolidays?' + params.toString());
+        const json = await res.json();
+
+        document.getElementById('hlTotalCount').textContent = json.total;
+        renderHolidayTable(json.data);
+        renderHolidayPagination(hlState.page, json.totalPages);
+    }
+
+    function renderHolidayTable(rows) {
+        const tbody = document.getElementById('hlTableBody');
+        if (!rows || rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-12 text-center text-gray-400 text-sm">${t('admin.hl.nodata') || 'Không có dữ liệu'}</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(row => {
+            hlRowCache[row.id] = row;
+            const d = new Date(row.holidayDate);
+            const dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+            const recurringBadge = row.isRecurring
+                ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">${t('admin.hl.recurring.yes') || '🔁 Hàng năm'}</span>`
+                : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">${t('admin.hl.recurring.no') || 'Một lần'}</span>`;
+            return `<tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 font-bold text-gray-900">${dateStr}</td>
+                <td class="px-4 py-3 text-gray-700">${row.name}</td>
+                <td class="px-4 py-3 text-center">${recurringBadge}</td>
+                <td class="px-4 py-3 text-center text-gray-400 text-xs hidden sm:table-cell">${row.createdAt}</td>
+                <td class="px-4 py-3 text-center">
+                    <div class="flex gap-1.5 justify-center">
+                        <button onclick="openHolidayModalById(${row.id})"
+                            class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-all">✏️</button>
+                        <button onclick="openHolidayDeleteModal(${row.id},'${row.name.replace(/'/g,"\\'")}')"
+                            class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-all">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    function renderHolidayPagination(page, totalPages) {
+        const pag  = document.getElementById('hlPagination');
+        const info = document.getElementById('hlPaginationInfo');
+        const btns = document.getElementById('hlPaginationBtns');
+        if (totalPages <= 1) { pag.classList.add('hidden'); return; }
+        pag.classList.remove('hidden');
+        info.textContent = `Trang ${page} / ${totalPages}`;
+        let html = '';
+        if (page > 1)
+            html += `<button onclick="loadHolidays(${page-1})" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200">← Trước</button>`;
+        const start = Math.max(1, page-2), end = Math.min(totalPages, page+2);
+        for (let p = start; p <= end; p++)
+            html += `<button onclick="loadHolidays(${p})" class="px-4 py-2 ${p===page?'bg-red-600 text-white shadow-lg shadow-red-600/20':'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded-xl font-bold text-sm">${p}</button>`;
+        if (page < totalPages)
+            html += `<button onclick="loadHolidays(${page+1})" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 shadow-lg">Sau →</button>`;
+        btns.innerHTML = html;
+    }
+
+    // ── Modal Add/Edit ────────────────────────────────────────────────────
+function openHolidayModalById(id) { openHolidayModal(hlRowCache[id]); }
+
+    let hlMode = 'single';
+
+    function setHlMode(mode) {
+        hlMode = mode;
+        const btnSingle  = document.getElementById('hlModeSingle');
+        const btnRange   = document.getElementById('hlModeRange');
+        const wrapSingle = document.getElementById('hlSingleDateWrap');
+        const wrapRange  = document.getElementById('hlRangeDateWrap');
+        if (mode === 'single') {
+            btnSingle.classList.add('bg-white','shadow','text-gray-900'); btnSingle.classList.remove('text-gray-400');
+            btnRange.classList.remove('bg-white','shadow','text-gray-900'); btnRange.classList.add('text-gray-400');
+            wrapSingle.classList.remove('hidden'); wrapRange.classList.add('hidden');
+        } else {
+            btnRange.classList.add('bg-white','shadow','text-gray-900'); btnRange.classList.remove('text-gray-400');
+            btnSingle.classList.remove('bg-white','shadow','text-gray-900'); btnSingle.classList.add('text-gray-400');
+            wrapSingle.classList.add('hidden'); wrapRange.classList.remove('hidden');
+            updateHlPreview();
+        }
+    }
+
+    function updateHlPreview() {
+        const from = document.getElementById('hlDateFrom').value;
+        const to   = document.getElementById('hlDateTo').value;
+        const preview = document.getElementById('hlRangePreview');
+        const text    = document.getElementById('hlRangePreviewText');
+        if (!from || !to) { preview.classList.add('hidden'); return; }
+        const d1 = new Date(from), d2 = new Date(to);
+        if (d2 < d1) { preview.classList.add('hidden'); return; }
+        const days = Math.round((d2 - d1) / 86400000) + 1;
+        const fmt  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+        text.textContent = `Sẽ thêm ${days} ngày (${fmt(d1)} → ${fmt(d2)})`;
+        preview.classList.remove('hidden');
+    }
+
+    function openHolidayModal(row) {
+        const toggle = document.getElementById('hlModeToggle');
+        if (row && row.id) {
+            document.getElementById('hlModalTitle').textContent = t('admin.hl.modal.edit.title') || 'Chỉnh sửa ngày lễ';
+            document.getElementById('hlEditId').value   = row.id;
+            document.getElementById('hlDate').value     = row.holidayDate?.substring(0,10) || '';
+            document.getElementById('hlName').value     = row.name || '';
+            document.getElementById('hlRecurring').checked = row.isRecurring || false;
+            document.getElementById('hlDate').readOnly  = true;
+            document.getElementById('hlDate').classList.add('opacity-60');
+            toggle.classList.add('hidden');
+            setHlMode('single');
+        } else {
+            document.getElementById('hlModalTitle').textContent = t('admin.hl.modal.add.title') || 'Thêm ngày lễ';
+            document.getElementById('hlEditId').value   = '';
+            document.getElementById('hlDate').value     = new Date().toISOString().substring(0,10);
+            document.getElementById('hlDateFrom').value = new Date().toISOString().substring(0,10);
+            document.getElementById('hlDateTo').value   = '';
+            document.getElementById('hlName').value     = '';
+            document.getElementById('hlRecurring').checked = false;
+            document.getElementById('hlDate').readOnly  = false;
+            document.getElementById('hlDate').classList.remove('opacity-60');
+            document.getElementById('hlRangePreview').classList.add('hidden');
+            toggle.classList.remove('hidden');
+            setHlMode('single');
+        }
+        const modal = document.getElementById('hlModal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
+    function closeHolidayModal() {
+        const modal = document.getElementById('hlModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+
+    async function saveHoliday() {
+        const id          = document.getElementById('hlEditId').value;
+        const name        = document.getElementById('hlName').value.trim();
+        const isRecurring = document.getElementById('hlRecurring').checked;
+        if (!name) { alert(t('common.fill_all') || 'Vui lòng điền đầy đủ!'); return; }
+
+        let url, body;
+        if (id) {
+            const holidayDate = document.getElementById('hlDate').value;
+            if (!holidayDate) { alert(t('common.fill_all') || 'Vui lòng điền đầy đủ!'); return; }
+            url  = '/Admin/SaveHoliday';
+            body = { id: parseInt(id), holidayDate, name, isRecurring };
+        } else if (hlMode === 'range') {
+            const dateFrom = document.getElementById('hlDateFrom').value;
+            const dateTo   = document.getElementById('hlDateTo').value;
+            if (!dateFrom || !dateTo) { alert('Vui lòng chọn đủ ngày bắt đầu và kết thúc!'); return; }
+            if (new Date(dateTo) < new Date(dateFrom)) { alert('Ngày kết thúc phải sau ngày bắt đầu!'); return; }
+            url  = '/Admin/SaveHolidayRange';
+            body = { dateFrom, dateTo, name, isRecurring };
+        } else {
+            const holidayDate = document.getElementById('hlDate').value;
+            if (!holidayDate) { alert(t('common.fill_all') || 'Vui lòng điền đầy đủ!'); return; }
+            url  = '/Admin/SaveHoliday';
+            body = { id: null, holidayDate, name, isRecurring };
+        }
+
+        const res  = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const json = await res.json();
+        if (json.success) {
+            closeHolidayModal();
+            loadHolidays(hlState.page || 1);
+            if (json.created > 1) {
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 z-[9999] bg-green-50 border-2 border-green-200 text-green-700 px-5 py-3 rounded-2xl shadow-xl font-semibold text-sm animate-fade-in';
+                toast.textContent = `Đã thêm ${json.created} ngày lễ thành công!`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+        } else { alert(json.message || 'Có lỗi xảy ra!'); }
+    }
+
+    // ── Modal Delete ──────────────────────────────────────────────────────
+    function openHolidayDeleteModal(id, name) {
+        hlState.deleteId = id;
+        document.getElementById('hlDeleteMsg').textContent = `${t('admin.hl.confirm.del') || 'Bạn có chắc muốn xóa ngày lễ'} "${name}"?`;
+        const modal = document.getElementById('hlDeleteModal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
+    function closeHolidayDeleteModal() {
+        const modal = document.getElementById('hlDeleteModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        hlState.deleteId = null;
+    }
+
+    async function confirmDeleteHoliday() {
+        if (!hlState.deleteId) return;
+        const res  = await fetch('/Admin/DeleteHoliday', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(hlState.deleteId)
+        });
+        const json = await res.json();
+        if (json.success) { closeHolidayDeleteModal(); loadHolidays(hlState.page || 1); }
+        else alert(json.message || 'Có lỗi xảy ra!');
+    }
+
+    function resetHolidayFilter() {
+        document.getElementById('hlFilterKeyword').value = '';
+        // Giữ năm hiện tại
+        document.getElementById('hlFilterYear').value = new Date().getFullYear();
+        loadHolidays(1);
+    }
+
+    // ── Close holiday modals on outside click ─────────────────────────────
+    document.getElementById('hlModal')?.addEventListener('click',       e => { if (e.target === e.currentTarget) closeHolidayModal(); });
+    document.getElementById('hlDeleteModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeHolidayDeleteModal(); });
 
 </script>
