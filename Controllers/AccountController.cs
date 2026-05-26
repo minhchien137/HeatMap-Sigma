@@ -188,7 +188,7 @@ namespace HeatmapSystem.Controllers
                     // Ghi login attempt thất bại
                     await _authService.RecordLoginAttempt(TaiKhoan, ipAddress, false, "Tài khoản không tồn tại");
 
-                    TempData["Error"] = "Tài khoản hoặc mật khẩu không chính xác!";
+                    TempData["Error"] = "账号或密码不正确！";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }
@@ -212,7 +212,7 @@ namespace HeatmapSystem.Controllers
                     // Ghi login attempt thất bại
                     await _authService.RecordLoginAttempt(TaiKhoan, ipAddress, false, "Sai mật khẩu");
 
-                    TempData["Error"] = "Tài khoản hoặc mật khẩu không chính xác!";
+                    TempData["Error"] = "账号或密码不正确！!";
                     ViewBag.TaiKhoan = TaiKhoan;
                     return View();
                 }

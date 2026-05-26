@@ -206,6 +206,7 @@ const I18N = {
         'import.err.no_phase':       'Vui lòng chọn Project Phase',
         'import.err.no_hours':       'Vui lòng nhập giờ cho ít nhất 1 ô',
         'import.err.row' :           'Hàng',
+        'import.err.emp_no_data':    'Chưa nhập giờ. Vui lòng nhập dữ liệu hoặc bỏ chọn nhân viên này.',
         
         // ── HISTORY PAGE ──────────────────────────────
         'history.title':       'Lịch sử nhập dữ liệu',
@@ -821,6 +822,7 @@ const I18N = {
         'import.err.no_phase':       'Please select Project Phase',
         'import.err.no_hours':       'Please enter at least 1 hour for each cell',
         'import.err.row' :           'Row',
+        'import.err.emp_no_data':    'No hours entered. Please add data or deselect this employee.',
         
         // ── HISTORY PAGE ──────────────────────────────
         'history.title':       'Data Entry History',
@@ -1327,6 +1329,8 @@ const I18N = {
         'import.err.no_hours':       '请至少为1个单元格输入工时',
         'import.err.row' :           '第',
         'import.success.save3':      '✅ 已成功保存 {n} 条记录！',
+        'import.err.emp_no_data':    '未输入工时。请填写数据或取消选择该员工。',
+        
         
         // ── HISTORY PAGE ──────────────────────────────
         'history.title':       '数据录入历史',

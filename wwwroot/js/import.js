@@ -363,7 +363,7 @@ function buildTickTableUI(wrapperId, dates, rows, opts) {
     const msDropdown = document.createElement('div');
     // ms-dropdown class bắt buộc để global close handler nhận ra
     msDropdown.className = 'ms-dropdown';
-    msDropdown.style.cssText = 'display:none; position:fixed; z-index:9999; background:white; border:2px solid #dc2626; border-top:none; border-bottom-left-radius:1rem; border-bottom-right-radius:1rem; box-shadow:0 10px 40px rgba(0,0,0,0.12); max-height:220px; overflow-y:auto;';
+    msDropdown.style.cssText = 'display:none; position:fixed; z-index:9999; background:white; border:2px solid #dc2626; border-top:none; border-bottom-left-radius:1rem; border-bottom-right-radius:1rem; box-shadow:0 10px 40px rgba(0,0,0,0.12); max-height:220px; overflow-y:auto; overflow-x:hidden; flex-direction:column;';
     msDropdown._triggerEl = msTrigger;
     if (opts.dropdownId) msDropdown.id = opts.dropdownId;
     document.body.appendChild(msDropdown);
@@ -379,7 +379,7 @@ function buildTickTableUI(wrapperId, dates, rows, opts) {
     window.projectsData.forEach(p => {
         const item = document.createElement('label');
         item.className = 'ms-item'; item.dataset.name = p.NameProject;
-        item.style.cssText = 'display:flex; align-items:center; gap:10px; padding:9px 14px; cursor:pointer; font-size:0.875rem; color:#374151; transition:background 0.1s;';
+        item.style.cssText = 'display:flex; width:100%; box-sizing:border-box; align-items:center; gap:10px; padding:9px 14px; cursor:pointer; font-size:0.875rem; color:#374151; transition:background 0.1s;';
         item.onmouseenter = () => item.style.background = '#fef2f2';
         item.onmouseleave = () => { if (!item.querySelector('input').checked) item.style.background=''; else item.style.background='#fff5f5'; };
         
@@ -844,6 +844,19 @@ function handleSubmitMode3() {
     saveBulkRows(bulkActiveEmpId);
     const records = []; let err = '';
     
+    // ── Bước 0: Kiểm tra mỗi employee đã nhập ít nhất 1 giờ ────────────
+    for (const [empId, empData] of Object.entries(bulkAllData)) {
+        const rows = bulkTableRows[empId] || [];
+        const dates = getBulkDates(empId);
+        const hasAnyHours = rows.length > 0 &&
+        rows.some(row => dates.some(d => parseFloat(row.hours[d.date]) > 0));
+        if (!hasAnyHours) {
+            switchBulkEmp(empId); // Chuyển sang tab của employee chưa nhập
+            showErrorModal(`${empData.name}: ${t('import.err.emp_no_data')||'Chưa nhập giờ. Vui lòng nhập dữ liệu hoặc bỏ chọn nhân viên này.'}`);
+            return;
+        }
+    }
+    
     // ── Validate tất cả employee × row ──────────────────────────────────
     outer:
     for (const [empId, empData] of Object.entries(bulkAllData)) {
@@ -877,6 +890,15 @@ function handleSubmitMode3() {
     });
     
     if (!records.length) { showErrorModal(t('import.err.no_hours')||'Vui lòng nhập giờ cho ít nhất 1 ô'); return; }
+    
+    // ── Kiểm tra nhân viên nào chưa nhập dữ liệu ─────────────────────
+    const empsNoData = Object.entries(bulkAllData)
+    .filter(([empId]) => !records.some(r => r.EmpId === parseInt(empId)))
+    .map(([, empData]) => empData.name);
+    
+    if (empsNoData.length > 0) {
+        showErrorModal(`Chưa nhập dữ liệu cho: ${empsNoData.join(', ')}`); return;
+    }
     
     // ── Kiểm tra tổng giờ/người/ngày ≤ 24h ──────────────────────────────
     const hc = {};
