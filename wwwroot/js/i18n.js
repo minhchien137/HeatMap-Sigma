@@ -176,6 +176,7 @@ const I18N = {
         'import.btn.copy_day_short': '📋 Copy ngày đầu',
         'import.btn.bulk':           'Nhập dữ liệu hàng loạt',
         'import.btn.confirm_save':   'Xác nhận lưu',
+        
         'import.js.no_emp':          'Không tìm thấy nhân viên',
         'import.js.select_emp':      '-- Chọn nhân viên --',
         'import.js.load_err':        'Lỗi khi tải danh sách',
@@ -201,6 +202,10 @@ const I18N = {
         'import.success.save1':      '✓ Đã lưu {n} dự án thành công!',
         'import.success.save2':      '✓ Lưu thành công {n} ngày!',
         'import.success.save3':      '✅ Đã lưu thành công {n} bản ghi!',
+        'import.hint.select_proj':'← Chọn dự án từ dropdown...',
+        'import.err.no_phase':       'Vui lòng chọn Project Phase',
+        'import.err.no_hours':       'Vui lòng nhập giờ cho ít nhất 1 ô',
+        'import.err.row' :           'Hàng',
         
         // ── HISTORY PAGE ──────────────────────────────
         'history.title':       'Lịch sử nhập dữ liệu',
@@ -812,6 +817,10 @@ const I18N = {
         'import.success.save1':      '✓ Saved {n} projects successfully!',
         'import.success.save2':      '✓ Saved {n} days successfully!',
         'import.success.save3':      '✅ Saved {n} records successfully!',
+        'import.hint.select_proj':'← Select project from dropdown...',
+        'import.err.no_phase':       'Please select Project Phase',
+        'import.err.no_hours':       'Please enter at least 1 hour for each cell',
+        'import.err.row' :           'Row',
         
         // ── HISTORY PAGE ──────────────────────────────
         'history.title':       'Data Entry History',
@@ -1313,6 +1322,10 @@ const I18N = {
         'import.search_proj':        '搜索项目...',
         'import.success.save1':      '✓ 已成功保存 {n} 个项目！',
         'import.success.save2':      '✓ 已成功保存 {n} 天数据！',
+        'import.hint.select_proj':'← 从下拉列表选择项目...！',
+        'import.err.no_phase':       '请选择项目阶段',
+        'import.err.no_hours':       '请至少为1个单元格输入工时',
+        'import.err.row' :           '第',
         'import.success.save3':      '✅ 已成功保存 {n} 条记录！',
         
         // ── HISTORY PAGE ──────────────────────────────
