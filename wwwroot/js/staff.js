@@ -6,6 +6,7 @@ let recordsPerPage = 50;
 let sortColumn = 'emp_code';
 let sortDirection = 'asc';
 let userDepartment = null;  // bo phan cua user dang dang nhap (null = admin, xem tat ca)
+const pathBase = window.pathBase || '';
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load data from server
 async function loadData() {
     try {
-        const response = await fetch('/Heatmap/GetStaffData');
+        const response = await fetch(`${pathBase}/Heatmap/GetStaffData`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }

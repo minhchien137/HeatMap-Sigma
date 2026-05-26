@@ -121,7 +121,7 @@
                 </div>
             }
 
-            <form id="loginForm" method="post" action="/Account/DangNhap" class="space-y-6 md:space-y-8">
+            <form id="loginForm" method="post" action="@Url.Action("DangNhap", "Account")" class="space-y-6 md:space-y-8">
                 <div class="group">
                     <input type="text" id="txtTaiKhoan" name="TaiKhoan" required value="@ViewBag.TaiKhoan"
                            class="form-input w-full px-6 md:px-8 py-4 md:py-5 bg-gray-50 border-2 border-transparent rounded-xl md:rounded-2xl focus:bg-white focus:border-red-600 focus:ring-0 outline-none transition-all text-base md:text-lg text-gray-700 placeholder-gray-300"
@@ -171,7 +171,7 @@
 
             <p class="bottom-link mt-12 md:mt-20 text-xs md:text-sm text-gray-400 font-bold tracking-tight">
                 <span data-i18n="login.no_account">Chưa có tài khoản?</span>
-                <a href="/Account/DangKy" class="text-red-600 hover:text-red-800 transition-colors ml-1 border-b-2 border-red-100 pb-1">
+                <a href="@Url.Action("DangKy", "Account")" class="text-red-600 hover:text-red-800 transition-colors ml-1 border-b-2 border-red-100 pb-1">
                     <span data-i18n="login.go_register">Đăng ký ngay</span>
                 </a>
             </p>

@@ -223,7 +223,7 @@
 
         <!-- Quick Links -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-            <a href="/Heatmap/Home" class="group">
+            <a href="@Url.Action("Home","Heatmap")" class="group">
                 <div
                     class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.06)] sm:shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_20px_60px_rgba(220,38,38,0.12)] sm:hover:shadow-[0_30px_80px_rgba(220,38,38,0.15)] hover:border-red-200 hover:-translate-y-1 sm:hover:-translate-y-2 transition-all duration-300">
                     <div class="flex items-center">
@@ -245,7 +245,7 @@
                 </div>
             </a>
 
-            <a href="/Heatmap/Report" class="group">
+            <a href="@Url.Action("Report","Heatmap")" class="group">
                 <div
                     class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.06)] sm:shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_20px_60px_rgba(220,38,38,0.12)] sm:hover:shadow-[0_30px_80px_rgba(220,38,38,0.15)] hover:border-red-200 hover:-translate-y-1 sm:hover:-translate-y-2 transition-all duration-300">
                     <div class="flex items-center">
@@ -267,7 +267,7 @@
                 </div>
             </a>
 
-            <a href="/Account/Account" class="group">
+            <a href="@Url.Action("Account","Account")" class="group">
                 <div
                     class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.06)] sm:shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_20px_60px_rgba(220,38,38,0.12)] sm:hover:shadow-[0_30px_80px_rgba(220,38,38,0.15)] hover:border-red-200 hover:-translate-y-1 sm:hover:-translate-y-2 transition-all duration-300">
                     <div class="flex items-center">
@@ -298,7 +298,7 @@
         // Load saved settings from localStorage
         // Update visual state of language cards
         function updateLangUI(lang) {
-            ['vi', 'en'].forEach(function(l) {
+            ['vi', 'en', 'cn'].forEach(function(l) {
                 const card  = document.getElementById('lang-' + l);
                 const check = document.getElementById('check-' + l);
                 if (!card || !check) return;

@@ -12,6 +12,8 @@ let trendChart = null;
 let departmentChart = null;
 let currentChartView = 'week';
 let currentData = null;
+const pathBase = window.pathBase || '';
+
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function () {
@@ -57,7 +59,7 @@ function initializeFilters() {
 // Load departments
 async function loadDepartments() {
     try {
-        const response = await fetch('/Heatmap/GetDepartmentList');
+        const response = await fetch(`${pathBase}/Heatmap/GetDepartmentList`);
         if (response.ok) {
             const departments = await response.json();
             const select = document.getElementById('departmentFilter');
@@ -76,7 +78,7 @@ async function loadDepartments() {
 // Load projects
 async function loadProjects() {
     try {
-        const response = await fetch('/Heatmap/GetProjectList');
+        const response = await fetch(`${pathBase}/Heatmap/GetProjectList`);
         if (response.ok) {
             const projects = await response.json();
             const select = document.getElementById('projectFilter');
@@ -95,7 +97,7 @@ async function loadProjects() {
 // Load phases
 async function loadPhases() {
     try {
-        const response = await fetch('/Heatmap/GetPhaseList');
+        const response = await fetch(`${pathBase}/Heatmap/GetPhaseList`);
         if (response.ok) {
             const phases = await response.json();
             const select = document.getElementById('phaseFilter');
@@ -115,7 +117,7 @@ async function loadPhases() {
 // Load customers
 async function loadCustomers() {
     try {
-        const response = await fetch('/Heatmap/GetCustomerList');
+        const response = await fetch(`${pathBase}/Heatmap/GetCustomerList`);
         if (response.ok) {
             const customers = await response.json();
             const select = document.getElementById('customerFilter');
@@ -148,7 +150,7 @@ async function loadReportData() {
     
     try {
         const queryString = new URLSearchParams(filters).toString();
-        const response = await fetch(`/Heatmap/GetReportData?${queryString}`);
+        const response = await fetch(`${pathBase}/Heatmap/GetReportData?${queryString}`);
         
         if (response.ok) {
             currentData = await response.json();
@@ -1071,7 +1073,7 @@ async function fetchStaffDailyDetail(project, department, svnStaff) {
             department: department,
             svnStaff: svnStaff
         }).toString();
-        const response = await fetch(`/Heatmap/GetStaffDailyDetail?${queryString}`);
+        const response = await fetch(`${pathBase}/Heatmap/GetStaffDailyDetail?${queryString}`);
         if (response.ok) {
             return await response.json();
         }
@@ -1191,7 +1193,7 @@ function showProjectDetail(row) {
 // Fetch cell staff detail
 async function fetchCellStaffDetail(project, week, department) {
     try {
-        const response = await fetch(`/Heatmap/GetCellStaffDetail?project=${encodeURIComponent(project)}&week=${week}&department=${encodeURIComponent(department)}`);
+        const response = await fetch(`${pathBase}/Heatmap/GetCellStaffDetail?project=${encodeURIComponent(project)}&week=${week}&department=${encodeURIComponent(department)}`);
         if (response.ok) {
             return await response.json();
         }
@@ -1210,7 +1212,7 @@ async function fetchProjectStaffDetail(project, department) {
             project: project,
             department: department
         }).toString();
-        const response = await fetch(`/Heatmap/GetProjectStaffDetail?${queryString}`);
+        const response = await fetch(`${pathBase}/Heatmap/GetProjectStaffDetail?${queryString}`);
         if (response.ok) {
             return await response.json();
         }
@@ -1257,7 +1259,7 @@ function exportReport() {
     const lang = localStorage.getItem('heatmap_lang') || 'vi';
     
     const queryString = new URLSearchParams({ ...filters, lang }).toString();
-    window.location.href = `/Heatmap/ExportReport?${queryString}`;
+    window.location.href = `${pathBase}/Heatmap/ExportReport?${queryString}`;
 }
 
 // Utility functions

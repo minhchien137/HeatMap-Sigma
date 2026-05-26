@@ -223,7 +223,7 @@
 
         <!-- Back to Home Button -->
         <div class="text-center mt-6 sm:mt-8 md:mt-10">
-            <a href="/Heatmap/Home"
+            <a href="@Url.Action("Home","Heatmap")"
                 class="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gray-900 text-white rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base hover:bg-gray-800 transition-all shadow-lg sm:shadow-xl hover:shadow-2xl hover:-translate-y-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -489,5 +489,8 @@
     }
 </style>
 
+<script>
+    window.pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
+</script>
 <script src="~/js/i18n.js"></script>
 <script src="~/js/staff.js"></script>

@@ -7,6 +7,7 @@ let sortColumn = 'WorkDate';
 let sortDirection = 'desc';
 let deleteRecordId = null;
 let userDepartment = null;  // bo phan user dang nhap (null = admin)
+const pathBase = window.pathBase || '';
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -23,7 +24,7 @@ function handleResize() {
 // Load data from server
 async function loadData() {
     try {
-        const response = await fetch('/Heatmap/GetHistoryData');
+        const response = await fetch(`${pathBase}/Heatmap/GetHistoryData`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -553,7 +554,7 @@ function exportToExcel() {
     if (week) params.append('week', week);
     if (search) params.append('search', search);
     
-    const url = `/Heatmap/ExportHistoryToExcel?${params.toString()}`;
+    const url = `${pathBase}/Heatmap/ExportHistoryToExcel?${params.toString()}`;
     window.location.href = url;
     
     setTimeout(() => {
@@ -606,7 +607,7 @@ async function confirmDelete() {
     if (!deleteRecordId) return;
     
     try {
-        const response = await fetch(`/Heatmap/DeleteStaffDetail/${deleteRecordId}`, {
+        const response = await fetch(`${pathBase}/Heatmap/DeleteStaffDetail/${deleteRecordId}`, {
             method: 'POST'
         });
         
