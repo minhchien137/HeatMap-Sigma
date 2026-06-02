@@ -204,21 +204,39 @@ public class DetailDataDto
             ViewBag.IsHR = isHRImport;
             var svnCodeImport = GetCurrentSVNCode();
             int? userDeptId = null;
+            int? userEmpId  = null;
+            string userEmpName = null;
+
             if (!isAdminImport && !string.IsNullOrEmpty(svnCodeImport))
             {
                 using var conn = _zkContext.Database.GetDbConnection();
                 conn.Open();
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT TOP 1 department_id FROM personnel_employee WHERE emp_code = @code";
+                cmd.CommandText = @"SELECT TOP 1 id, department_id, first_name, last_name, nickname
+                                    FROM personnel_employee WHERE emp_code = @code";
                 var param = cmd.CreateParameter();
                 param.ParameterName = "@code";
                 param.Value = svnCodeImport;
                 cmd.Parameters.Add(param);
-                var result = cmd.ExecuteScalar();
-                if (result != null && result != DBNull.Value)
-                    userDeptId = Convert.ToInt32(result);
+
+                using var reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    userEmpId = Convert.ToInt32(reader["id"]);
+                    if (!reader.IsDBNull(reader.GetOrdinal("department_id")))
+                        userDeptId = Convert.ToInt32(reader["department_id"]);
+                    var fn = reader.IsDBNull(reader.GetOrdinal("first_name")) ? "" : reader.GetString(reader.GetOrdinal("first_name"));
+                    var ln = reader.IsDBNull(reader.GetOrdinal("last_name"))  ? "" : reader.GetString(reader.GetOrdinal("last_name"));
+                    var nn = reader.IsDBNull(reader.GetOrdinal("nickname"))   ? "" : reader.GetString(reader.GetOrdinal("nickname"));
+                    userEmpName = $"{fn} {ln}".Trim();
+                    if (string.IsNullOrEmpty(userEmpName)) userEmpName = nn ?? svnCodeImport;
+                }
             }
-            ViewBag.UserDepartmentId = userDeptId;
+
+            ViewBag.UserDepartmentId  = userDeptId;
+            ViewBag.UserEmployeeId    = userEmpId;
+            ViewBag.UserEmployeeName = userEmpName;
+
 
             // Dự án từ Database
             var projects = _context.SVN_Projects.ToList();

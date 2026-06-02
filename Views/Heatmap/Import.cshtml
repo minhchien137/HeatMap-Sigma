@@ -1047,8 +1047,10 @@
 
 
                                             <script>
-                                                window.pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
-                                                window.userDepartmentId = @(ViewBag.UserDepartmentId?.ToString() ?? "null");
+                                                window.pathBase          = '@Context.Request.PathBase'.replace(/\/$/, '');
+                                                window.userDepartmentId  = @(ViewBag.UserDepartmentId?.ToString() ?? "null");
+                                                window.userEmployeeId    = @(ViewBag.UserEmployeeId?.ToString()   ?? "null");   // THÊM
+                                                window.userEmployeeName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)(ViewBag.UserEmployeeName ?? "")));
                                                 window.projectsData = [
                                                     @foreach (var project in ViewBag.Projects)
                                                     {

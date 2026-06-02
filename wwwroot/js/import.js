@@ -174,8 +174,39 @@ function loadEmployees(departmentId, targetSelectId) {
         es.innerHTML='<option value="">-- Chọn nhân viên --</option>';
         emps.forEach(e=>{const fn=`${e.first_name} ${e.last_name}`.trim()||e.nickname||e.emp_code;const o=document.createElement('option');o.value=e.id;o.textContent=fn;es.appendChild(o);});
         if(sd) populateSearchableSelect(sdId,emps,'-- Chọn nhân viên --');
+        
+        // ── AUTO-SELECT & LOCK cho mode 1 / mode 2 ──────────────────
+        if (window.userEmployeeId && (targetSelectId==='employee1' || targetSelectId==='employee2')) {
+            const empId = String(window.userEmployeeId);
+            const empName = window.userEmployeeName || '';
+            // Tìm employee trong list
+            const found = emps.find(e => String(e.id) === empId);
+            if (found) {
+                const fn = `${found.first_name} ${found.last_name}`.trim() || found.nickname || found.emp_code;
+                // Select trong hidden <select>
+                for (let o of es.options) { if(o.value===empId){o.selected=true;break;} }
+                // Select + hiển thị tên trong searchable dropdown
+                selectSearchableItem(sdId, empId, fn);
+            } else if (empName) {
+                // Fallback: employee không có trong list (khác status) vẫn hiển thị tên
+                const display = sd?.querySelector('.searchable-select-display');
+                if (display) { display.textContent=empName; display.classList.add('selected'); }
+            }
+            // Lock trigger – không cho click đổi
+            if (sd) {
+                const trigger = sd.querySelector('.searchable-select-trigger');
+                if (trigger) {
+                    trigger.style.pointerEvents = 'none';
+                    trigger.style.cursor        = 'not-allowed';
+                    trigger.style.background    = '#f9fafb';
+                    trigger.style.opacity       = '0.85';
+                }
+            }
+        }
+        // ─────────────────────────────────────────────────────────────
     }).catch(()=>{es.innerHTML='<option value="">Lỗi khi tải danh sách</option>';if(sd)resetSearchableSelect(sdId,'Lỗi khi tải danh sách');});
 }
+
 function loadEmployeesAsCheckboxes(departmentId) {
     const c=document.getElementById('employeeCheckboxes3'); c.innerHTML='<p class="text-gray-400 text-center py-4">Đang tải...</p>';
     if(!departmentId){c.innerHTML='<p class="text-gray-400 text-center py-4">Vui lòng chọn bộ phận</p>';return;}
